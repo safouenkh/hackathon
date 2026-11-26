@@ -1,0 +1,26 @@
+# Documents fournis par l'AFI : jamais dans Git (données personnelles dans le dump, fichiers lourds)
+/Chatbot Dalila/
+/Hackathon Agentic/
+/Cycle de vie des marchés publics/
+*.sql
+*.pdf
+*.mp4
+*.docx
+*.doc
+*.xlsx
+*.pptx
+data/raw/
+
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Éditeurs
+.vscode/
+.idea/
