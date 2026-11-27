@@ -1,4 +1,4 @@
-"""Importe en base les pages des organismes et les règles d'orientation (après migration 0004).
+"""Importe en base les pages des organismes, les fiches SICAD et les règles d'orientation (migrations 0004 à 0006).
 
 Usage :
     .venv\\Scripts\\python.exe -m scripts.lire_sources          # lit les liens configurés
@@ -34,8 +34,11 @@ def main() -> int:
         print("\nÉCHEC : rien n'a été écrit.")
         return 1
     etat = "écrit en base" if a.appliquer else "contrôle seulement (écrit puis annulé, ajouter --appliquer)"
+    for x in r.redecoupees:
+        print(f"  redécoupée : {x}")
     print(f"\nOK : {len(r.versions_creees)} version(s) créée(s), {len(r.inchangees)} inchangée(s), "
-          f"{r.passages} passage(s), {r.regles_ajoutees} règle(s) ; {etat}.")
+          f"{len(r.redecoupees)} redécoupée(s), {r.passages} passage(s), {r.regles_ajoutees} règle(s) ajoutée(s), "
+          f"{r.regles_desactivees} désactivée(s), {r.fiches_sicad} fiche(s) SICAD, {r.fiches_afi} fiche(s) AFI ; {etat}.")
     return 0
 
 

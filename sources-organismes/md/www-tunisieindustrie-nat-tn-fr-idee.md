@@ -13,21 +13,21 @@ avertissement: "Texte extrait automatiquement, non relu ; donnée non fiable."
 - Accueil
 - Incitations et avantages
     
-      **Cr�ation d'entreprises**
+      **Création d'entreprises**
   - Informations industrielles
-# Id�es de projet Des id�es de projets identifi�es par les �tudes strat�giques r�alis�es par l�API et le CETTEX (�tude GHERZI) ## Les id�es de projets et les fiches professionnelles sont inscrites sur le site de l�APII � titre indicatif
+# Idées de projet Des idées de projets identifiées par les études stratégiques réalisées par l’API et le CETTEX (étude GHERZI) ## Les idées de projets et les fiches professionnelles sont inscrites sur le site de l’APII à titre indicatif
   - ##### Industries agro-alimentaires
-  - ##### Mat�riaux de construction c�ramique et verre
-  - ##### Industries m�caniques et �lectrique
+  - ##### Matériaux de construction céramique et verre
+  - ##### Industries mécaniques et électrique
   - ##### Industries chimiques
   - **Industries textiles et habillement**
   - ##### Industries du cuir et de la chaussure
   - ##### Industries diverses
-  - **Services connexes � l'industrie**
-## Guide d�id�es de projets porteurs
+  - **Services connexes à l'industrie**
+## Guide d’idées de projets porteurs
   - 
-Ce guide est r�alis� gr�ce au soutien d�Invest for Jobs � Initiative sp�ciale � Emploi d�cent pour une transition juste � � travers le projet � Partenariats pour l�emploi et l�appui aux petites et moyennes entreprises en Tunisie II � mandat� par le minist�re f�d�ral allemand de la Coop�ration �conomique et du 
-D�veloppement (BMZ) et mis en �uvre par la GIZ Tunisie en �troite coop�ration avec le minist�re tunisien de l�Industrie, des Mines et de l�Energie.
+Ce guide est réalisé grâce au soutien d’Invest for Jobs – Initiative spéciale « Emploi décent pour une transition juste » à travers le projet « Partenariats pour l’emploi et l’appui aux petites et moyennes entreprises en Tunisie II » mandaté par le ministère fédéral allemand de la Coopération économique et du 
+Développement (BMZ) et mis en œuvre par la GIZ Tunisie en étroite coopération avec le ministère tunisien de l’Industrie, des Mines et de l’Energie.
 Copyright API Tunisia 2018 - Tous droits r serv s Date de la derni re MAJ: 25 Mars 2026 
 Agence de Promotion de l Industrie et de l'Innovation 
 63, rue de Syrie, 1002 Tunis Belv d re - Tunisie

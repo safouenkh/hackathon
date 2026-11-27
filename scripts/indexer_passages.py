@@ -1,11 +1,11 @@
-"""Reconstruit l'index Qdrant des passages (cahiers des charges) avec BGE-M3.
+"""Reconstruit l'index Qdrant des passages (cahiers des charges et pages des organismes) avec BGE-M3.
 
 Usage (Qdrant lancé : docker compose up -d qdrant) :
     .venv\\Scripts\\python.exe -m scripts.indexer_passages
 
-Lit les passages de la dernière version de chaque cahier dans PostgreSQL (compte de lecture),
-recrée la collection, puis encode et ajoute tous les passages. Le premier lancement télécharge
-le modèle (≈ 2,3 Go). L'identifiant de chaque point est l'UUID du passage.
+Lit les passages de la dernière version de chaque document indexé dans PostgreSQL (compte de
+lecture), recrée la collection, puis encode et ajoute tous les passages. Le premier lancement
+télécharge le modèle (≈ 2,3 Go, sans la copie ONNX). L'identifiant de chaque point est l'UUID du passage.
 """
 from __future__ import annotations
 

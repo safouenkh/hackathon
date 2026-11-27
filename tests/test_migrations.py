@@ -16,7 +16,7 @@ TABLES = {
     "parcours_versions", "parcours_elements", "formulaires", "formulaire_variantes",
     "formulaire_champs", "formulaire_champ_libelles", "parcours_formulaires", "schema_migrations",
     "formulaire_sections", "formulaire_section_libelles", "formulaire_mentions", "demandes", "demande_contacts",
-    "besoins_non_couverts", "document_chunks", "zone_complements", "regles_orientation",
+    "besoins_non_couverts", "document_chunks", "zone_complements", "regles_orientation", "demarches_externes",
 }
 
 

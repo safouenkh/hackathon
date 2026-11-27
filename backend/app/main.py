@@ -11,11 +11,13 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.demandes import router as demandes_router
 from app.api.outils import router as outils_router
+from app.api.voix import router as voix_router
 from app.config import get_settings
 
 app = FastAPI(title="Dalila (AFI) — backend", version="0.1.0")
 app.include_router(outils_router)
 app.include_router(demandes_router)
+app.include_router(voix_router)
 
 # Banc de test LLM : outil de développement, activé seulement par BANC_LLM_ACTIF=true
 if get_settings().banc_llm_actif:

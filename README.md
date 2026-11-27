@@ -102,12 +102,14 @@ Les liens lus sont listés dans `sources-organismes/liens.json` (seuls ceux-là 
 ```
 
 - Une page qui renvoie une erreur d'hébergeur (ex. « Account Suspended » sur tia.gov.tn le 27/11/2026) est notée en échec ; la dernière version réussie reste la référence.
-- Les extraits de `afi.chatbot_sources` (hors SICAD) sont aussi importés comme versions datées du 23/10/2026.
+- Les extraits de `afi.chatbot_sources` sont aussi importés comme versions datées du 23/10/2026 : pages des organismes, et **127 fiches SICAD** (démarches administratives, migration 0006, outil `demarches_administratives`).
+- Les **fiches validées de l'AFI** (`afi.chatbot_connaissances`, sauf celles que l'ontologie écarte) deviennent des documents cherchables : outil `connaissances_afi`.
+- Inventaire de ce qui est utilisé ou écarté (et pourquoi) : `docs/couverture_sources.md`.
 - `regles_orientation.json` : chaque règle cite une phrase exacte de sa page ; la base refuse une citation absente du texte (migration 0004).
 
 ### Graphe RDF et recherche dans les cahiers (outil `regles_zone`)
 
-- **Graphe** (BF16) : l'ontologie `ontology/afi_ontology.ttl` donne le schéma ; les zones, cahiers, passages et catégories d'usage du sol sont lus en base au démarrage (RDFLib, requêtes SPARQL fixes). Export Turtle pour Jena Fuseki : `python -m scripts.exporter_graphe`.
+- **Graphe** (BF16) : l'ontologie `ontology/afi_ontology.ttl` donne le schéma ; les zones, cahiers, passages et catégories d'usage du sol sont lus en base au démarrage (RDFLib, requêtes SPARQL fixes). Le graphe complet couvre les 9 familles du cahier (lieux, lots, secteurs, commodités, démarches, incitations, organismes, projet, services). Export Turtle pour Jena Fuseki, avec une requête SPARQL de test par famille : `python -m scripts.exporter_graphe`.
 - **Index vectoriel** (BF17) : Qdrant (`docker compose up -d qdrant`, 127.0.0.1 seulement) et BGE-M3, avec une recherche hybride dense + lexicale. Le texte de référence reste dans PostgreSQL.
 
 ```powershell
@@ -144,6 +146,31 @@ npm run build    # dist/ : servi ensuite par le backend sur /formulaire/...
 Le lien vient de `preparer_demande` (`FRONTEND_BASE_URL` dans `.env`). La page affiche le formulaire officiel dans sa langue, de droite à gauche en arabe, avec l'aide dans la langue du visiteur. Les valeurs du projet sont préremplies et le client saisit lui-même son contact. Les lignes de la CIN, du passeport et de la signature restent vides, à remplir à la main.
 
 Le client relit, puis il imprime ou enregistre en PDF depuis le navigateur. Il peut aussi envoyer la demande à l'AFI après avoir coché l'accord. Les coordonnées ne quittent le navigateur que lors de cet envoi, et ne vont jamais au LLM.
+
+## Voix et langues (service Dalila_Language, rôle 4)
+
+La reconnaissance vocale, la lecture à voix haute et la détection de la langue viennent du dépôt
+[Dalila_Language](https://github.com/mohamedyassineabdi/Dalila_Language). Ce service tourne **à part**, dans
+son propre environnement Python 3.11 : ses dépendances (`transformers<5`) ne sont pas compatibles avec
+FlagEmbedding, et son code n'a pas de licence déclarée, donc il n'est pas copié ici.
+
+```powershell
+cd ..\Dalila_Language
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt -r requirements-neural-tts.txt
+$env:DALILA_PREPARE_MODELS = '1'
+.\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 7860
+```
+
+Dans `.env` : `LANGUE_URL=http://127.0.0.1:7860`. Notre API expose ensuite :
+- `POST /voix/transcrire` : audio brut vers texte reconnu, affiché avant l'envoi (BF7) ;
+- `POST /voix/lire` : réponse vers audio WAV dans la langue du texte (BF8) ; un dialecte sans voix dédiée est
+  lu avec une voix arabe générique, et la réponse le signale ;
+- `GET /voix/etat` : modèles réellement prêts.
+
+L'audio n'est jamais enregistré et ne quitte pas la machine. Si le service est arrêté, la réponse écrite
+continue (BNF4). La page `/banc` a un bouton micro (avec accord avant le premier enregistrement, BNF8) et
+un bouton pour activer ou couper la lecture (BF9).
 
 ## Interface de test avec un LLM (développement uniquement)
 

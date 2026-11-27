@@ -10,11 +10,14 @@ from typing import Any, Callable
 from pydantic import BaseModel
 
 from app.processing.avantages import avantages
+from app.processing.connaissances_afi import connaissances_afi
 from app.processing.demande import preparer_demande
+from app.processing.demarches_admin import demarches_administratives
 from app.processing.lots import chercher_lots, comparer_lots, details_lot, lots_proches
 from app.processing.schemas import (
-    AvantagesDonnees, AvantagesEntree, ChercherLotsDonnees, ChercherLotsEntree, ComparerLotsDonnees,
-    ComparerLotsEntree, DemarcheDonnees, DemarcheEntree, DetailsLotDonnees, DetailsLotEntree,
+    AvantagesDonnees, AvantagesEntree, ChercherLotsDonnees, ConnaissancesAfiDonnees, ConnaissancesAfiEntree, ChercherLotsEntree, ComparerLotsDonnees,
+    ComparerLotsEntree, DemarcheDonnees, DemarcheEntree, DemarchesAdministrativesDonnees,
+    DemarchesAdministrativesEntree, DetailsLotDonnees, DetailsLotEntree,
     GuiderServiceDonnees, GuiderServiceEntree, LotsProchesDonnees, LotsProchesEntree, NoterBesoinDonnees,
     NoterBesoinEntree, PreparerDemandeDonnees, PreparerDemandeEntree, ReglesZoneDonnees, ReglesZoneEntree,
     ServicesAfiDonnees, ServicesAfiEntree, SortieOutil,
@@ -75,6 +78,21 @@ OUTILS: dict[str, Outil] = {o.nom: o for o in [
           "(zone_id, zone_nom ou lot_id) et la question. Si le cahier distingue des catégories (categorie_a_preciser), "
           "demander laquelle. Zone sans cahier : le dire, ne jamais prendre les règles d'une autre zone.",
           ReglesZoneEntree, ReglesZoneDonnees, regles_zone),
+    Outil("demarches_administratives",
+          "Démarches administratives HORS AFI utiles au projet (fiches du portail SICAD) : raccordement à "
+          "l'assainissement, étude d'impact sur l'environnement, importation, exportation et aides à l'export, "
+          "contrôle qualité, métrologie, énergie, activités soumises à un cahier des charges d'activité "
+          "(commerce, distribution, métiers)… Rend pour chaque fiche les conditions, pièces, étapes, lieu de dépôt, "
+          "délai, références et l'organisme, avec le lien. Donner le besoin et l'activité EN FRANÇAIS. Fiches "
+          "datées (donnee_non_fraiche) : dire de vérifier sur le lien. Pour les 8 services de l'AFI : outil demarche.",
+          DemarchesAdministrativesEntree, DemarchesAdministrativesDonnees, demarches_administratives),
+    Outil("connaissances_afi",
+          "Fiches validées par l'AFI (texte intégral) les plus proches de la question : présentation, missions et "
+          "chiffres de l'AFI, zones aménagées, en cours ou programmées, obligations de l'acquéreur (délais de "
+          "construction, clôture), règles générales de construction et réseaux, déclaration de projet à l'APII "
+          "(pièces, TRE, fonds propres), études et données industrielles par gouvernorat ou secteur. Donner la "
+          "question EN FRANÇAIS. Pour les règles d'UNE zone : regles_zone d'abord ; pour un service AFI : demarche.",
+          ConnaissancesAfiEntree, ConnaissancesAfiDonnees, connaissances_afi),
 ]}
 
 

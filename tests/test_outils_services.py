@@ -284,8 +284,10 @@ def test_avantages_agricole_vers_apia_avec_citation(source_test):
 
 @pytest.mark.parametrize("montant,attendu", [(20_000_000, ["TIA"]), (2_000_000, ["APII"]), (15_000_000, ["TIA"])])
 def test_avantages_seuil_de_15_mdt(source_test, montant, attendu):
+    # Le seuil décide qui accorde les avantages ; l'accompagnement (pépinières APII) ne dépend pas du montant.
     r = avantages(AvantagesEntree(activite="usine textile", investissement_dt=montant, investisseur_etranger=False))
-    assert _orgs(r) == attendu and C.montant_a_preciser not in codes(r)
+    octroi = sorted({o.organisation for o in r.donnees.orientation if o.role == "octroi_avantages"})
+    assert octroi == attendu and C.montant_a_preciser not in codes(r)
 
 
 def test_avantages_agricole_au_dessus_du_seuil_plusieurs_organismes(source_test):
@@ -299,10 +301,58 @@ def test_avantages_investisseur_etranger_premier_contact_fipa(source_test):
     assert {o.role for o in r.donnees.orientation if o.organisation == "FIPA"} == {"premier_contact"}
 
 
+@pytest.mark.parametrize("texte", ["3andi projet sardine", "عندي مشروع سردين", "pêche côtière",
+                                   "première transformation de produits agricoles"])
+def test_avantages_peche_et_transformation_vers_apia_seule(source_test, texte):
+    # Migration 0005 : la règle APII (« autres secteurs ») exclut aussi la pêche et la première transformation
+    r = avantages(AvantagesEntree(question=texte, investissement_dt=300_000, investisseur_etranger=False))
+    assert _orgs(r) == ["APIA"] and C.plusieurs_organismes not in codes(r)
+
+
+def test_avantages_services_vers_apii(source_test):
+    r = avantages(AvantagesEntree(activite="développement de logiciels", investissement_dt=100_000,
+                                  investisseur_etranger=False))
+    assert r.donnees.secteurs == ["services"] and _orgs(r) == ["APII"]
+
+
+@pytest.mark.parametrize("activite,organisme", [("élevage ovin", "APIA"), ("usine textile", "APII")])
+def test_avantages_accompagnement_source(source_test, activite, organisme):
+    r = avantages(AvantagesEntree(activite=activite, investissement_dt=200_000, investisseur_etranger=False))
+    acc = [o for o in r.donnees.orientation if o.role == "accompagnement"]
+    assert [o.organisation for o in acc] == [organisme] and "pepinieres" in acc[0].url
+
+
 def test_avantages_secteur_inconnu_rien_suppose(source_test):
     r = avantages(AvantagesEntree(activite="xyz"))
     assert r.donnees.secteurs == [] and C.secteur_a_preciser in codes(r)
     assert "APII" not in _orgs(r)                    # « autres secteurs » : jamais supposé sans secteur
+
+
+@pytest.mark.parametrize("textes,attendu", [
+    (["(Selon les exigences de la loi n°93-120 du 27 décembre 1993 portant promulgation du code)"], True),
+    (["Demeurant en vigueur les avantages du code d'incitation aux investissements pour les projets…"], True),
+    (["Loi n°2016-71 du 30 septembre 2016, portant loi de l’investissement"], False),
+    ([None, "Prime de développement régional : 15 %"], False),
+])
+def test_regime_ancien_detecte(textes, attendu):
+    from app.processing.avantages import regime_ancien
+    assert regime_ancien(*textes) is attendu
+
+
+def test_avantages_extrait_ancien_regime_signale():
+    class Source:
+        def rechercher(self, *a, **k):
+            return [Incitation(intitule="Prime", extrait="x", organisme="APIA", url="https://example.org/ancien",
+                               document=None, page=None, date_source=None, regime_ancien=True),
+                    Incitation(intitule="Prime", extrait="y", organisme="APIA", url="https://example.org/actuel",
+                               document=None, page=None, date_source=None)]
+    brancher_source(Source())
+    try:
+        r = avantages(AvantagesEntree(secteur="agriculture"))
+        assert [a.detail for a in r.avertissements if a.code == C.regime_ancien] == ["https://example.org/ancien"]
+    finally:
+        from app.processing.avantages import SourcePassagesOrganismes
+        brancher_source(SourcePassagesOrganismes())
 
 
 def test_avantages_index_indisponible_aucune_incitation_inventee():

@@ -156,18 +156,29 @@ id:secteur-agriculture a afi:Secteur ;
     skos:prefLabel "Agriculture"@fr, "فلاحة"@ar ;
     skos:altLabel "agriculture"@fr, "agricole"@fr, "agriculteur"@fr, "exploitation agricole"@fr, "ferme"@fr,
         "élevage"@fr, "production végétale"@fr, "production animale"@fr, "arboriculture"@fr, "maraîchage"@fr,
-        "agriculture"@en, "farming"@en, "farm"@en, "livestock"@en,
-        "landwirtschaft"@de, "tarım"@tr, "çiftlik"@tr,
-        "فلاحة"@ar, "فلاحي"@ar, "زراعة"@ar, "زراعي"@ar, "تربية الماشية"@ar,
-        "fla7a"@ar-Latn-TN, "fle7a"@ar-Latn-TN, "filaha"@ar-Latn-TN, "fellah"@ar-Latn-TN, "zra3a"@ar-Latn-TN .
+        "olivier"@fr, "oliviers"@fr, "oliveraie"@fr, "palmier dattier"@fr, "palmiers dattiers"@fr, "serre"@fr,
+        "serres"@fr, "apiculture"@fr, "aviculture"@fr, "élevage ovin"@fr, "élevage bovin"@fr, "céréales"@fr,
+        "agriculture"@en, "farming"@en, "farm"@en, "livestock"@en, "olive trees"@en, "olive grove"@en,
+        "greenhouse"@en, "beekeeping"@en, "poultry farm"@en,
+        "landwirtschaft"@de, "bauernhof"@de, "viehzucht"@de, "olivenbäume"@de,
+        "tarım"@tr, "çiftlik"@tr, "hayvancılık"@tr, "zeytin bahçesi"@tr,
+        "فلاحة"@ar, "فلاحي"@ar, "زراعة"@ar, "زراعي"@ar, "تربية الماشية"@ar, "تربية الأغنام"@ar,
+        "غراسة الزيتون"@ar, "أشجار الزيتون"@ar, "زياتين"@ar, "نخيل"@ar, "بيوت مكيفة"@ar, "تربية النحل"@ar,
+        "fla7a"@ar-Latn-TN, "fle7a"@ar-Latn-TN, "filaha"@ar-Latn-TN, "fellah"@ar-Latn-TN, "zra3a"@ar-Latn-TN,
+        "zitoun"@ar-Latn-TN, "znitoun"@ar-Latn-TN, "ghnam"@ar-Latn-TN, "dbara"@ar-Latn-TN, "na5la"@ar-Latn-TN,
+        "nakhla"@ar-Latn-TN .
 
 id:secteur-peche a afi:Secteur ;
     afi:codeSecteur "peche" ;
     skos:prefLabel "Pêche et aquaculture"@fr, "صيد بحري"@ar ;
-    skos:altLabel "pêche"@fr, "pêcheur"@fr, "aquaculture"@fr, "pisciculture"@fr,
-        "fishing"@en, "fishery"@en, "aquaculture"@en, "fischerei"@de, "balıkçılık"@tr,
-        "صيد بحري"@ar, "الصيد البحري"@ar, "تربية الأسماك"@ar, "تربية الأحياء المائية"@ar,
-        "sayd"@ar-Latn-TN, "sayed"@ar-Latn-TN, "7out"@ar-Latn-TN .
+    skos:altLabel "pêche"@fr, "pêcheur"@fr, "aquaculture"@fr, "pisciculture"@fr, "poisson"@fr, "poissons"@fr,
+        "sardine"@fr, "sardines"@fr, "thon"@fr, "crevette"@fr, "crevettes"@fr, "bateau de pêche"@fr,
+        "fishing"@en, "fishery"@en, "aquaculture"@en, "fish"@en, "fish farm"@en, "sardine"@en, "tuna"@en,
+        "fischerei"@de, "fisch"@de, "fischzucht"@de, "balıkçılık"@tr, "balık"@tr,
+        "صيد بحري"@ar, "الصيد البحري"@ar, "تربية الأسماك"@ar, "تربية الأحياء المائية"@ar, "سردين"@ar, "سمك"@ar,
+        "أسماك"@ar, "حوت"@ar, "قمبري"@ar,
+        "sayd"@ar-Latn-TN, "sayed"@ar-Latn-TN, "7out"@ar-Latn-TN, "7outa"@ar-Latn-TN, "sardine"@ar-Latn-TN,
+        "sardina"@ar-Latn-TN, "flouka"@ar-Latn-TN .
 
 id:secteur-premiere-transformation a afi:Secteur ;
     afi:codeSecteur "premiere_transformation" ;
@@ -182,14 +193,337 @@ id:secteur-industrie a afi:Secteur ;
         "industry"@en, "factory"@en, "manufacturing"@en, "industrie"@de, "fabrik"@de, "sanayi"@tr, "fabrika"@tr,
         "صناعة"@ar, "صناعي"@ar, "مصنع"@ar, "sina3a"@ar-Latn-TN, "msna3"@ar-Latn-TN, "usine"@ar-Latn-TN .
 
+# Services : l'APII reçoit la « Déclaration de création d'un projet industriel ou de services »
+# (afi.chatbot_connaissances, fiche 42) ; pour l'orientation, ce sont les « autres secteurs » de la règle APII.
+# Les services liés à l'agriculture (vétérinaires…) restent reconnus comme agriculture quand le texte le dit.
+id:secteur-services a afi:Secteur ;
+    afi:codeSecteur "services" ;
+    skos:prefLabel "Services"@fr, "خدمات"@ar ;
+    dcterms:source "Fiche 42 de afi.chatbot_connaissances : « Déclaration de création d'un projet industriel ou de services auprès de l'APII »." ;
+    skos:altLabel "services"@fr, "prestation de services"@fr, "société de services"@fr, "logiciel"@fr, "logiciels"@fr,
+        "informatique"@fr, "développement de logiciels"@fr, "centre d'appels"@fr, "bureau d'études"@fr,
+        "services"@en, "software"@en, "it services"@en, "call center"@en, "consulting"@en,
+        "dienstleistung"@de, "dienstleistungen"@de, "softwareentwicklung"@de,
+        "hizmet"@tr, "hizmetler"@tr, "yazılım"@tr,
+        "خدمات"@ar, "برمجيات"@ar, "إعلامية"@ar, "مركز نداء"@ar, "مكتب دراسات"@ar,
+        "khadamet"@ar-Latn-TN, "informatique"@ar-Latn-TN, "logiciel"@ar-Latn-TN .
+
+# ---------------------------------------------------------------------
+# Démarches administratives (famille « Démarche » du cahier §IV.5 : « Base de connaissances,
+# fiches SICAD »). Schéma et vocabulaire seulement : les démarches, leurs organismes et leurs
+# domaines sont construits depuis PostgreSQL (assistant.demarches_externes, fiches SICAD de
+# afi.chatbot_sources) par backend/app/semantique/graphe_demarches.py.
+# Un domaine est relié aux fiches par son libellé SICAD exact (afi:libelleSicad, comparé sans
+# accents ni casse). Les synonymes ont été saisis par l'équipe le 2026-11-27 : ils servent à
+# reconnaître le besoin dans une question, pas à décider quelle démarche s'applique.
+# ---------------------------------------------------------------------
+
+afi:Demarche a owl:Class ;
+    rdfs:label "Démarche"@fr, "Procedure"@en, "إجراء"@ar .
+
+afi:DemarcheAdministrative a owl:Class ;
+    rdfs:subClassOf afi:Demarche ;
+    rdfs:label "Démarche administrative (fiche SICAD)"@fr, "Administrative procedure"@en, "إجراء إداري"@ar ;
+    rdfs:comment "Fiche du portail SICAD ; texte dans assistant.document_versions (type fiche_sicad)."@fr .
+
+afi:ServiceAFI rdfs:subClassOf afi:Demarche .
+
+afi:DomaineDemarche a owl:Class ;
+    rdfs:label "Domaine de démarche (SICAD)"@fr, "Procedure domain"@en .
+
+afi:relevePar a owl:ObjectProperty ;
+    rdfs:comment "Ministère ou organisme cité par la fiche (jamais déduit)."@fr ;
+    rdfs:domain afi:Demarche ;
+    rdfs:range afi:Organisme .
+
+afi:dansDomaine a owl:ObjectProperty ;
+    rdfs:domain afi:Demarche ;
+    rdfs:range afi:DomaineDemarche .
+
+afi:libelleSicad a owl:DatatypeProperty ;
+    rdfs:comment "Libellé exact du domaine sur SICAD (« Secteurs & Domaines »)."@fr ;
+    rdfs:domain afi:DomaineDemarche ;
+    rdfs:range xsd:string .
+
+afi:typeFiche a owl:DatatypeProperty ;
+    rdfs:comment "prestation (conditions, pièces, étapes, délai) ou cahier_des_charges (activité soumise à un cahier des charges)."@fr ;
+    rdfs:domain afi:DemarcheAdministrative ;
+    rdfs:range xsd:string .
+
+afi:secteurSicad a owl:DatatypeProperty ;
+    rdfs:domain afi:DemarcheAdministrative ;
+    rdfs:range xsd:string .
+
+id:domaine-assainissement a afi:DomaineDemarche ;
+    afi:libelleSicad "Assainissement" ;
+    skos:altLabel "assainissement"@fr, "eaux usées"@fr, "égout"@fr, "égouts"@fr, "réseau d'assainissement"@fr,
+        "raccordement à l'égout"@fr, "rejet des eaux"@fr, "déversement"@fr, "onas"@fr,
+        "sewage"@en, "sewer"@en, "wastewater"@en, "sanitation"@en,
+        "abwasser"@de, "kanalisation"@de, "atık su"@tr, "kanalizasyon"@tr,
+        "تطهير"@ar, "التطهير"@ar, "الصرف الصحي"@ar, "المياه المستعملة"@ar, "الديوان الوطني للتطهير"@ar,
+        "onas"@ar-Latn-TN, "tat7ir"@ar-Latn-TN, "tatehir"@ar-Latn-TN .
+
+id:domaine-protection-environnement a afi:DomaineDemarche ;
+    afi:libelleSicad "Protection de l'environnement" ;
+    skos:altLabel "environnement"@fr, "environnementale"@fr, "étude d'impact"@fr, "impact sur l'environnement"@fr,
+        "pollution"@fr, "dépollution"@fr, "anpe"@fr, "déchets"@fr, "déchets dangereux"@fr,
+        "environment"@en, "environmental impact"@en, "impact assessment"@en, "pollution"@en, "waste"@en,
+        "umwelt"@de, "umweltverträglichkeitsprüfung"@de, "abfall"@de, "çevre"@tr, "çevresel etki"@tr, "atık"@tr,
+        "البيئة"@ar, "دراسة المؤثرات"@ar, "المؤثرات على المحيط"@ar, "التلوث"@ar, "النفايات"@ar,
+        "pollution"@ar-Latn-TN, "bi2a"@ar-Latn-TN, "etude d'impact"@ar-Latn-TN .
+
+id:domaine-importation a afi:DomaineDemarche ;
+    afi:libelleSicad "Opérations d'importation" ;
+    skos:altLabel "importer"@fr, "importation"@fr, "importations"@fr, "import"@fr,
+        "import"@en, "importing"@en, "einfuhr"@de, "importieren"@de, "ithalat"@tr, "ithal"@tr,
+        "توريد"@ar, "استيراد"@ar, "tawrid"@ar-Latn-TN, "nwarred"@ar-Latn-TN, "nwared"@ar-Latn-TN .
+
+id:domaine-commerce-exterieur a afi:DomaineDemarche ;
+    afi:libelleSicad "Commerce extérieur et manifestions internationales" ;
+    skos:altLabel "exporter"@fr, "exportation"@fr, "export"@fr, "commerce extérieur"@fr, "foire internationale"@fr,
+        "salon international"@fr, "cepex"@fr,
+        "export"@en, "exporting"@en, "trade fair"@en, "ausfuhr"@de, "exportieren"@de, "messe"@de,
+        "ihracat"@tr, "fuar"@tr,
+        "تصدير"@ar, "التجارة الخارجية"@ar, "معرض دولي"@ar, "tasdir"@ar-Latn-TN, "nsadder"@ar-Latn-TN,
+        "export"@ar-Latn-TN .
+
+id:domaine-controle-qualite a afi:DomaineDemarche ;
+    afi:libelleSicad "Contrôle de la qualité et contrôle technique à l'importation et à l'exportation" ;
+    skos:altLabel "contrôle de la qualité"@fr, "contrôle qualité"@fr, "contrôle technique"@fr,
+        "certificat de contrôle"@fr, "quality control"@en, "technical inspection"@en,
+        "qualitätskontrolle"@de, "kalite kontrolü"@tr, "مراقبة الجودة"@ar, "المراقبة الفنية"@ar .
+
+id:domaine-metrologie a afi:DomaineDemarche ;
+    afi:libelleSicad "Métrologie légale" ;
+    skos:altLabel "métrologie"@fr, "instrument de mesure"@fr, "instruments de mesure"@fr, "balance"@fr,
+        "étalonnage"@fr, "jaugeage"@fr, "metrology"@en, "calibration"@en, "measuring instrument"@en,
+        "eichung"@de, "kalibrierung"@de, "metroloji"@tr, "kalibrasyon"@tr,
+        "مترولوجيا"@ar, "معايرة"@ar, "أدوات القيس"@ar, "ميزان"@ar .
+
+id:domaine-maitrise-energie a afi:DomaineDemarche ;
+    afi:libelleSicad "La Maîtrise de l'Energie" ;
+    skos:altLabel "maîtrise de l'énergie"@fr, "efficacité énergétique"@fr, "audit énergétique"@fr,
+        "économie d'énergie"@fr, "energy efficiency"@en, "energy audit"@en, "energieeffizienz"@de,
+        "energieaudit"@de, "enerji verimliliği"@tr, "التحكم في الطاقة"@ar, "النجاعة الطاقية"@ar .
+
+id:domaine-energie a afi:DomaineDemarche ;
+    afi:libelleSicad "Energie" ;
+    skos:altLabel "énergie"@fr, "électricité"@fr, "raccordement électrique"@fr, "énergie renouvelable"@fr,
+        "énergies renouvelables"@fr, "photovoltaïque"@fr, "solaire"@fr,
+        "energy"@en, "electricity"@en, "solar"@en, "renewable energy"@en, "strom"@de, "solarenergie"@de,
+        "enerji"@tr, "elektrik"@tr, "güneş enerjisi"@tr,
+        "طاقة"@ar, "كهرباء"@ar, "الطاقة الشمسية"@ar, "الطاقات المتجددة"@ar,
+        "kahraba"@ar-Latn-TN, "trisiti"@ar-Latn-TN, "triciti"@ar-Latn-TN .
+
+id:domaine-securite-industrie a afi:DomaineDemarche ;
+    afi:libelleSicad "Sécurité dans les domaines de l'Industrie,de l'Energie et des Mines" ;
+    skos:altLabel "sécurité industrielle"@fr, "appareils à pression"@fr, "équipements sous pression"@fr,
+        "organisme de contrôle technique"@fr, "industrial safety"@en, "pressure equipment"@en,
+        "industriesicherheit"@de, "druckgeräte"@de, "endüstriyel güvenlik"@tr, "السلامة الصناعية"@ar .
+
+id:domaine-mines a afi:DomaineDemarche ;
+    afi:libelleSicad "Mines" ;
+    skos:altLabel "mine"@fr, "mines"@fr, "carrière"@fr, "carrières"@fr, "minerai"@fr,
+        "mining"@en, "quarry"@en, "bergbau"@de, "steinbruch"@de, "madencilik"@tr, "maden"@tr, "taş ocağı"@tr,
+        "مناجم"@ar, "منجم"@ar, "مقطع"@ar, "مقاطع"@ar .
+
+id:domaine-commerce-interieur a afi:DomaineDemarche ;
+    afi:libelleSicad "Commerce intérieur" ;
+    skos:altLabel "commerce"@fr, "distribution"@fr, "commerce de gros"@fr, "commerce de détail"@fr, "grossiste"@fr,
+        "carte de commerçant"@fr, "concessionnaire"@fr, "représentant de commerce"@fr,
+        "trade"@en, "wholesale"@en, "retail"@en, "distribution"@en, "handel"@de, "großhandel"@de,
+        "ticaret"@tr, "toptan"@tr, "perakende"@tr,
+        "تجارة"@ar, "توزيع"@ar, "تجارة الجملة"@ar, "تجارة التفصيل"@ar, "tijara"@ar-Latn-TN, "commerce"@ar-Latn-TN .
+
+id:domaine-metiers-services a afi:DomaineDemarche ;
+    afi:libelleSicad "Métiers et Services" ;
+    skos:altLabel "répertoire des métiers"@fr, "artisan"@fr, "artisanat"@fr, "métier"@fr, "réparation"@fr,
+        "craft"@en, "craftsman"@en, "repair"@en, "handwerk"@de, "reparatur"@de, "zanaat"@tr, "tamir"@tr,
+        "حرف"@ar, "حرفي"@ar, "صناعات تقليدية"@ar, "إصلاح"@ar .
+
+id:domaine-huiles-usagees a afi:DomaineDemarche ;
+    afi:libelleSicad "La gestion des huiles lubrifiantes et des filtres à huiles usagées" ;
+    skos:altLabel "huiles usagées"@fr, "huile usagée"@fr, "huiles lubrifiantes"@fr, "huile de vidange"@fr,
+        "used oil"@en, "waste oil"@en, "altöl"@de, "atık yağ"@tr, "الزيوت المستعملة"@ar, "زيوت التشحيم"@ar .
+
+id:domaine-environnement-marin a afi:DomaineDemarche ;
+    afi:libelleSicad "Protection de l'environnement marin contre la pollution" ;
+    skos:altLabel "pollution marine"@fr, "rejet en mer"@fr, "immersion"@fr, "marine pollution"@en,
+        "meeresverschmutzung"@de, "deniz kirliliği"@tr, "التلوث البحري"@ar .
+
+id:domaine-environnement-urbain a afi:DomaineDemarche ;
+    afi:libelleSicad "Protection de l'environnement urbain" ;
+    skos:altLabel "parcs urbains"@fr, "parc urbain"@fr, "espaces verts"@fr, "urban park"@en, "المنتزهات الحضرية"@ar .
+
+# Mots qui, dans le TITRE d'une fiche SICAD, signalent une aide ou un avantage (FOPRODEX, FODEP,
+# avantages fiscaux) : ces fiches sont aussi rendues par l'outil avantages quand leur domaine est reconnu.
+id:incitation-demarche a skos:Concept ;
+    skos:prefLabel "titre annonçant une aide"@fr ;
+    rdfs:comment "Sert aussi à reconnaître les instances de afi:Incitation (titres des pages des organismes)."@fr ;
+    skos:altLabel "avantages"@fr, "avantage"@fr, "indemnités"@fr, "concours du fonds"@fr, "prime"@fr, "primes"@fr,
+        "subvention"@fr, "subventions"@fr, "incitations"@fr, "incitation"@fr, "prêts fonciers"@fr,
+        "franchise douanière"@fr, "financement"@fr, "package d'incitations"@fr .
+
+id:domaine-cahiers-des-charges a afi:DomaineDemarche ;
+    afi:libelleSicad "Prestations soumises au régime des cahiers des charges" ;
+    rdfs:comment "Pas de synonyme : « cahier des charges » désigne aussi le règlement d'une zone (outil regles_zone)."@fr .
+
+# ---------------------------------------------------------------------
+# Lieu, Lot, Commodité, Incitation, Projet (familles du cahier §IV.5)
+# Schéma seulement : les instances sont construites depuis PostgreSQL et les données de référence
+# sourcées (backend/app/semantique/graphe_familles.py). Le graphe garde des identifiants et des liens :
+# prix, statuts, surfaces et distances restent en SQL.
+# ---------------------------------------------------------------------
+
+afi:Lieu a owl:Class ;
+    rdfs:label "Lieu"@fr, "Place"@en, "مكان"@ar .
+
+afi:ZoneIndustrielle rdfs:subClassOf afi:Lieu .
+
+afi:Gouvernorat a owl:Class ;
+    rdfs:subClassOf afi:Lieu ;
+    rdfs:label "Gouvernorat"@fr, "Governorate"@en, "ولاية"@ar ;
+    rdfs:comment "Codes zones.gouv_id ; noms relevés sur liste.php (backend/app/processing/reference.py)."@fr .
+
+afi:codeGouvernorat a owl:DatatypeProperty ;
+    rdfs:domain afi:Gouvernorat ;
+    rdfs:range xsd:integer .
+
+afi:gouvernoratDeduit a owl:DatatypeProperty ;
+    rdfs:comment "Correspondance déduite (non lue sur le site) : à confirmer par l'AFI."@fr ;
+    rdfs:domain afi:Gouvernorat ;
+    rdfs:range xsd:boolean .
+
+afi:dansGouvernorat a owl:ObjectProperty ;
+    rdfs:comment "Lien venu de zones.gouv_id (jamais deviné)."@fr ;
+    rdfs:range afi:Gouvernorat .
+
+afi:Lot a owl:Class ;
+    rdfs:label "Lot industriel"@fr, "Industrial plot"@en, "مقسم صناعي"@ar ;
+    rdfs:comment "Seulement l'identifiant et la zone : surface, prix et statut restent dans afi.lots."@fr .
+
+afi:identifiantLot a owl:DatatypeProperty ;
+    rdfs:comment "afi.lots.lot_id."@fr ;
+    rdfs:domain afi:Lot ;
+    rdfs:range xsd:integer .
+
+afi:dansZone a owl:ObjectProperty ;
+    rdfs:comment "Lien venu de lots.zone_id ; un lot orphelin (zone absente de afi.zones) n'en a pas."@fr ;
+    rdfs:domain afi:Lot ;
+    rdfs:range afi:ZoneIndustrielle .
+
+afi:lotOrphelin a owl:DatatypeProperty ;
+    rdfs:domain afi:Lot ;
+    rdfs:range xsd:boolean .
+
+afi:TypeCommodite a owl:Class ;
+    rdfs:label "Commodité"@fr, "Amenity"@en, "مرفق"@ar ;
+    rdfs:comment "Types com_id de la carte publique (/data/zone-commodites.php, lu le 26/11/2026)."@fr .
+
+afi:codeCommodite a owl:DatatypeProperty ;
+    rdfs:domain afi:TypeCommodite ;
+    rdfs:range xsd:integer .
+
+afi:aProximiteDe a owl:ObjectProperty ;
+    rdfs:comment "La zone a une distance renseignée (en km) vers ce type d'équipement dans afi.zone_commodites ; la distance reste en SQL."@fr ;
+    rdfs:domain afi:ZoneIndustrielle ;
+    rdfs:range afi:TypeCommodite .
+
+afi:Incitation a owl:Class ;
+    rdfs:label "Incitation"@fr, "Incentive"@en, "حافز"@ar ;
+    rdfs:comment "Page d'un organisme ou fiche SICAD dont le titre annonce une aide (vocabulaire id:incitation-demarche) ; le texte est dans PostgreSQL et Qdrant."@fr .
+
+afi:accordeePar a owl:ObjectProperty ;
+    rdfs:domain afi:Incitation ;
+    rdfs:range afi:Organisme .
+
+afi:octroieAvantagesPour a owl:ObjectProperty ;
+    rdfs:comment "Règle sourcée de assistant.regles_orientation (rôle octroi_avantages, phrase exacte contrôlée par la base)."@fr ;
+    rdfs:domain afi:Organisme ;
+    rdfs:range afi:Secteur .
+
+afi:codeOrganisation a owl:DatatypeProperty ;
+    rdfs:comment "Code utilisé par assistant.sources.organisation et assistant.regles_orientation."@fr ;
+    rdfs:domain afi:Organisme ;
+    rdfs:range xsd:string .
+
+afi:Projet a owl:Class ;
+    rdfs:label "Projet d'investissement"@fr, "Investment project"@en, "مشروع استثماري"@ar ;
+    rdfs:comment "Projet décrit par l'investisseur dans la conversation (schéma Projet de preparer_demande) ; jamais enregistré dans le graphe. Les listes QualificationProjet et ConseilProjet::NATURES de l'ancienne application n'ont pas été fournies."@fr .
+
+afi:natureProjet a owl:ObjectProperty ;
+    rdfs:domain afi:Projet ;
+    rdfs:range afi:Secteur .
+
+afi:nombreEmplois a owl:DatatypeProperty ;
+    rdfs:domain afi:Projet ;
+    rdfs:range xsd:nonNegativeInteger .
+
+afi:investissementDt a owl:DatatypeProperty ;
+    rdfs:comment "Coût total du projet en dinars tunisiens."@fr ;
+    rdfs:domain afi:Projet ;
+    rdfs:range xsd:nonNegativeInteger .
+
+afi:surfaceSouhaiteeM2 a owl:DatatypeProperty ;
+    rdfs:domain afi:Projet ;
+    rdfs:range xsd:nonNegativeInteger .
+
+afi:localiseDans a owl:ObjectProperty ;
+    rdfs:domain afi:Projet ;
+    rdfs:range afi:Lieu .
+
+# ---------------------------------------------------------------------
+# Organismes cités par le cahier (§IV.5 : « AFI, INS, TIA, APII, APIA, FIPA »). Noms lus dans la liste
+# des sigles du guide des idées de projet de l'APII (PDF lu le 2026-11-27) ou sur les pages de l'APII.
+# ---------------------------------------------------------------------
+
+id:organisme-apia a afi:Organisme ;
+    afi:codeOrganisation "APIA" ;
+    skos:prefLabel "Agence de Promotion des Investissements Agricoles"@fr ;
+    skos:altLabel "APIA"@fr ;
+    dcterms:source <https://www.tunisieindustrie.nat.tn/fr/download/IDEES/GUIDE.pdf> .
+
+id:organisme-apii a afi:Organisme ;
+    afi:codeOrganisation "APII" ;
+    skos:prefLabel "Agence de Promotion de l'Industrie et de l'Innovation"@fr ;
+    skos:altLabel "APII"@fr ;
+    dcterms:source <https://www.tunisieindustrie.nat.tn/fr/idee.asp> .
+
+id:organisme-tia a afi:Organisme ;
+    afi:codeOrganisation "TIA" ;
+    skos:prefLabel "Tunisia Investment Authority"@en ;
+    skos:altLabel "TIA"@fr ;
+    dcterms:source <https://www.tunisieindustrie.nat.tn/fr/download/IDEES/GUIDE.pdf> .
+
+id:organisme-fipa a afi:Organisme ;
+    afi:codeOrganisation "FIPA" ;
+    skos:prefLabel "Foreign Investment Promotion Agency"@en ;
+    skos:altLabel "FIPA"@fr ;
+    dcterms:source <https://www.tunisieindustrie.nat.tn/fr/download/IDEES/GUIDE.pdf> .
+
+id:organisme-ins a afi:Organisme ;
+    afi:codeOrganisation "INS" ;
+    skos:prefLabel "Institut National de la Statistique"@fr ;
+    skos:altLabel "INS"@fr ;
+    rdfs:comment "Cité par le cahier « sans lecture automatique » ; le guide APII le donne comme source des statistiques du commerce extérieur (« Source: INS pour l'import et export de la Tunisie »). Aucune page lue."@fr ;
+    dcterms:source <https://www.tunisieindustrie.nat.tn/fr/download/IDEES/GUIDE.pdf> .
+
 # ---------------------------------------------------------------------
 # L'AFI
 # ---------------------------------------------------------------------
 
+afi:ficheEcartee a owl:DatatypeProperty ;
+    rdfs:comment "Fiche de afi.chatbot_connaissances jamais proposée par la recherche (raison dans le commentaire de l'organisme)."@fr ;
+    rdfs:domain afi:Organisme ;
+    rdfs:range xsd:integer .
+
 id:afi a afi:Organisme ;
     skos:prefLabel "Agence Foncière Industrielle"@fr, "الوكالة العقارية الصناعية"@ar ;
     skos:altLabel "AFI"@fr ;
-    afi:ficheContact 26 .
+    afi:ficheContact 26 ;
+    # 12 : ancienne version des fiches 13 et 14 ; 3 : contact dont les numéros sont écrits à l'envers
+    # (« +216 260 124 71 », la fiche 26 donne « +216 71 124 260 ») : le contact vient de la fiche 26.
+    afi:ficheEcartee 3, 12 .
 
 # ---------------------------------------------------------------------
 # Les 8 services (cahier §IV.6) ; noms et parcours : assistant.services, assistant.parcours

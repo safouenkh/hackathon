@@ -13,6 +13,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.banc.gemini import Banc, creer_banc
+from app.banc.sources import sources_du_tour
 from app.config import get_settings
 
 router = APIRouter(prefix="/banc", tags=["banc de test"], include_in_schema=False)
@@ -77,6 +78,7 @@ def message(m: Message) -> dict:
     return {
         "reponse": reponse,
         "appels": appels,
+        "sources": sources_du_tour(appels),    # affichées par la page, jamais lues à voix haute
         "controle": controle,
         "donnees_masquees": masquees,       # types de données personnelles retirées avant l'envoi au LLM
         "duree_s": round(duree, 1),

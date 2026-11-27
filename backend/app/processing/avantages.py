@@ -10,6 +10,7 @@
 """
 from __future__ import annotations
 
+import re
 from typing import Protocol
 
 from sqlalchemy import Connection
@@ -24,6 +25,16 @@ from app.processing.schemas import (
 from app.repositories import documents as repo_docs
 from app.repositories import orientation as repo_orientation
 from app.semantique.ontologie import ontologie
+
+
+# L'ancien code d'incitation aux investissements (loi n° 93-120) a été remplacé par la loi n° 2016-71 ; les
+# pages de l'APIA le citent encore (tableaux « Selon les exigences de la loi n°93-120 », avantages « demeurant
+# en vigueur » pour d'anciens projets). Un tel extrait est signalé, jamais présenté comme l'avantage actuel.
+_ANCIEN_REGIME = re.compile(r"93\s*-\s*120|code\s+d.incitations?\s+aux\s+investissements", re.I)
+
+
+def regime_ancien(*textes: str | None) -> bool:
+    return any(t and _ANCIEN_REGIME.search(t) for t in textes)
 
 
 class SourceIncitations(Protocol):
@@ -58,7 +69,10 @@ class SourcePassagesOrganismes:
                 continue
             res.append(Incitation(intitule=(p["section"] or [p["titre"]])[-1], extrait=p["texte"],
                                   organisme=p["organisation"], url=p["source_url"], document=p["titre"],
-                                  page=p["page_from"], date_source=p["retrieved_at"]))
+                                  page=p["page_from"], date_source=p["retrieved_at"],
+                                  # passage, titres, ou page entière annoncée en tête comme relevant de l'ancien code
+                                  regime_ancien=regime_ancien(p["texte"], p.get("debut_version"),
+                                                              *(p["section"] or []))))
         return res
 
 
@@ -92,7 +106,8 @@ def _regles_applicables(regles: list[dict], secteurs: list[str], montant: int | 
                 continue
         if r["secteur"] is not None and r["secteur"] not in secteurs:
             continue
-        if r["secteur_exclu"] is not None and (not secteurs or r["secteur_exclu"] in secteurs):
+        # « les autres secteurs » : jamais supposé sans secteur connu
+        if r["secteurs_exclus"] and (not secteurs or set(r["secteurs_exclus"]) & set(secteurs)):
             continue
         bornes = (r["investissement_min_dt"], r["investissement_max_dt"])
         if any(b is not None for b in bornes):
@@ -106,6 +121,31 @@ def _regles_applicables(regles: list[dict], secteurs: list[str], montant: int | 
                 continue
         retenues.append(r)
     return retenues
+
+
+def _incitations_sicad(texte: str, conn: Connection | None) -> list[Incitation]:
+    """Fiches SICAD dont le titre annonce une aide, dans les domaines reconnus dans la demande (ontologie)."""
+    from app.processing.demarches_admin import sections
+    from app.repositories import demarches as repo_demarches
+    from app.semantique.graphe_demarches import documents_d_incitation
+
+    domaines = ontologie().domaines_du_texte(texte)
+    docs = documents_d_incitation(domaines) if domaines else []
+    if not docs:
+        return []
+    with _connexion(conn) as c:
+        fiches = repo_demarches.fiches(c, docs)
+    res = []
+    for d in docs:
+        f = fiches.get(d)
+        if f is None:
+            continue
+        s = sections(f["full_text"] or "")
+        extrait = "\n".join(s.get("conditions", []) + s.get("pieces", [])) or f["titre"]
+        res.append(Incitation(intitule=f["titre"], extrait=extrait,
+                              organisme=(f["organismes"] or [None])[-1], url=f["url"], document=None, page=None,
+                              date_source=f["retrieved_at"], regime_ancien=regime_ancien(f["full_text"])))
+    return res
 
 
 def avantages(entree: AvantagesEntree, conn: Connection | None = None) -> SortieOutil[AvantagesDonnees]:
@@ -144,6 +184,13 @@ def avantages(entree: AvantagesEntree, conn: Connection | None = None) -> Sortie
         incitations = []
     if getattr(_source, "disponible", True) is False:
         avert.append(Avertissement(code=C.source_indisponible, detail="aucune source d'extraits branchée"))
+    # Fiches SICAD d'aides (export, dépollution…) quand la demande relève de leur domaine
+    try:
+        incitations += _incitations_sicad(question, conn)
+    except Exception as exc:
+        avert.append(Avertissement(code=C.source_indisponible, detail=f"fiches SICAD : {type(exc).__name__}"))
+    for url in dict.fromkeys(i.url or i.document for i in incitations if i.regime_ancien):
+        avert.append(Avertissement(code=C.regime_ancien, detail=url))
     if incitations:
         avert += [Avertissement(code=C.texte_non_relu), Avertissement(code=C.pertinence_non_garantie)]
     elif not orientation:

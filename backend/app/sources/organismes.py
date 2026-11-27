@@ -3,7 +3,8 @@
 Deux origines pour une même page (même URL = même document, une version par contenu) :
 - les pages lues par scripts.lire_sources puis converties par scripts.extraire_sources
   (sources-organismes/md/*.md, date de lecture dans l'en-tête) ;
-- les extraits de afi.chatbot_sources (dump AFI), hors SICAD (formalités, pas des incitations).
+- les extraits de afi.chatbot_sources (dump AFI) des organismes ; les fiches SICAD (démarches
+  administratives) du même dump sont importées par app.sources.sicad dans la même transaction.
 La version la plus récente sert aux réponses ; les anciennes restent (BNF14 : un échec de lecture
 garde la dernière version). Chaque version est découpée en passages (assistant.document_chunks).
 
@@ -27,6 +28,9 @@ from app.sources.cahiers import uuid_passage
 
 TYPE_DOCUMENT = "page_organisme"
 TAILLE_PASSAGE = 1500
+# Un reste plus court n'est jamais un passage à part (ex. un « . » final coupé à 1500 caractères) :
+# il reste avec le texte qui le précède, quitte à dépasser un peu la taille.
+MIN_PASSAGE = 40
 AUTEUR = "Import des pages des organismes"
 _TITRE = re.compile(r"^(#{1,6})\s+(.*)$")
 _PAGE = re.compile(r"^<!-- page (\d+) -->$")
@@ -39,8 +43,12 @@ class Rapport:
     avertissements: list[str] = field(default_factory=list)
     versions_creees: list[str] = field(default_factory=list)
     inchangees: list[str] = field(default_factory=list)
+    redecoupees: list[str] = field(default_factory=list)
     passages: int = 0
     regles_ajoutees: int = 0
+    regles_desactivees: int = 0
+    fiches_sicad: int = 0
+    fiches_afi: int = 0
     run_id: int | None = None
 
     @property
@@ -49,7 +57,9 @@ class Rapport:
 
     def compteurs(self) -> dict[str, int]:
         return {"versions_creees": len(self.versions_creees), "inchangees": len(self.inchangees),
-                "passages": self.passages, "regles_ajoutees": self.regles_ajoutees}
+                "redecoupees": len(self.redecoupees), "passages": self.passages,
+                "regles_ajoutees": self.regles_ajoutees, "regles_desactivees": self.regles_desactivees,
+                "fiches_sicad": self.fiches_sicad, "fiches_afi": self.fiches_afi}
 
 
 def cle_document(url: str) -> str:
@@ -91,7 +101,7 @@ def decouper(texte: str, taille: int = TAILLE_PASSAGE) -> list[dict[str, Any]]:
 
     def ajouter(bloc: str) -> None:
         nonlocal page_debut
-        if blocs and sum(len(b) for b in blocs) + len(bloc) > taille:
+        if blocs and sum(len(b) for b in blocs) + len(bloc) > taille and len(bloc) >= MIN_PASSAGE:
             vider()
         if page_debut is None:
             page_debut = page
@@ -130,6 +140,8 @@ def decouper(texte: str, taille: int = TAILLE_PASSAGE) -> list[dict[str, Any]]:
         while len(para) > taille:                 # paragraphe très long : coupé entre deux phrases
             coupe = para.rfind(". ", 0, taille)
             coupe = coupe + 1 if coupe > taille // 3 else taille
+            if len(para[coupe:].strip()) < MIN_PASSAGE:     # reste minuscule : on ne coupe pas
+                break
             ajouter(para[:coupe].strip())
             para = para[coupe:].strip()
         if para:
@@ -157,21 +169,41 @@ def _source(conn, organisation: str, titre: str, url: str, statut: str, erreur: 
     return sid
 
 
-def _version(conn, r: Rapport, *, source_id: int, url: str, titre: str, texte: str, chemin: str | None,
-             provenance: str, recupere_le: date | None, etiquette: str) -> None:
-    cle = cle_document(url)
+def _version(conn, r: Rapport, *, source_id: int, url: str | None, titre: str, texte: str, chemin: str | None,
+             provenance: str, recupere_le: date | None, etiquette: str, type_document: str = TYPE_DOCUMENT,
+             cle_doc: str | None = None) -> int:
+    """Version du texte (créée si nouvelle) ; renvoie son identifiant. Document : clé `cle_doc`, sinon l'URL."""
+    cle = cle_doc or cle_document(url)
     doc = _un(conn, "SELECT id FROM assistant.documents WHERE cle = %s", (cle,))
     if doc is None:
         doc = _un(conn, "INSERT INTO assistant.documents (source_id, cle, title, type, language) "
-                        "VALUES (%s, %s, %s, %s, 'fr') RETURNING id", (source_id, cle, titre, TYPE_DOCUMENT))
+                        "VALUES (%s, %s, %s, %s, 'fr') RETURNING id", (source_id, cle, titre, type_document))
     sha = hashlib.sha256(texte.encode("utf-8")).hexdigest()
-    if _un(conn, "SELECT id FROM assistant.document_versions WHERE document_id = %s AND sha256 = %s", (doc, sha)):
-        r.inchangees.append(etiquette)
-        return
+    passages = decouper(texte)
+    existante = _un(conn, "SELECT id FROM assistant.document_versions WHERE document_id = %s AND sha256 = %s",
+                    (doc, sha))
+    if existante:
+        anciens = [t for (t,) in conn.execute("SELECT text FROM assistant.document_chunks WHERE version_id = %s "
+                                               "ORDER BY ordinal LIMIT 10000", (existante,)).fetchall()]
+        if anciens == [p["texte"] for p in passages]:
+            r.inchangees.append(etiquette)
+            return existante
+        # Même texte, découpage corrigé : les passages de cette version sont remplacés (l'index est reconstruit)
+        conn.execute("DELETE FROM assistant.document_chunks WHERE version_id = %s", (existante,))
+        _ecrire_passages(conn, existante, sha, passages)
+        r.passages += len(passages)
+        r.redecoupees.append(etiquette)
+        return existante
     vid = _un(conn, "INSERT INTO assistant.document_versions (document_id, sha256, media_type, original_path, "
                     "full_text, content_provenance, retrieved_at) VALUES (%s, %s, 'text/markdown', %s, %s, %s, %s) "
                     "RETURNING id", (doc, sha, chemin, texte, provenance, recupere_le))
-    passages = decouper(texte)
+    _ecrire_passages(conn, vid, sha, passages)
+    r.passages += len(passages)
+    r.versions_creees.append(etiquette)
+    return vid
+
+
+def _ecrire_passages(conn, vid: int, sha: str, passages: list[dict[str, Any]]) -> None:
     with conn.cursor() as cur:
         cur.executemany(
             "INSERT INTO assistant.document_chunks (id, version_id, cle, ordinal, text, page_from, page_to, article, "
@@ -180,8 +212,6 @@ def _version(conn, r: Rapport, *, source_id: int, url: str, titre: str, texte: s
             [(uuid_passage(sha, f"p{p['ordinal']:04d}"), vid, f"p{p['ordinal']:04d}", p["ordinal"], p["texte"],
               p["page_from"], p["page_to"], p["section"], p["section"][-1] if p["section"] else None)
              for p in passages])
-    r.passages += len(passages)
-    r.versions_creees.append(etiquette)
 
 
 def _normaliser_espaces(t: str) -> str:
@@ -190,6 +220,7 @@ def _normaliser_espaces(t: str) -> str:
 
 def _ecrire_regles(conn, dossier: Path, r: Rapport) -> None:
     donnees = json.loads((dossier / "regles_orientation.json").read_text(encoding="utf-8"))
+    gardees: list[int] = []
     for regle in donnees["regles"]:
         citation = regle["citation"]
         versions = conn.execute(
@@ -203,21 +234,28 @@ def _ecrire_regles(conn, dossier: Path, r: Rapport) -> None:
         if versions and version != versions[0][0]:
             r.avertissements.append(f"règle {regle['organisation']} : citation absente de la version la plus récente "
                                     f"de {regle['source_url']}, version plus ancienne citée")
-        criteres = (regle["organisation"], regle["role"], regle.get("secteur"), regle.get("secteur_exclu"),
+        criteres = (regle["organisation"], regle["role"], regle.get("secteur"), regle.get("secteurs_exclus"),
                     regle.get("investissement_min_dt"), regle.get("investissement_max_dt"),
                     regle.get("investisseur_etranger"))
         existe = _un(conn, "SELECT id FROM assistant.regles_orientation WHERE organisation = %s AND role = %s "
-                           "AND secteur IS NOT DISTINCT FROM %s AND secteur_exclu IS NOT DISTINCT FROM %s "
+                           "AND secteur IS NOT DISTINCT FROM %s AND secteurs_exclus IS NOT DISTINCT FROM %s::text[] "
                            "AND investissement_min_dt IS NOT DISTINCT FROM %s "
                            "AND investissement_max_dt IS NOT DISTINCT FROM %s "
                            "AND investisseur_etranger IS NOT DISTINCT FROM %s", criteres)
         if existe:
+            conn.execute("UPDATE assistant.regles_orientation SET actif = true WHERE id = %s AND NOT actif", (existe,))
+            gardees.append(existe)
             continue
-        conn.execute("INSERT INTO assistant.regles_orientation (organisation, role, secteur, secteur_exclu, "
-                     "investissement_min_dt, investissement_max_dt, investisseur_etranger, citation, version_id, "
-                     "ajoute_par) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                     (*criteres, citation, version, donnees["ajoute_par"]))
+        gardees.append(_un(conn, "INSERT INTO assistant.regles_orientation (organisation, role, secteur, "
+                                 "secteurs_exclus, investissement_min_dt, investissement_max_dt, investisseur_etranger, "
+                                 "citation, version_id, ajoute_par) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+                                 "RETURNING id", (*criteres, citation, version, donnees["ajoute_par"])))
         r.regles_ajoutees += 1
+    # Le fichier est la référence de cet import : une règle qui en a disparu est désactivée (historique gardé).
+    if not r.erreurs:
+        n = conn.execute("UPDATE assistant.regles_orientation SET actif = false WHERE ajoute_par = %s AND actif "
+                         "AND NOT (id = ANY(%s))", (donnees["ajoute_par"], gardees)).rowcount
+        r.regles_desactivees += n
 
 
 def _ecrire(conn, dossier: Path, r: Rapport) -> None:
@@ -252,7 +290,7 @@ def _ecrire(conn, dossier: Path, r: Rapport) -> None:
                              "non relu."),
                  recupere_le=date.fromisoformat(meta["date_collecte"]), etiquette=url)
 
-    # Extraits du dump AFI (hors SICAD)
+    # Extraits du dump AFI : organismes (les fiches SICAD sont traitées à part, voir app.sources.sicad)
     for id_, organisme, url, titre, contenu, collecte in conn.execute(
             "SELECT id, upper(source), url, titre, contenu, created_at::date FROM afi.chatbot_sources "
             "WHERE lower(source) <> 'sicad' AND url IS NOT NULL AND coalesce(contenu, '') <> '' ORDER BY id LIMIT 200"
@@ -264,6 +302,10 @@ def _ecrire(conn, dossier: Path, r: Rapport) -> None:
         _version(conn, r, source_id=sid, url=url, titre=titre, texte=contenu.strip(), chemin=None,
                  provenance=f"Extrait afi.chatbot_sources id={id_} (dump AFI), collecté le {collecte} ; non relu.",
                  recupere_le=collecte, etiquette=f"chatbot_sources:{id_}")
+    from app.semantique.ontologie import ontologie
+    from app.sources import connaissances, sicad
+    r.fiches_sicad = sicad.ecrire(conn, r)
+    r.fiches_afi = connaissances.ecrire(conn, r, ontologie().fiches_ecartees)
     _ecrire_regles(conn, dossier, r)
 
 
@@ -283,7 +325,9 @@ def importer(conninfo: str, dossier: Path, appliquer: bool = False) -> Rapport:
         except (ValueError, OSError, psycopg.Error) as exc:
             r.erreurs.append(f"écriture annulée : {type(exc).__name__}: {exc}")
         if r.erreurs:
-            r.versions_creees, r.inchangees, r.passages, r.regles_ajoutees, r.run_id = [], [], 0, 0, None
+            r.versions_creees, r.inchangees, r.redecoupees, r.passages, r.regles_ajoutees, r.run_id = \
+                [], [], [], 0, 0, None
+            r.regles_desactivees, r.fiches_sicad, r.fiches_afi = 0, 0, 0
             if appliquer:
                 conn.execute("INSERT INTO assistant.ingestion_runs (status, error, finished_at) VALUES "
                              "('echec', %s, now())", ("\n".join(r.erreurs[:50]),))

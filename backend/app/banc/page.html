@@ -79,6 +79,23 @@
   .tour { font-size: 12px; color: var(--doux); margin: 4px 0 8px; }
   .vide { color: var(--doux); font-size: 13px; }
   .attente { color: var(--doux); font-style: italic; }
+  .micro { background: var(--fond); border-color: var(--bord); color: var(--texte); padding: 10px 12px; }
+  .micro.actif { background: var(--rouge-doux); border-color: var(--rouge); color: var(--rouge); }
+  .micro:disabled { opacity: .55; cursor: wait; }
+  .secondaire[aria-pressed="true"] { background: var(--vert-doux); border-color: var(--vert); color: var(--vert); }
+  .ecouter { background: transparent; border: 1px solid var(--bord); color: var(--texte); font-size: 12px; padding: 1px 8px; }
+  .voixnote { font-size: 12px; color: var(--ambre); }
+  .bulle a { color: var(--accent); }
+  .sources { margin-top: 6px; font-size: 13px; border: 1px solid var(--bord); border-radius: 8px; padding: 4px 9px;
+             background: var(--carte); }
+  .sources > summary { cursor: pointer; color: var(--doux); }
+  .source { padding: 6px 0; border-top: 1px solid var(--bord); }
+  .source:first-of-type { border-top: 0; }
+  .source a { color: var(--accent); }
+  .source .date { color: var(--doux); font-size: 12px; }
+  .extrait > summary { cursor: pointer; font-size: 12px; color: var(--doux); }
+  .texte-source { white-space: pre-wrap; font-size: 12.5px; background: var(--code); border-radius: 6px; padding: 6px 8px;
+                  max-height: 220px; overflow: auto; }
   @media (max-width: 860px) {
     main { grid-template-columns: 1fr; height: auto; padding: 12px 16px; }
     section { min-height: 60vh; }
@@ -91,6 +108,8 @@
   <span class="pastille" id="modele">modèle…</span>
   <span class="note">Rôle 3 : test des outils avec un LLM. Ce n'est pas l'interface finale.</span>
   <span class="espace"></span>
+  <span class="pastille" id="etatvoix" title="Service langues et voix (Dalila_Language)">voix…</span>
+  <button class="secondaire" id="lecture" type="button" aria-pressed="false" title="Lire chaque réponse à voix haute">🔊 Lecture : non</button>
   <button class="secondaire" id="nouvelle" type="button">Nouvelle conversation</button>
 </header>
 <main>
@@ -100,6 +119,7 @@
     <div class="exemples" id="exemples"></div>
     <form id="formulaire">
       <textarea id="saisie" maxlength="500" dir="auto" placeholder="Pose une question dans n'importe quelle langue… (Entrée pour envoyer)" aria-label="Question"></textarea>
+      <button class="micro" id="micro" type="button" title="Parler (cliquer pour commencer, puis pour arrêter)" aria-label="Micro">🎤</button>
       <button class="envoyer" id="envoyer" type="submit">Envoyer</button>
     </form>
     <div class="compteur" id="compteur">0 / 500</div>
@@ -164,12 +184,47 @@
     n.title = type + " " + id;
     return n;
   }
-  function rendreTexteEnrichi(parent, texte) {
-    // **gras** uniquement
+  function rendreGras(parent, texte) {
     texte.split(/(\*\*[^*]+\*\*)/g).forEach((morceau) => {
       if (/^\*\*[^*]+\*\*$/.test(morceau)) parent.appendChild(el("strong", "", morceau.slice(2, -2)));
       else if (morceau) parent.appendChild(document.createTextNode(morceau.replace(/\*/g, "")));
     });
+  }
+  // **gras** et liens [texte](https://… ou /formulaire/…) : jamais d'adresse brute affichée
+  const LIEN = /\[([^\]]+)\]\(((?:https?:\/\/|\/)[^)\s]+)\)/g;
+  function rendreTexteEnrichi(parent, texte) {
+    let dernier = 0;
+    texte.replace(LIEN, (tout, libelle, url, pos) => {
+      rendreGras(parent, texte.slice(dernier, pos));
+      const a = el("a", "", libelle); a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      parent.appendChild(a);
+      dernier = pos + tout.length;
+      return tout;
+    });
+    rendreGras(parent, texte.slice(dernier));
+  }
+
+  function rendreSources(sources) {
+    const d = el("details", "sources");
+    d.appendChild(el("summary", "", "📚 Sources (" + sources.length + ")"));
+    sources.forEach((s) => {
+      const bloc = el("div", "source");
+      const lien = s.url && /^https?:\/\//.test(s.url);
+      const titre = lien ? el("a", "", s.titre) : el("strong", "", s.titre);
+      if (lien) { titre.href = s.url; titre.target = "_blank"; titre.rel = "noopener noreferrer"; }
+      bloc.appendChild(titre);
+      if (s.date) bloc.appendChild(el("span", "date", " · lu le " + s.date));
+      if (s.a_verifier) bloc.appendChild(el("span", "av", "à vérifier : " + s.a_verifier));
+      if (s.extrait) {
+        const x = el("details", "extrait");
+        x.appendChild(el("summary", "", "texte exact de la source"));
+        const p = el("div", "texte-source", s.extrait); p.dir = "auto";
+        x.appendChild(p);
+        bloc.appendChild(x);
+      }
+      d.appendChild(bloc);
+    });
+    return d;
   }
   function rendreMessage(texte) {
     const bloc = el("div", "bulle");
@@ -257,6 +312,7 @@
         return;
       }
       const m = ajouter("dalila", rendreMessage(corps.reponse));
+      if (corps.sources && corps.sources.length) m.appendChild(rendreSources(corps.sources));
       m.appendChild(rendreControle(corps.controle));
       if (corps.donnees_masquees && corps.donnees_masquees.length) {
         m.appendChild(el("div", "controle ok", "🔒 Retiré avant l'envoi au modèle : " + corps.donnees_masquees.join(", ")
@@ -267,7 +323,11 @@
       meta.appendChild(el("span", "", corps.duree_s + " s"));
       meta.appendChild(el("span", "", corps.appels.length + " appel(s) d'outil"));
       meta.appendChild(el("span", "", "jetons : " + corps.jetons.entree + " entrée / " + corps.jetons.sortie + " sortie"));
+      const ecouter = el("button", "ecouter", "🔊 Écouter"); ecouter.type = "button";
+      ecouter.addEventListener("click", () => lireAVoixHaute(corps.reponse, m));
+      meta.appendChild(ecouter);
       m.appendChild(meta);
+      if (lectureActive) lireAVoixHaute(corps.reponse, m);
       rendreTrace(question, corps.appels);
       fil.scrollTop = fil.scrollHeight;
     } catch (e) {
@@ -277,6 +337,69 @@
       occupe = false; envoyer.disabled = false; saisie.focus();
     }
   }
+
+  // ---------- Voix (BF7 à BF9, BNF8) : service local Dalila_Language via /voix ----------
+  let lectureActive = false;
+  $("lecture").addEventListener("click", () => {
+    lectureActive = !lectureActive;
+    $("lecture").setAttribute("aria-pressed", String(lectureActive));
+    $("lecture").textContent = "🔊 Lecture : " + (lectureActive ? "oui" : "non");
+  });
+
+  async function lireAVoixHaute(texte, message) {
+    const note = el("div", "voixnote", "Synthèse vocale…");
+    message.appendChild(note);
+    try {
+      const r = await fetch("/voix/lire", { method: "POST", headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ texte: (texte || "").slice(0, 4000) }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { note.textContent = "Voix indisponible : la réponse reste en texte."; return; }
+      const audio = el("audio"); audio.controls = true;
+      audio.src = "data:audio/wav;base64," + d.audio_base64;
+      note.textContent = "Voix : " + d.langue + " (" + (d.moteur || "?") + ")"
+        + (d.voix_arabe_generique ? " — dialecte lu avec une voix arabe générique" : "");
+      message.appendChild(audio);
+      audio.play().catch(() => {});      // lecture automatique parfois bloquée : le lecteur reste visible
+    } catch (e) { note.textContent = "Voix injoignable : la réponse reste en texte."; }
+  }
+
+  let enregistreur = null, morceaux = [], accordMicro = false;
+  async function basculerMicro() {
+    const bouton = $("micro");
+    if (enregistreur && enregistreur.state === "recording") { enregistreur.stop(); return; }
+    if (!accordMicro) {
+      accordMicro = window.confirm("Le micro enregistre votre question pour la transcrire sur ce serveur local. "
+        + "L'audio n'est pas conservé. Autoriser le micro ?");
+      if (!accordMicro) return;
+    }
+    let flux;
+    try { flux = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch (e) { ajouter("dalila", el("div", "bulle", "Micro refusé ou indisponible : écrivez votre question.")); return; }
+    morceaux = [];
+    enregistreur = new MediaRecorder(flux);
+    enregistreur.ondataavailable = (e) => { if (e.data.size) morceaux.push(e.data); };
+    enregistreur.onstop = async () => {
+      flux.getTracks().forEach((t) => t.stop());
+      bouton.classList.remove("actif"); bouton.textContent = "⏳"; bouton.disabled = true;
+      const blob = new Blob(morceaux, { type: enregistreur.mimeType || "audio/webm" });
+      try {
+        const r = await fetch("/voix/transcrire", { method: "POST", headers: { "Content-Type": blob.type }, body: blob });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok || !d.texte) { ajouter("dalila", el("div", "bulle", "Je n'ai pas compris l'audio : réessayez ou écrivez votre question.")); return; }
+        saisie.value = d.texte; majCompteur();          // BF7 : le texte reconnu est affiché avant l'envoi
+        poser(d.texte);
+      } catch (e) { ajouter("dalila", el("div", "bulle", "Reconnaissance vocale injoignable : écrivez votre question.")); }
+      finally { bouton.textContent = "🎤"; bouton.disabled = false; saisie.value = ""; majCompteur(); }
+    };
+    enregistreur.start();
+    bouton.classList.add("actif"); bouton.textContent = "⏹";
+  }
+  $("micro").addEventListener("click", basculerMicro);
+  fetch("/voix/etat").then((r) => r.json()).then((e) => {
+    $("etatvoix").textContent = e.disponible
+      ? "voix : prête" + (e.voix_tunisienne === "ready" ? " (tunisienne)" : " (arabe générique pour le tunisien)")
+      : "voix : indisponible";
+  }).catch(() => { $("etatvoix").textContent = "voix : indisponible"; });
 
   $("formulaire").addEventListener("submit", (e) => { e.preventDefault(); const q = saisie.value; saisie.value = ""; majCompteur(); poser(q); });
   saisie.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("formulaire").requestSubmit(); } });

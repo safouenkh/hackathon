@@ -18,6 +18,8 @@ data/raw/
 /sources-organismes/brut/
 # Graphe RDF régénéré depuis la base (scripts.exporter_graphe)
 /ontology/genere/
+# Résultats sur les questions DATA2 : ils recopient les questions d'un dépôt sans licence, gardés en local
+/docs/simulation/simulation_data2_*.json
 
 # Secrets
 .env

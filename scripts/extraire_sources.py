@@ -26,9 +26,15 @@ _CHARSET = re.compile(rb"""charset=["']?([\w-]+)""", re.I)
 
 def decoder(octets: bytes) -> str:
     """Décode selon le jeu de caractères déclaré par la page (APII : iso-8859-1, lu en cp1252 qui contient
-    les apostrophes typographiques 0x92) ; UTF-8 sinon."""
+    les apostrophes typographiques 0x92) ; sans déclaration : UTF-8 s'il est valide, sinon cp1252
+    (pages APII pepinieres.asp et idee.asp, sans balise charset : leur lecture en UTF-8 donnait des « � »)."""
     m = _CHARSET.search(octets[:4000])
-    declare = (m.group(1).decode("ascii", "ignore").lower() if m else "utf-8")
+    if not m:
+        try:
+            return octets.decode("utf-8")
+        except UnicodeDecodeError:
+            return octets.decode("cp1252", "replace")
+    declare = m.group(1).decode("ascii", "ignore").lower()
     codec = "cp1252" if declare in ("iso-8859-1", "latin-1", "latin1", "windows-1252") else declare
     try:
         return octets.decode(codec, "replace")

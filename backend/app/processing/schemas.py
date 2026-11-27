@@ -60,6 +60,7 @@ class CodeAvertissement(str, Enum):
     montant_a_preciser = "montant_a_preciser"      # l'organisme dépend du coût du projet (detail = seuil en DT)
     nationalite_a_preciser = "nationalite_a_preciser"  # une règle vise les investisseurs étrangers : demander
     plusieurs_organismes = "plusieurs_organismes"  # plusieurs règles s'appliquent : les citer toutes, ne pas trancher
+    regime_ancien = "regime_ancien"                # extrait de l'ancien code d'incitation (loi 93-120) (detail = url)
     activite_non_filtree = "activite_non_filtree"  # aucune donnée SQL sur les activités autorisées
     budget_non_verifiable = "budget_non_verifiable"  # lots sans prix exclus d'une recherche par budget
     resultats_tronques = "resultats_tronques"
@@ -479,13 +480,15 @@ class GuiderServiceDonnees(_Strict):
 # =====================================================================
 
 class AvantagesEntree(_Strict):
-    activite: str | None = Field(default=None, max_length=200)      # ex. « élevage ovin », « usine textile »
+    activite: str | None = Field(default=None, max_length=200,     # ex. « élevage ovin », « usine textile »
+                                 description="Activité du projet, en français (sources en français)")
     gouvernorat: str | None = None
     zone_id: int | None = None
     secteur: str | None = Field(default=None, max_length=50)        # code (agriculture, peche…) ou texte libre
     investissement_dt: int | None = Field(default=None, ge=0)       # coût total du projet en dinars
     investisseur_etranger: bool | None = None
-    question: str | None = Field(default=None, max_length=300)      # ex. « idées de projet », « primes »
+    question: str | None = Field(default=None, max_length=300,     # ex. « idées de projet », « primes »
+                                 description="Demande de l'investisseur traduite en français (recherche)")
     limite: int = Field(default=5, ge=1, le=8)
 
 
@@ -497,6 +500,7 @@ class Incitation(_Strict):
     document: str | None
     page: int | None
     date_source: date | None
+    regime_ancien: bool = False         # l'extrait ou son titre cite l'ancien code (loi 93-120)
 
 
 class OrientationOrganisme(_Strict):
@@ -512,6 +516,60 @@ class AvantagesDonnees(_Strict):
     orientation: list[OrientationOrganisme] = Field(default_factory=list)
     incitations: list[Incitation]
     zone_developpement_regional: bool | None   # zones.zone_devreg, signification non confirmée -> null
+
+
+# =====================================================================
+# Base de connaissances validée par l'AFI (chatbot_connaissances)
+# =====================================================================
+
+class ConnaissancesAfiEntree(_Strict):
+    question: str = Field(min_length=2, max_length=300,
+                          description="Question de l'investisseur traduite en français (recherche)")
+    limite: int = Field(default=3, ge=1, le=5)
+
+
+class ConnaissancesAfiDonnees(_Strict):
+    fiches: list[FicheAfi]              # texte intégral validé par l'AFI, du plus proche au moins proche
+
+
+# =====================================================================
+# Démarches administratives hors AFI (fiches SICAD)
+# =====================================================================
+
+class DemarchesAdministrativesEntree(_Strict):
+    besoin: str = Field(min_length=2, max_length=300,
+                        description="Démarche ou besoin de l'investisseur traduit en français (ex. « raccordement "
+                                    "au réseau d'assainissement », « importer des machines », « étude d'impact »)")
+    activite: str | None = Field(default=None, max_length=200,
+                                 description="Activité du projet, en français (ex. « conserverie de sardines »)")
+    limite: int = Field(default=3, ge=1, le=5)
+
+
+class FicheDemarche(_Strict):
+    """Une fiche SICAD : texte exact de la source, rangé par section (lignes de la page)."""
+    titre: str
+    type_fiche: Literal["prestation", "cahier_des_charges"]
+    organismes: list[str]               # tels qu'écrits sur la fiche (jamais déduits)
+    secteur: str | None
+    domaines: list[str]
+    conditions: list[str] = Field(default_factory=list)
+    pieces: list[str] = Field(default_factory=list)
+    etapes: list[str] = Field(default_factory=list)    # « étape — intervenant — délai »
+    lieu_depot: list[str] = Field(default_factory=list)
+    lieu_obtention: list[str] = Field(default_factory=list)
+    delai: list[str] = Field(default_factory=list)
+    references: list[str] = Field(default_factory=list)
+    contacts: list[str] = Field(default_factory=list)  # contacts publics des ministères et organismes
+    documents_joints: list[str] = Field(default_factory=list)   # titres seulement (fichiers sur SICAD)
+    url: str
+    date_source: date | None            # date de collecte de l'extrait (dump AFI)
+    section_pertinente: str | None      # section du passage le plus proche de la demande
+    regime_ancien: bool = False         # la fiche cite l'ancien code d'incitation (loi 93-120)
+
+
+class DemarchesAdministrativesDonnees(_Strict):
+    domaines_reconnus: list[str] = Field(default_factory=list)  # domaines SICAD reconnus dans la demande (ontologie)
+    fiches: list[FicheDemarche]
 
 
 # =====================================================================
@@ -676,7 +734,8 @@ class DemandeEnvoyee(_Strict):
 # =====================================================================
 
 class ReglesZoneEntree(_Strict):
-    question: str = Field(min_length=2, max_length=500)     # question de l'investisseur (sans donnée personnelle)
+    question: str = Field(min_length=2, max_length=500,     # question de l'investisseur (sans donnée personnelle)
+                          description="Question traduite en français : les cahiers des charges sont en français")
     zone_id: int | None = None
     zone_nom: str | None = Field(default=None, max_length=100)
     lot_id: int | None = None

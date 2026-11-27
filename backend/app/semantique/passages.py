@@ -15,6 +15,9 @@ from typing import Iterable, Protocol
 from app.config import get_settings
 
 DENSE, LEXICAL = "dense", "lexical"
+# Fichiers de BGE-M3 lus par FlagEmbedding (poids PyTorch, tokenizer, têtes lexicale et ColBERT).
+_FICHIERS_UTILES = ["*.json", "pytorch_model.bin", "sentencepiece.bpe.model", "colbert_linear.pt",
+                    "sparse_linear.pt"]
 
 
 @dataclass(frozen=True)
@@ -42,13 +45,25 @@ class EncodeurBGEM3:
         self._appareil = appareil
         self._modele = None
 
+    def _chemin_modele(self) -> str:
+        """Dossier local du modèle. Un nom du Hub est téléchargé sans la copie ONNX ni les images
+        (≈ 2,3 Go au lieu de 4,6 Go) ; FlagEmbedding reçoit alors un chemin et ne retélécharge rien."""
+        from pathlib import Path
+
+        if Path(self.nom).exists():
+            return self.nom
+        from huggingface_hub import snapshot_download
+
+        return snapshot_download(repo_id=self.nom, allow_patterns=_FICHIERS_UTILES)
+
     def _charger(self):
         if self._modele is None:
             import torch
             from FlagEmbedding import BGEM3FlagModel
 
             appareil = self._appareil or ("cuda:0" if torch.cuda.is_available() else "cpu")
-            self._modele = BGEM3FlagModel(self.nom, use_fp16=appareil.startswith("cuda"), devices=[appareil])
+            self._modele = BGEM3FlagModel(self._chemin_modele(), use_fp16=appareil.startswith("cuda"),
+                                          devices=[appareil])
         return self._modele
 
     @staticmethod

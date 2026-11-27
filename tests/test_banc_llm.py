@@ -12,7 +12,8 @@ def test_declarations_valides_et_autonomes():
     decl = declarations()
     assert [d.name for d in decl] == ["chercher_lots", "details_lot", "comparer_lots", "lots_proches",
                                       "avantages", "services_afi", "demarche", "guider_service",
-                                      "preparer_demande", "noter_besoin", "regles_zone"]
+                                      "preparer_demande", "noter_besoin", "regles_zone",
+                                      "demarches_administratives", "connaissances_afi"]
     for d in decl:
         assert "$ref" not in json.dumps(d.parameters_json_schema)
 

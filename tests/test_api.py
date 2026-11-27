@@ -13,7 +13,7 @@ def test_catalogue_des_outils():
     noms = [o["nom"] for o in r.json()]
     assert noms == ["chercher_lots", "details_lot", "comparer_lots", "lots_proches", "avantages",
                     "services_afi", "demarche", "guider_service", "preparer_demande", "noter_besoin",
-                    "regles_zone"]
+                    "regles_zone", "demarches_administratives", "connaissances_afi"]
     assert all("properties" in o["entree"] for o in r.json())
 
 

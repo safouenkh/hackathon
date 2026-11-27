@@ -17,7 +17,7 @@ _JOINTURES = """
     JOIN assistant.documents d ON d.id = dv.document_id
     JOIN assistant.sources so ON so.id = d.source_id
 """
-TYPES_INDEXES = ("cahier_charges", "page_organisme")
+TYPES_INDEXES = ("cahier_charges", "page_organisme", "fiche_sicad", "fiche_afi")
 
 
 def passages_a_indexer(conn: Connection, types: tuple[str, ...] = TYPES_INDEXES, limite: int = 20_000) -> list[dict]:
@@ -32,7 +32,9 @@ def passages_a_indexer(conn: Connection, types: tuple[str, ...] = TYPES_INDEXES,
 
 
 def passages_par_ids(conn: Connection, ids: list[str]) -> dict[str, dict]:
+    """Passages relus en base ; `debut_version` = début du texte de la page (ex. annonce du régime juridique)."""
     rows = conn.execute(text(
-        f"SELECT {_COLONNES} {_JOINTURES} WHERE c.id = ANY(CAST(:ids AS uuid[])) LIMIT 50"
+        f"SELECT {_COLONNES}, left(dv.full_text, 300) AS debut_version {_JOINTURES} "
+        "WHERE c.id = ANY(CAST(:ids AS uuid[])) LIMIT 50"
     ), {"ids": ids}).mappings().all()
     return {r["passage_id"]: dict(r) for r in rows}

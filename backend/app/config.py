@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     # Interface web du banc (/banc) : désactivée par défaut, jamais en production
     banc_llm_actif: bool = False
 
+    # Service « langues et voix » (Dalila_Language, rôle 4) : vide = voix désactivée, réponse écrite seule.
+    langue_url: str = ""                  # ex. http://127.0.0.1:7860
+    langue_timeout_seconds: float = 60.0  # synthèse et reconnaissance tournent sur processeur
+
     def conninfo(self, admin: bool = False) -> str:
         """libpq connection string (key=value form, values are quoted by psycopg.conninfo)."""
         from psycopg.conninfo import make_conninfo

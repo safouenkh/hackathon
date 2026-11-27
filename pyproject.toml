@@ -11,6 +11,7 @@ dependencies = [
     "psycopg[binary]>=3.2",
     "uvicorn>=0.30",
     "rdflib>=7.1,<8",          # ontologie (Turtle, SKOS) : BSD-3-Clause
+    "httpx>=0.27",             # appels au service « langues et voix » (Dalila_Language) : BSD-3-Clause
 ]
 
 [project.optional-dependencies]
