@@ -388,7 +388,7 @@
     "organisation": "TIA",
     "sujet": "procedures",
     "titre": "Step-by-step process",
-    "tentative_le": "2026-11-27T18:39:24+00:00",
+    "tentative_le": "2026-11-27T18:44:56+00:00",
     "robots_txt": "lu",
     "statut": "echec",
     "erreur": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
@@ -397,7 +397,7 @@
     "organisation": "TIA",
     "sujet": "accompagnement",
     "titre": "Dedicated services",
-    "tentative_le": "2026-11-27T18:39:26+00:00",
+    "tentative_le": "2026-11-27T18:44:58+00:00",
     "robots_txt": "lu",
     "statut": "echec",
     "erreur": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
@@ -406,7 +406,7 @@
     "organisation": "TIA",
     "sujet": "avantages",
     "titre": "Funding",
-    "tentative_le": "2026-11-27T18:39:27+00:00",
+    "tentative_le": "2026-11-27T18:44:59+00:00",
     "robots_txt": "lu",
     "statut": "echec",
     "erreur": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
@@ -415,7 +415,7 @@
     "organisation": "TIA",
     "sujet": "organisme",
     "titre": "Our mission",
-    "tentative_le": "2026-11-27T18:39:28+00:00",
+    "tentative_le": "2026-11-27T18:45:02+00:00",
     "robots_txt": "lu",
     "statut": "echec",
     "erreur": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
@@ -424,7 +424,7 @@
     "organisation": "TIA",
     "sujet": "couts",
     "titre": "Competitive costs",
-    "tentative_le": "2026-11-27T18:39:31+00:00",
+    "tentative_le": "2026-11-27T18:45:06+00:00",
     "robots_txt": "lu",
     "statut": "echec",
     "erreur": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
