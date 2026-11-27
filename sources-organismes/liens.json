@@ -1,0 +1,50 @@
+{
+  "description": "Liens configurés des organismes (cahier BF14, BNF14) : seules ces URL sont lues. Liste donnée par Safouen le 2026-11-27 ; deux liens corrigés (prêts fonciers collés en une ligne, « : » en trop après mrub=213).",
+  "conteneurs": {
+    "_note": "Bloc principal de chaque site (sélecteur XPath) : son contenu est converti en Markdown avec ses titres. Relevé sur les pages lues le 2026-11-27 ; sans entrée, trafilatura choisit le bloc. Les éléments de « retirer » (fil d'Ariane, menus) sont enlevés.",
+    "www.apia.com.tn": {"bloc": "//div[contains(concat(' ', normalize-space(@class), ' '), ' content ')]",
+                        "retirer": ["//ul[contains(@class, 'breadcrumb')]"]},
+    "www.tunisieindustrie.nat.tn": {"bloc": "//div[contains(concat(' ', normalize-space(@class), ' '), ' entry ')]",
+                                    "retirer": []}
+  },
+  "a_trouver": [
+    {"organisation": "TIA", "sujet": "opportunites_secteurs", "note": "« page sectors opportunities : à scrapper par secteur » : aucun lien donné"},
+    {"organisation": "TIA", "sujet": "reference_juridique", "note": "« government decree n° 2018-417 of May 11, 2018 » : aucun lien donné"}
+  ],
+  "liens": [
+    {"organisation": "APIA", "sujet": "idees_projets", "titre": "Production végétale", "url": "https://www.apia.com.tn/production-vegetale.html"},
+    {"organisation": "APIA", "sujet": "idees_projets", "titre": "Production animale", "url": "https://www.apia.com.tn/production-animale.html"},
+    {"organisation": "APIA", "sujet": "idees_projets", "titre": "Agriculture intégrée", "url": "https://www.apia.com.tn/agriculture-integre.html"},
+    {"organisation": "APIA", "sujet": "idees_projets", "titre": "Première transformation", "url": "https://www.apia.com.tn/1ere-transformation.html"},
+    {"organisation": "APIA", "sujet": "idees_projets", "titre": "Services", "url": "https://www.apia.com.tn/services.html"},
+    {"organisation": "APIA", "sujet": "idees_projets", "titre": "Pêche et aquaculture", "url": "https://www.apia.com.tn/peche-et-aquaculture.html"},
+    {"organisation": "APIA", "sujet": "avantages", "titre": "Disposition générale", "url": "https://www.apia.com.tn/disposition-generale.html"},
+    {"organisation": "APIA", "sujet": "avantages", "titre": "Incitations financières", "url": "https://www.apia.com.tn/incitations-financieres-2.html"},
+    {"organisation": "APIA", "sujet": "avantages", "titre": "Incitations fiscales", "url": "https://www.apia.com.tn/incitations-fiscales-2.html"},
+    {"organisation": "APIA", "sujet": "avantages", "titre": "Prêts fonciers (2)", "url": "https://www.apia.com.tn/prets-fonciers-2.html"},
+    {"organisation": "APIA", "sujet": "avantages", "titre": "Prêts fonciers", "url": "https://www.apia.com.tn/prets-fonciers.html"},
+    {"organisation": "APIA", "sujet": "avantages", "titre": "Subvention financière", "url": "https://www.apia.com.tn/subvention-financiere.html"},
+    {"organisation": "APIA", "sujet": "avantages", "titre": "Subvention fiscale", "url": "https://www.apia.com.tn/subvention-fiscale.html"},
+    {"organisation": "APIA", "sujet": "avantages", "titre": "Activités couvertes par le code", "url": "https://www.apia.com.tn/activites-couvertes-par-le-code.html"},
+    {"organisation": "APIA", "sujet": "accompagnement", "titre": "Liste des accompagnateurs (projet pilote)", "url": "https://www.apia.com.tn/medias/files/encadrement-et-appui/Liste-des-AC-projet-pilote.pdf",
+     "lien_seul": "Données personnelles (noms, e-mails et téléphones personnels des accompagnateurs) : seul le lien est gardé, le contenu n'est ni lu, ni stocké, ni envoyé au LLM."},
+    {"organisation": "APIA", "sujet": "pepinieres", "titre": "Pépinières d'entreprises", "url": "https://www.apia.com.tn/pepinieres_entreprise"},
+    {"organisation": "APIA", "sujet": "pepinieres", "titre": "Candidature aux pépinières d'entreprises", "url": "https://www.apia.com.tn/formulaires/candidature_pepinieres_entreprises"},
+    {"organisation": "APIA", "sujet": "faq", "titre": "FAQ", "url": "https://www.apia.com.tn/faq.html"},
+    {"organisation": "APII", "sujet": "avantages", "titre": "Nouveau cadre juridique", "url": "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=12&mrub=212"},
+    {"organisation": "APII", "sujet": "avantages", "titre": "Nomenclature", "url": "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=12&mrub=213"},
+    {"organisation": "APII", "sujet": "avantages", "titre": "Franchise douanière", "url": "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=12&mrub=214"},
+    {"organisation": "APII", "sujet": "avantages", "titre": "Incitations à la mise à niveau", "url": "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=12&mrub=215"},
+    {"organisation": "APII", "sujet": "pepinieres", "titre": "Pépinières d'entreprises", "url": "https://www.tunisieindustrie.nat.tn/fr/pepinieres.asp"},
+    {"organisation": "APII", "sujet": "procedures", "titre": "Déclaration de projet en ligne", "url": "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=16&mrub=122"},
+    {"organisation": "APII", "sujet": "idees_projets", "titre": "Idées de projet", "url": "https://www.tunisieindustrie.nat.tn/fr/idee.asp"},
+    {"organisation": "APII", "sujet": "idees_projets", "titre": "Guide des idées de projet (PDF)", "url": "https://www.tunisieindustrie.nat.tn/fr/download/IDEES/GUIDE.pdf"},
+    {"organisation": "TIA", "sujet": "procedures", "titre": "Step-by-step process", "url": "https://tia.gov.tn/investor-guide/step-by-step-prcess/"},
+    {"organisation": "TIA", "sujet": "accompagnement", "titre": "Dedicated services", "url": "https://tia.gov.tn/who-we-are/our-mission/dedicated-services/"},
+    {"organisation": "TIA", "sujet": "avantages", "titre": "Funding", "url": "https://tia.gov.tn/investor-guide/funding/"},
+    {"organisation": "TIA", "sujet": "organisme", "titre": "Our mission", "url": "https://tia.gov.tn/who-we-are/our-mission/"},
+    {"organisation": "TIA", "sujet": "couts", "titre": "Competitive costs", "url": "https://tia.gov.tn/why-tunisia/competitive-costs-2/"},
+    {"organisation": "FIPA", "sujet": "organisme", "titre": "Investir en Tunisie", "url": "https://investintunisia.tn/"},
+    {"organisation": "FIPA", "sujet": "contact", "titre": "Nous contacter", "url": "https://investintunisia.tn/nous-contacter/"}
+  ]
+}

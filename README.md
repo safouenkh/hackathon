@@ -91,6 +91,34 @@ Le paquet (hors Git) contient le texte des 23 cahiers des charges découpé en p
 - Les passages vont dans `assistant.document_chunks` (texte, article, pages, catégorie d'usage du sol, indice « à vérifier »).
 - La base AFI reste la référence : une valeur du JSON n'est gardée (`assistant.zone_complements`, avec sa source) que si la valeur AFI est vide. Les écarts sont listés dans la relecture, jamais appliqués.
 
+### Pages des organismes et orientation (outil `avantages`)
+
+Les liens lus sont listés dans `sources-organismes/liens.json` (seuls ceux-là sont lus, robots.txt respecté, une page par seconde).
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.lire_sources            # réponses brutes (brut/, hors Git) + manifeste.json
+.\.venv\Scripts\python.exe -m scripts.extraire_sources        # Markdown relisible dans sources-organismes/md/
+.\.venv\Scripts\python.exe -m scripts.importer_organismes --appliquer   # versions, passages et règles d'orientation en base
+```
+
+- Une page qui renvoie une erreur d'hébergeur (ex. « Account Suspended » sur tia.gov.tn le 27/11/2026) est notée en échec ; la dernière version réussie reste la référence.
+- Les extraits de `afi.chatbot_sources` (hors SICAD) sont aussi importés comme versions datées du 23/10/2026.
+- `regles_orientation.json` : chaque règle cite une phrase exacte de sa page ; la base refuse une citation absente du texte (migration 0004).
+
+### Graphe RDF et recherche dans les cahiers (outil `regles_zone`)
+
+- **Graphe** (BF16) : l'ontologie `ontology/afi_ontology.ttl` donne le schéma ; les zones, cahiers, passages et catégories d'usage du sol sont lus en base au démarrage (RDFLib, requêtes SPARQL fixes). Export Turtle pour Jena Fuseki : `python -m scripts.exporter_graphe`.
+- **Index vectoriel** (BF17) : Qdrant (`docker compose up -d qdrant`, 127.0.0.1 seulement) et BGE-M3, avec une recherche hybride dense + lexicale. Le texte de référence reste dans PostgreSQL.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu128
+.\.venv\Scripts\python.exe -m pip install -e ".[vecteurs]"
+docker compose up -d qdrant
+.\.venv\Scripts\python.exe -m scripts.indexer_passages     # recrée l'index (le 1er lancement télécharge BGE-M3, ≈ 2,3 Go)
+```
+
+`regles_zone` trouve le cahier de la zone dans le graphe, cherche les passages proches de la question **dans ce cahier seulement**, puis relit leur texte en base. Une zone sans cahier reçoit `cahier_absent`.
+
 ## Lancer l'API
 
 ```powershell

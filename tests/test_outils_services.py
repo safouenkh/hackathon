@@ -244,29 +244,79 @@ def test_guide_hors_limites_et_parcours_inconnu():
 
 # ---------- avantages ----------
 
-def test_avantages_stub_ne_rien_inventer():
-    r = avantages(AvantagesEntree(activite="textile", gouvernorat="Sfax"))
-    assert r.donnees.incitations == []
-    assert C.source_indisponible in codes(r) and C.aucun_resultat in codes(r)
+class _SourceTest:
+    """Fausse source d'extraits : note les organismes demandés, renvoie une incitation avec et une sans source."""
+    def __init__(self):
+        self.organisations = "non appelé"
+
+    def rechercher(self, question, organisations, limite=5):
+        self.organisations = organisations
+        return [Incitation(intitule="A", extrait="x", organisme="APIA", url="https://example.org/a",
+                           document=None, page=None, date_source=None),
+                Incitation(intitule="B", extrait="y", organisme=None, url=None, document=None,
+                           page=None, date_source=None)]
+
+
+@pytest.fixture
+def source_test():
+    s = _SourceTest()
+    brancher_source(s)
+    yield s
+    from app.processing.avantages import SourcePassagesOrganismes
+    brancher_source(SourcePassagesOrganismes())
+
+
+def _orgs(r):
+    return sorted({o.organisation for o in r.donnees.orientation})
+
+
+def test_avantages_agricole_vers_apia_avec_citation(source_test):
+    # Règles sourcées (migration 0004) : APIA pour le secteur agricole ; TIA dépend du montant ; FIPA de la nationalité
+    r = avantages(AvantagesEntree(activite="nheb na3mel projet fla7a", question="idées de projet et primes"))
+    assert r.donnees.secteurs == ["agriculture"] and _orgs(r) == ["APIA"]
+    apia = r.donnees.orientation[0]
+    assert "secteur agricole" in apia.citation and apia.url.startswith("https://tia.gov.tn/")
+    assert {C.montant_a_preciser, C.nationalite_a_preciser} <= codes(r)
+    assert source_test.organisations == ["APIA"]
+    assert [i.intitule for i in r.donnees.incitations] == ["A"]          # l'incitation sans source est écartée
     assert r.donnees.zone_developpement_regional is None
 
 
-def test_avantages_ecarte_une_incitation_sans_source():
-    class Fausse:
-        def rechercher(self, activite, gouvernorat, zone_id, limite=5):
-            return [
-                Incitation(intitule="A", extrait="x", organisme="TIA", url="https://example.org/a",
-                           document=None, page=None, date_source=None),
-                Incitation(intitule="B", extrait="y", organisme=None, url=None, document=None,
-                           page=None, date_source=None),
-            ]
-    brancher_source(Fausse())
+@pytest.mark.parametrize("montant,attendu", [(20_000_000, ["TIA"]), (2_000_000, ["APII"]), (15_000_000, ["TIA"])])
+def test_avantages_seuil_de_15_mdt(source_test, montant, attendu):
+    r = avantages(AvantagesEntree(activite="usine textile", investissement_dt=montant, investisseur_etranger=False))
+    assert _orgs(r) == attendu and C.montant_a_preciser not in codes(r)
+
+
+def test_avantages_agricole_au_dessus_du_seuil_plusieurs_organismes(source_test):
+    r = avantages(AvantagesEntree(secteur="agriculture", investissement_dt=20_000_000, investisseur_etranger=False))
+    assert _orgs(r) == ["APIA", "TIA"] and C.plusieurs_organismes in codes(r)
+
+
+def test_avantages_investisseur_etranger_premier_contact_fipa(source_test):
+    r = avantages(AvantagesEntree(activite="factory", investissement_dt=1_000_000, investisseur_etranger=True))
+    assert _orgs(r) == ["APII", "FIPA"] and C.plusieurs_organismes not in codes(r)
+    assert {o.role for o in r.donnees.orientation if o.organisation == "FIPA"} == {"premier_contact"}
+
+
+def test_avantages_secteur_inconnu_rien_suppose(source_test):
+    r = avantages(AvantagesEntree(activite="xyz"))
+    assert r.donnees.secteurs == [] and C.secteur_a_preciser in codes(r)
+    assert "APII" not in _orgs(r)                    # « autres secteurs » : jamais supposé sans secteur
+
+
+def test_avantages_index_indisponible_aucune_incitation_inventee():
+    class Panne:
+        def rechercher(self, *a, **k):
+            raise ConnectionError("qdrant arrêté")
+    brancher_source(Panne())
     try:
-        r = avantages(AvantagesEntree(activite="pêche"))
-        assert [i.intitule for i in r.donnees.incitations] == ["A"]
-        assert C.source_indisponible not in codes(r)
+        r = avantages(AvantagesEntree(secteur="peche"))
+        assert r.donnees.incitations == [] and C.source_indisponible in codes(r)
+        assert _orgs(r) == ["APIA"]                    # l'orientation sourcée reste donnée
     finally:
-        brancher_source(SourceIncitationsIndisponible())
+        from app.processing.avantages import SourcePassagesOrganismes
+        brancher_source(SourcePassagesOrganismes())
 
 
 # ---------- preparer_demande ----------

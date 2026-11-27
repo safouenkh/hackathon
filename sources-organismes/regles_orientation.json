@@ -1,0 +1,36 @@
+{
+  "description": "Règles d'orientation vers l'organisme compétent. Chaque règle cite la phrase exacte de sa source (contrôlée par la base, migration 0004). La version citée est la plus récente de la page en base. Saisies par l'équipe le 2026-11-27 à partir des pages listées.",
+  "ajoute_par": "Équipe Dalila (import du 2026-11-27)",
+  "regles": [
+    {
+      "organisation": "TIA", "role": "octroi_avantages", "investissement_min_dt": 15000000,
+      "source_url": "https://tia.gov.tn/fr/guide-de-linvestisseur/parcours-de-linvestisseur/",
+      "citation": "L'Instance Tunisienne de l'Investissement (TIA) pour les projets dont le coût d'investissement est ≥ 15 MDT"
+    },
+    {
+      "organisation": "APII", "role": "octroi_avantages", "secteur_exclu": "agriculture", "investissement_max_dt": 15000000,
+      "source_url": "https://tia.gov.tn/fr/guide-de-linvestisseur/parcours-de-linvestisseur/",
+      "citation": "L'Agence de Promotion de l'Industrie et de l'Innovation (APII) ou ses directions régionale pour les projets dans les autres secteurs et dont le coût d'investissement est < 15 MDT"
+    },
+    {
+      "organisation": "APIA", "role": "octroi_avantages", "secteur": "agriculture",
+      "source_url": "https://tia.gov.tn/fr/guide-de-linvestisseur/parcours-de-linvestisseur/",
+      "citation": "L'Agence de Promotion de l'Investissement Agricole (APIA) ou ses directions régionales pour les projets opérant dans le secteur agricole"
+    },
+    {
+      "organisation": "APIA", "role": "octroi_avantages", "secteur": "peche",
+      "source_url": "https://www.apia.com.tn/incitations-financieres-2.html",
+      "citation": "Incitations financières au profit des investissements réalisés dans le secteur agricole, de la pêche, des services liés et de la première transformation"
+    },
+    {
+      "organisation": "APIA", "role": "octroi_avantages", "secteur": "premiere_transformation",
+      "source_url": "https://www.apia.com.tn/incitations-financieres-2.html",
+      "citation": "Incitations financières au profit des investissements réalisés dans le secteur agricole, de la pêche, des services liés et de la première transformation"
+    },
+    {
+      "organisation": "FIPA", "role": "premier_contact", "investisseur_etranger": true,
+      "source_url": "https://investintunisia.tn/sollicitez-nous/",
+      "citation": "FIPA-Tunisia, l’Agence de Promotion de l’Investissement Extérieur, symbolise l’excellence du service public rendu aux investisseurs étrangers."
+    }
+  ]
+}

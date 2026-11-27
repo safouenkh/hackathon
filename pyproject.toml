@@ -23,6 +23,12 @@ dev = [
 llm-test = [
     "google-genai>=1.30",
 ]
+# Recherche dans les cahiers des charges (outil regles_zone). Installer d'abord PyTorch avec CUDA :
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+vecteurs = [
+    "qdrant-client>=1.12",     # client Qdrant : Apache-2.0
+    "FlagEmbedding>=1.3",      # modèle BAAI/bge-m3 (dense + lexical) : MIT
+]
 
 # Seul `backend` est du code Python à installer (migrations/ et ontology/ sont des données).
 [tool.setuptools.packages.find]

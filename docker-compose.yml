@@ -19,5 +19,18 @@ services:
       retries: 20
     restart: unless-stopped
 
+  # Index vectoriel des passages (recherche hybride dense + lexicale, BGE-M3). Le texte de
+  # référence reste dans PostgreSQL ; l'index se reconstruit avec scripts.indexer_passages.
+  qdrant:
+    image: qdrant/qdrant:v1.20.2
+    container_name: dalila-qdrant
+    ports:
+      # Exposé uniquement sur la machine locale (aucune authentification configurée)
+      - "127.0.0.1:${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrantdata:/qdrant/storage
+    restart: unless-stopped
+
 volumes:
   pgdata:
+  qdrantdata:

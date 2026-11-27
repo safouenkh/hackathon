@@ -136,6 +136,53 @@ afi:numeroArticle a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 # ---------------------------------------------------------------------
+# Secteurs d'activité (famille « Secteur » du cahier BF16)
+# Codes utilisés par assistant.regles_orientation (secteur, secteur_exclu). Les synonymes ont été
+# saisis par l'équipe le 2026-11-27 : ils servent à reconnaître le secteur dans une question, pas à
+# décider de l'éligibilité (ce sont les règles sourcées qui orientent).
+# « agroalimentaire » n'est volontairement rattaché à aucun secteur : l'APII le classe dans
+# l'industrie (« Industries agro-alimentaires ») et l'APIA traite la « première transformation ».
+# ---------------------------------------------------------------------
+
+afi:Secteur a owl:Class ;
+    rdfs:label "Secteur d'activité"@fr, "Sector"@en, "قطاع"@ar .
+
+afi:codeSecteur a owl:DatatypeProperty ;
+    rdfs:domain afi:Secteur ;
+    rdfs:range xsd:string .
+
+id:secteur-agriculture a afi:Secteur ;
+    afi:codeSecteur "agriculture" ;
+    skos:prefLabel "Agriculture"@fr, "فلاحة"@ar ;
+    skos:altLabel "agriculture"@fr, "agricole"@fr, "agriculteur"@fr, "exploitation agricole"@fr, "ferme"@fr,
+        "élevage"@fr, "production végétale"@fr, "production animale"@fr, "arboriculture"@fr, "maraîchage"@fr,
+        "agriculture"@en, "farming"@en, "farm"@en, "livestock"@en,
+        "landwirtschaft"@de, "tarım"@tr, "çiftlik"@tr,
+        "فلاحة"@ar, "فلاحي"@ar, "زراعة"@ar, "زراعي"@ar, "تربية الماشية"@ar,
+        "fla7a"@ar-Latn-TN, "fle7a"@ar-Latn-TN, "filaha"@ar-Latn-TN, "fellah"@ar-Latn-TN, "zra3a"@ar-Latn-TN .
+
+id:secteur-peche a afi:Secteur ;
+    afi:codeSecteur "peche" ;
+    skos:prefLabel "Pêche et aquaculture"@fr, "صيد بحري"@ar ;
+    skos:altLabel "pêche"@fr, "pêcheur"@fr, "aquaculture"@fr, "pisciculture"@fr,
+        "fishing"@en, "fishery"@en, "aquaculture"@en, "fischerei"@de, "balıkçılık"@tr,
+        "صيد بحري"@ar, "الصيد البحري"@ar, "تربية الأسماك"@ar, "تربية الأحياء المائية"@ar,
+        "sayd"@ar-Latn-TN, "sayed"@ar-Latn-TN, "7out"@ar-Latn-TN .
+
+id:secteur-premiere-transformation a afi:Secteur ;
+    afi:codeSecteur "premiere_transformation" ;
+    skos:prefLabel "Première transformation (agricole)"@fr ;
+    skos:altLabel "première transformation"@fr, "1ère transformation"@fr, "transformation des produits agricoles"@fr,
+        "first processing"@en, "التحويل الأولي"@ar .
+
+id:secteur-industrie a afi:Secteur ;
+    afi:codeSecteur "industrie" ;
+    skos:prefLabel "Industrie"@fr, "صناعة"@ar ;
+    skos:altLabel "industrie"@fr, "industriel"@fr, "usine"@fr, "manufacture"@fr, "fabrication"@fr,
+        "industry"@en, "factory"@en, "manufacturing"@en, "industrie"@de, "fabrik"@de, "sanayi"@tr, "fabrika"@tr,
+        "صناعة"@ar, "صناعي"@ar, "مصنع"@ar, "sina3a"@ar-Latn-TN, "msna3"@ar-Latn-TN, "usine"@ar-Latn-TN .
+
+# ---------------------------------------------------------------------
 # L'AFI
 # ---------------------------------------------------------------------
 

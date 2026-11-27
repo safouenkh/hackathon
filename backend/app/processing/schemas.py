@@ -49,6 +49,17 @@ class CodeAvertissement(str, Enum):
     # Valeur absente de la base AFI, reprise d'une autre source (assistant.zone_complements) :
     # à donner en précisant qu'elle est à confirmer auprès de l'AFI (detail = champ et source).
     valeur_complementaire = "valeur_complementaire"
+    cahier_absent = "cahier_absent"                # aucun cahier des charges relié à la zone : ne pas prendre celui d'une autre
+    zone_ambigue = "zone_ambigue"                  # plusieurs zones portent ce nom : demander laquelle (detail = ids)
+    categorie_a_preciser = "categorie_a_preciser"  # le cahier distingue des catégories : demander laquelle (detail = codes)
+    categorie_inconnue = "categorie_inconnue"      # catégorie absente de ce cahier (detail = code demandé)
+    texte_non_relu = "texte_non_relu"              # texte extrait du PDF (OCR en partie), non relu : citer avec prudence
+    passage_a_verifier = "passage_a_verifier"      # passage signalé (OCR faible) : à vérifier sur le PDF (detail = id)
+    pertinence_non_garantie = "pertinence_non_garantie"  # passages les plus proches : s'ils ne répondent pas, le dire
+    secteur_a_preciser = "secteur_a_preciser"      # secteur non reconnu : demander (agriculture, pêche, industrie…)
+    montant_a_preciser = "montant_a_preciser"      # l'organisme dépend du coût du projet (detail = seuil en DT)
+    nationalite_a_preciser = "nationalite_a_preciser"  # une règle vise les investisseurs étrangers : demander
+    plusieurs_organismes = "plusieurs_organismes"  # plusieurs règles s'appliquent : les citer toutes, ne pas trancher
     activite_non_filtree = "activite_non_filtree"  # aucune donnée SQL sur les activités autorisées
     budget_non_verifiable = "budget_non_verifiable"  # lots sans prix exclus d'une recherche par budget
     resultats_tronques = "resultats_tronques"
@@ -468,9 +479,14 @@ class GuiderServiceDonnees(_Strict):
 # =====================================================================
 
 class AvantagesEntree(_Strict):
-    activite: str | None = Field(default=None, max_length=200)
+    activite: str | None = Field(default=None, max_length=200)      # ex. « élevage ovin », « usine textile »
     gouvernorat: str | None = None
     zone_id: int | None = None
+    secteur: str | None = Field(default=None, max_length=50)        # code (agriculture, peche…) ou texte libre
+    investissement_dt: int | None = Field(default=None, ge=0)       # coût total du projet en dinars
+    investisseur_etranger: bool | None = None
+    question: str | None = Field(default=None, max_length=300)      # ex. « idées de projet », « primes »
+    limite: int = Field(default=5, ge=1, le=8)
 
 
 class Incitation(_Strict):
@@ -483,7 +499,17 @@ class Incitation(_Strict):
     date_source: date | None
 
 
+class OrientationOrganisme(_Strict):
+    organisation: str                   # APIA, APII, TIA, FIPA
+    role: str                           # octroi_avantages, premier_contact, accompagnement
+    citation: str                       # phrase exacte de la source (contrôlée par la base)
+    url: str | None
+    date_source: date | None
+
+
 class AvantagesDonnees(_Strict):
+    secteurs: list[str] = Field(default_factory=list)           # codes reconnus (ontologie)
+    orientation: list[OrientationOrganisme] = Field(default_factory=list)
     incitations: list[Incitation]
     zone_developpement_regional: bool | None   # zones.zone_devreg, signification non confirmée -> null
 
@@ -643,3 +669,46 @@ class DemandeEnvoyee(_Strict):
     reference: str
     envoyee_le: datetime
     depot_officiel_effectue: Literal[False] = False   # le client dépose encore le formulaire signé à l'AFI
+
+
+# =====================================================================
+# regles_zone : règles du cahier des charges d'une zone (graphe + Qdrant + PostgreSQL)
+# =====================================================================
+
+class ReglesZoneEntree(_Strict):
+    question: str = Field(min_length=2, max_length=500)     # question de l'investisseur (sans donnée personnelle)
+    zone_id: int | None = None
+    zone_nom: str | None = Field(default=None, max_length=100)
+    lot_id: int | None = None
+    categorie: str | None = Field(default=None, max_length=20)  # code d'usage du sol du cahier (ex. « UIB »)
+    limite: int = Field(default=5, ge=1, le=8)
+
+    @model_validator(mode="after")
+    def _une_zone(self) -> "ReglesZoneEntree":
+        if sum(x is not None for x in (self.zone_id, self.zone_nom, self.lot_id)) != 1:
+            raise ValueError("donner exactement un de zone_id, zone_nom ou lot_id")
+        return self
+
+
+class CahierRegles(_Strict):
+    document_id: int
+    titre: str
+    categories: list[str]               # codes d'usage du sol définis par ce cahier
+    date_collecte: date | None
+
+
+class PassageRegle(_Strict):
+    passage_id: str                     # assistant.document_chunks.id
+    texte: str                          # texte exact du passage (extrait du PDF, non relu)
+    article: str | None
+    section: list[str]
+    pages: list[int]                    # vide : pages inconnues
+    categorie_sol: str | None           # null : règle commune à toute la zone (ou catégorie inconnue)
+    a_verifier: bool                    # indice automatique (OCR faible, bruit)
+    rang: int
+
+
+class ReglesZoneDonnees(_Strict):
+    zone: ZoneResume | None
+    cahier: CahierRegles | None
+    passages: list[PassageRegle] = Field(default_factory=list)

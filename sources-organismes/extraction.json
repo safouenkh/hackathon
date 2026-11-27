@@ -1,0 +1,189 @@
+{
+  "https://www.apia.com.tn/production-vegetale.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-production-vegetale.md",
+    "caracteres": 12046,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/production-animale.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-production-animale.md",
+    "caracteres": 7656,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/agriculture-integre.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-agriculture-integre.md",
+    "caracteres": 7413,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/1ere-transformation.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-1ere-transformation.md",
+    "caracteres": 5136,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/services.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-services.md",
+    "caracteres": 6394,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/peche-et-aquaculture.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-peche-et-aquaculture.md",
+    "caracteres": 4198,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/disposition-generale.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-disposition-generale.md",
+    "caracteres": 1216,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/incitations-financieres-2.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-incitations-financieres-2.md",
+    "caracteres": 2162,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/incitations-fiscales-2.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-incitations-fiscales-2.md",
+    "caracteres": 6146,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/prets-fonciers-2.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-prets-fonciers-2.md",
+    "caracteres": 2122,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/prets-fonciers.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-prets-fonciers.md",
+    "caracteres": 3363,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/subvention-financiere.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-subvention-financiere.md",
+    "caracteres": 10620,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/subvention-fiscale.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-subvention-fiscale.md",
+    "caracteres": 13923,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/activites-couvertes-par-le-code.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-activites-couvertes-par-le-code.md",
+    "caracteres": 2960,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/medias/files/encadrement-et-appui/Liste-des-AC-projet-pilote.pdf": {
+    "statut": "non_lu",
+    "raison": "lien_seul"
+  },
+  "https://www.apia.com.tn/pepinieres_entreprise": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-pepinieres-entreprise.md",
+    "caracteres": 2103,
+    "methode": "bloc_configure"
+  },
+  "https://www.apia.com.tn/formulaires/candidature_pepinieres_entreprises": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-formulaires-candidature-pepinieres-entreprises.md",
+    "caracteres": 585,
+    "methode": "trafilatura"
+  },
+  "https://www.apia.com.tn/faq.html": {
+    "statut": "ok",
+    "fichier": "md/www-apia-com-tn-faq.md",
+    "caracteres": 7391,
+    "methode": "bloc_configure"
+  },
+  "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=12&mrub=212": {
+    "statut": "ok",
+    "fichier": "md/www-tunisieindustrie-nat-tn-fr-doc-asp-mcat-12-mrub-212.md",
+    "caracteres": 36082,
+    "methode": "bloc_configure"
+  },
+  "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=12&mrub=213": {
+    "statut": "ok",
+    "fichier": "md/www-tunisieindustrie-nat-tn-fr-doc-asp-mcat-12-mrub-213.md",
+    "caracteres": 20724,
+    "methode": "bloc_configure"
+  },
+  "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=12&mrub=214": {
+    "statut": "ok",
+    "fichier": "md/www-tunisieindustrie-nat-tn-fr-doc-asp-mcat-12-mrub-214.md",
+    "caracteres": 5033,
+    "methode": "bloc_configure"
+  },
+  "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=12&mrub=215": {
+    "statut": "ok",
+    "fichier": "md/www-tunisieindustrie-nat-tn-fr-doc-asp-mcat-12-mrub-215.md",
+    "caracteres": 629,
+    "methode": "bloc_configure"
+  },
+  "https://www.tunisieindustrie.nat.tn/fr/pepinieres.asp": {
+    "statut": "ok",
+    "fichier": "md/www-tunisieindustrie-nat-tn-fr-pepinieres.md",
+    "caracteres": 3986,
+    "methode": "trafilatura"
+  },
+  "https://www.tunisieindustrie.nat.tn/fr/doc.asp?mcat=16&mrub=122": {
+    "statut": "ok",
+    "fichier": "md/www-tunisieindustrie-nat-tn-fr-doc-asp-mcat-16-mrub-122.md",
+    "caracteres": 2202,
+    "methode": "bloc_configure"
+  },
+  "https://www.tunisieindustrie.nat.tn/fr/idee.asp": {
+    "statut": "ok",
+    "fichier": "md/www-tunisieindustrie-nat-tn-fr-idee.md",
+    "caracteres": 1172,
+    "methode": "trafilatura"
+  },
+  "https://www.tunisieindustrie.nat.tn/fr/download/IDEES/GUIDE.pdf": {
+    "statut": "ok",
+    "fichier": "md/www-tunisieindustrie-nat-tn-fr-download-idees-guide.md",
+    "caracteres": 150136,
+    "methode": "pypdf",
+    "pages": 122
+  },
+  "https://investintunisia.tn/": {
+    "statut": "ok",
+    "fichier": "md/investintunisia-tn.md",
+    "caracteres": 1340,
+    "methode": "trafilatura"
+  },
+  "https://investintunisia.tn/nous-contacter/": {
+    "statut": "ok",
+    "fichier": "md/investintunisia-tn-nous-contacter.md",
+    "caracteres": 407,
+    "methode": "trafilatura"
+  },
+  "https://tia.gov.tn/investor-guide/step-by-step-prcess/": {
+    "statut": "non_lu",
+    "raison": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
+  },
+  "https://tia.gov.tn/who-we-are/our-mission/dedicated-services/": {
+    "statut": "non_lu",
+    "raison": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
+  },
+  "https://tia.gov.tn/investor-guide/funding/": {
+    "statut": "non_lu",
+    "raison": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
+  },
+  "https://tia.gov.tn/who-we-are/our-mission/": {
+    "statut": "non_lu",
+    "raison": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
+  },
+  "https://tia.gov.tn/why-tunisia/competitive-costs-2/": {
+    "statut": "non_lu",
+    "raison": "ValueError:  page d'erreur de l'hébergeur (« Account Suspended »)"
+  }
+}

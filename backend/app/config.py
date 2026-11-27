@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     frontend_base_url: str = ""
     # Ontologie (Turtle) : vide = ontology/afi_ontology.ttl du dépôt
     ontologie_path: str = ""
+    # Index vectoriel des passages (Qdrant) et modèle d'embedding (BGE-M3, licence MIT)
+    qdrant_url: str = "http://127.0.0.1:6333"
+    qdrant_collection_passages: str = "passages_documents"
+    embedding_model: str = "BAAI/bge-m3"
+    embedding_device: str = ""            # vide : cuda:0 si disponible, sinon cpu
+    qdrant_timeout_seconds: float = 5.0
     # Banc de test LLM (scripts/banc_llm_gemini.py) : clé jamais affichée ni committée
     gemini_api_key: SecretStr = SecretStr("")
     gemini_model: str = "gemini-flash-latest"

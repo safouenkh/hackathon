@@ -36,6 +36,12 @@ class Ontologie:
     fiche_contact: int | None = None
     lieu_depot: tuple[str, ...] = ()           # expressions normalisées
     frais: tuple[str, ...] = ()
+    secteurs: dict[str, tuple[str, ...]] = field(default_factory=dict)   # code -> synonymes normalisés
+
+    def secteurs_du_texte(self, texte: str | None) -> list[str]:
+        """Codes des secteurs dont un synonyme apparaît dans le texte (mots entiers, normalisés)."""
+        t = f" {normaliser(texte or '')} "
+        return sorted(code for code, syns in self.secteurs.items() if any(f" {s} " in t for s in syns))
 
     def service(self, code: str) -> ServiceOntologie:
         return self.services.get(code) or ServiceOntologie(code, (), (), (), None, None)
@@ -73,9 +79,16 @@ def lire(chemin: Path) -> Ontologie:
             fiches_presentation=_entiers(g, s, AFI.fichePresentation),
             exige_statut_lot=_texte(g, s, AFI.exigeStatutLot),
             service_du_statut_lot=_texte(g, s, AFI.serviceDuStatutLot))
+    secteurs = {}
+    for s in g.subjects(RDF.type, AFI.Secteur):
+        code = _texte(g, s, AFI.codeSecteur)
+        if not code or code in secteurs:
+            raise ValueError(f"ontologie : secteur sans code ou en double ({s})")
+        secteurs[code] = _libelles(g, s)
     contact = g.value(RESSOURCE.afi, AFI.ficheContact)
     return Ontologie(services=services, fiche_contact=int(contact) if contact is not None else None,
-                     lieu_depot=_libelles(g, RESSOURCE["lieu-depot"]), frais=_libelles(g, RESSOURCE.frais))
+                     lieu_depot=_libelles(g, RESSOURCE["lieu-depot"]), frais=_libelles(g, RESSOURCE.frais),
+                     secteurs=secteurs)
 
 
 @lru_cache

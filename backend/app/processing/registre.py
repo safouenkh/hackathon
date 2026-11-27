@@ -16,10 +16,11 @@ from app.processing.schemas import (
     AvantagesDonnees, AvantagesEntree, ChercherLotsDonnees, ChercherLotsEntree, ComparerLotsDonnees,
     ComparerLotsEntree, DemarcheDonnees, DemarcheEntree, DetailsLotDonnees, DetailsLotEntree,
     GuiderServiceDonnees, GuiderServiceEntree, LotsProchesDonnees, LotsProchesEntree, NoterBesoinDonnees,
-    NoterBesoinEntree, PreparerDemandeDonnees, PreparerDemandeEntree, ServicesAfiDonnees, ServicesAfiEntree,
-    SortieOutil,
+    NoterBesoinEntree, PreparerDemandeDonnees, PreparerDemandeEntree, ReglesZoneDonnees, ReglesZoneEntree,
+    ServicesAfiDonnees, ServicesAfiEntree, SortieOutil,
 )
 from app.processing.formulaire import noter_besoin
+from app.processing.regles import regles_zone
 from app.processing.services import demarche, guider_service, services_afi
 
 
@@ -69,6 +70,11 @@ OUTILS: dict[str, Outil] = {o.nom: o for o in [
     Outil("noter_besoin", "Note une question hors des services AFI pour l'analyse des besoins (BF24), après avoir "
           "donné le contact AFI. Recopier la question sans nom ni numéro personnel.",
           NoterBesoinEntree, NoterBesoinDonnees, noter_besoin),
+    Outil("regles_zone", "Règles du cahier des charges d'une zone (hauteur, recul, activités, clôtures, rejets…) : "
+          "extraits exacts avec article et pages, recherchés dans le cahier de CETTE zone seulement. Donner la zone "
+          "(zone_id, zone_nom ou lot_id) et la question. Si le cahier distingue des catégories (categorie_a_preciser), "
+          "demander laquelle. Zone sans cahier : le dire, ne jamais prendre les règles d'une autre zone.",
+          ReglesZoneEntree, ReglesZoneDonnees, regles_zone),
 ]}
 
 

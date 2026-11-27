@@ -12,7 +12,8 @@ def test_catalogue_des_outils():
     assert r.status_code == 200
     noms = [o["nom"] for o in r.json()]
     assert noms == ["chercher_lots", "details_lot", "comparer_lots", "lots_proches", "avantages",
-                    "services_afi", "demarche", "guider_service", "preparer_demande", "noter_besoin"]
+                    "services_afi", "demarche", "guider_service", "preparer_demande", "noter_besoin",
+                    "regles_zone"]
     assert all("properties" in o["entree"] for o in r.json())
 
 

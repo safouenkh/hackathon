@@ -2,3 +2,5 @@
 afi-services-markdown/data/documents/pages/*.html -text
 # Migrations : SHA-256 des octets contrôlé par scripts/migrer.py -> fins de ligne LF partout.
 migrations/*.sql text eol=lf
+# Pages des organismes : le SHA-256 du texte identifie la version importée -> LF partout.
+sources-organismes/md/*.md text eol=lf

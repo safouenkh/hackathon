@@ -18,7 +18,7 @@ Chaque sortie a la même forme :
 
 Le LLM rédige à partir de `donnees`. Il **recopie les chiffres sans les recalculer**, insère les `balises[].texte` et restitue les `avertissements`.
 
-## Les 10 outils
+## Les 11 outils
 
 | Outil | Entrée principale | Ce qu'il renvoie |
 |---|---|---|
@@ -26,12 +26,13 @@ Le LLM rédige à partir de `donnees`. Il **recopie les chiffres sans les recalc
 | `details_lot` | `lot_id` | Lot, zone, commodités (aéroport, port, gare, autoroute, GP, électricité, eau, gaz, téléphone, GMG, OTC), services proches (OSM), documents de zone, polygone présent ou non |
 | `comparer_lots` | `lot_ids` (2 à 10) | Une ligne par lot avec ses distances, et les meilleurs lots par critère (prix total, prix au m², surface, chaque type de distance) |
 | `lots_proches` | `type` (`port`, `gare`, `aeroport`, `autoroute`, `route_gp`, `bank`, `hospital`…) **et/ou** une référence (`lot_id`, `zone_id`, `point`), plus `distance_max_km` | Zones triées par distance, avec le nombre de lots disponibles et aux enchères |
-| `avantages` | `activite`, `gouvernorat`, `zone_id` | Incitations **avec leurs sources**. **STUB** en attendant le rôle 2 : liste vide + `source_indisponible` |
+| `avantages` | `activite`, `secteur`, `investissement_dt`, `investisseur_etranger`, `question`, `gouvernorat`, `zone_id` | Secteurs reconnus (ontologie), **organisme(s) compétent(s)** selon les règles sourcées de `assistant.regles_orientation` (citation exacte + lien : APIA pour l'agricole, TIA ≥ 15 MDT, APII < 15 MDT hors agricole, FIPA pour un investisseur étranger), et **extraits** des pages de ces organismes (texte exact, lien, date). Condition inconnue (montant, nationalité) : jamais supposée, `montant_a_preciser` / `nationalite_a_preciser`. Index absent : `source_indisponible` |
 | `services_afi` | `besoin` (texte libre, facultatif) | Les services actifs (schéma `assistant`), les services candidats et des balises `CHOIX` pour la question à choix (BF22), plus le contact AFI |
 | `demarche` | `service` (code donné par `services_afi`), `parcours` (code, si le service en a plusieurs) | Pour chaque parcours **publié** : conditions, étapes, pièces (avec sous-lignes et phases), frais en dinars, lieu de dépôt, lignes de paiement sans montant, formulaire (PDF par langue, ligne à cocher), URL source et date. Plus les fiches validées de l'AFI en complément. Service inconnu : `service_non_couvert` + contact AFI (BF24) |
 | `guider_service` | `parcours` (code), `position` (0, puis `suivant`) | **Un point à la fois** : présentation (si l'ontologie en désigne une), conditions, pièces, formulaire, étapes, frais, puis lieu de dépôt (ou contact AFI s'il n'est pas dans la source). Avec `total`, `plan`, `precedent` et `suivant` |
 | `preparer_demande` | `service` (code, **obligatoire**), `parcours`, `lot_ids`, `projet` (activité, emplois, investissement, surface, gouvernorat : **aucune donnée personnelle**) | Résumé (lots, totaux, pièces, frais, lieu de dépôt, formulaire), informations manquantes, liens, et `formulaires_preremplis` : pour chaque langue officielle, le lien de la page du formulaire, les valeurs préremplies (champs « projet » seulement) et `champs_projet_a_completer` (ce que l'agent peut encore demander). `depot_effectue = false` et `confirmation_requise = true`, toujours |
 | `noter_besoin` | `question` (≤ 500 caractères, sans nom ni numéro), `langue` | Note la question hors des services dans `assistant.besoins_non_couverts` (BF24). `note = false` si l'enregistrement est indisponible |
+| `regles_zone` | `question`, et **une** zone : `zone_id`, `zone_nom` ou `lot_id` ; `categorie` (code d'usage du sol, facultatif), `limite` ≤ 8 | Cahier de la zone (graphe RDF, lien `afi.zone_documents`), catégories qu'il définit, et les passages les plus proches de la question **dans ce cahier seulement** (Qdrant, hybride dense + lexical), avec texte exact relu en base, article, chapitres, pages, catégorie et `a_verifier`. Zone sans cahier : `cahier_absent` |
 
 Rien n'est écrit dans le code : les services, parcours, textes, montants et formulaires viennent des **versions publiées** du schéma `assistant` ; les synonymes, les liens vers les fiches de `afi.chatbot_connaissances`, le vocabulaire du lieu de dépôt et des frais, et le lien entre statut d'un lot et service viennent de l'ontologie `ontology/afi_ontology.ttl`. Chaque ligne garde son identifiant (`assistant.parcours_elements.id`) ; une ligne corrigée d'après une autre source porte `corrige = true`, `a_verifier = true` et sa preuve dans `note_verification`.
 
