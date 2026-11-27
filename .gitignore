@@ -3,6 +3,8 @@
 /Hackathon Agentic/
 /Cycle de vie des marchés publics/
 *.sql
+# Exception : les migrations du schéma `assistant` (notre code, sans donnée AFI)
+!/migrations/*.sql
 *.pdf
 *.mp4
 *.docx
@@ -10,6 +12,8 @@
 *.xlsx
 *.pptx
 data/raw/
+# Paquet GraphRAG de l'équipe (texte des cahiers AFI, données reçues) : importé en base, hors Git
+/afi_graphrag_package/
 
 # Secrets
 .env

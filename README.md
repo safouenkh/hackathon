@@ -77,6 +77,20 @@ Les outils `services_afi`, `demarche`, `guider_service` et `preparer_demande` li
 
 Une fiche modifiée crée un nouveau brouillon ; une fiche inchangée (même SHA-256) ne crée rien. Une fiche mal formée arrête l'import sans rien écrire, et l'échec est noté dans `assistant.ingestion_runs`.
 
+### Cahiers des charges des zones (paquet GraphRAG de l'équipe)
+
+Le paquet (hors Git) contient le texte des 23 cahiers des charges découpé en passages, et un JSON de zones.
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.importer_cahiers --paquet <dossier> --revue       # lecture seule : docs/revue_paquet_graphrag.md
+.\.venv\Scripts\python.exe -m scripts.importer_cahiers --paquet <dossier>               # contrôle (écrit puis annule)
+.\.venv\Scripts\python.exe -m scripts.importer_cahiers --paquet <dossier> --appliquer   # écrit en base
+```
+
+- Chaque cahier est relié à sa zone par la table AFI `afi.zone_documents` (même nom de fichier), jamais deviné.
+- Les passages vont dans `assistant.document_chunks` (texte, article, pages, catégorie d'usage du sol, indice « à vérifier »).
+- La base AFI reste la référence : une valeur du JSON n'est gardée (`assistant.zone_complements`, avec sa source) que si la valeur AFI est vide. Les écarts sont listés dans la relecture, jamais appliqués.
+
 ## Lancer l'API
 
 ```powershell
