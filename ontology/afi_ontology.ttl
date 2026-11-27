@@ -64,6 +64,78 @@ afi:serviceDuStatutLot a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 # ---------------------------------------------------------------------
+# Zones industrielles et cahiers des charges (famille « Zone » du cahier BF16)
+# Schéma seulement : les instances (zones, cahiers, passages, catégories) sont construites
+# depuis PostgreSQL au démarrage (backend/app/semantique/graphe_zones.py). Le graphe ne garde
+# que des identifiants et des relations stables ; prix, surfaces et statuts restent en SQL.
+# Repris du paquet GraphRAG de l'équipe (IndustrialZone, SpecificationDocument, Chunk,
+# LandUseCategory), noms en français pour rester cohérent avec ce fichier.
+# ---------------------------------------------------------------------
+
+afi:ZoneIndustrielle a owl:Class ;
+    rdfs:label "Zone industrielle"@fr, "Industrial zone"@en, "منطقة صناعية"@ar .
+
+afi:CahierDesCharges a owl:Class ;
+    rdfs:label "Cahier des charges"@fr, "Specification document"@en, "كراس الشروط"@ar ;
+    rdfs:comment "Règlement d'une zone ; document dans assistant.documents (type cahier_charges)."@fr .
+
+afi:Passage a owl:Class ;
+    rdfs:label "Passage de document"@fr, "Document chunk"@en ;
+    rdfs:comment "Le texte exact est dans assistant.document_chunks ; Qdrant utilise le même UUID."@fr .
+
+afi:CategorieUsageSol a owl:Class ;
+    rdfs:label "Catégorie d'usage du sol"@fr, "Land-use category"@en ;
+    rdfs:comment "Code défini par UN cahier : « UIB » de Korba et « UIB » de Jelma sont deux catégories différentes."@fr .
+
+afi:codeZone a owl:DatatypeProperty ;
+    rdfs:comment "afi.zones.code_zone."@fr ;
+    rdfs:domain afi:ZoneIndustrielle ;
+    rdfs:range xsd:integer .
+
+afi:aPourCahier a owl:ObjectProperty ;
+    rdfs:comment "Lien venu de la table AFI afi.zone_documents (jamais deviné)."@fr ;
+    rdfs:domain afi:ZoneIndustrielle ;
+    rdfs:range afi:CahierDesCharges .
+
+afi:aPourPassage a owl:ObjectProperty ;
+    rdfs:domain afi:CahierDesCharges ;
+    rdfs:range afi:Passage .
+
+afi:passageSuivant a owl:ObjectProperty ;
+    rdfs:domain afi:Passage ;
+    rdfs:range afi:Passage .
+
+afi:definitCategorie a owl:ObjectProperty ;
+    rdfs:domain afi:CahierDesCharges ;
+    rdfs:range afi:CategorieUsageSol .
+
+afi:concerneCategorie a owl:ObjectProperty ;
+    rdfs:comment "Le passage ne s'applique qu'à cette catégorie de son cahier."@fr ;
+    rdfs:domain afi:Passage ;
+    rdfs:range afi:CategorieUsageSol .
+
+afi:codeCategorie a owl:DatatypeProperty ;
+    rdfs:domain afi:CategorieUsageSol ;
+    rdfs:range xsd:string .
+
+afi:identifiantDocument a owl:DatatypeProperty ;
+    rdfs:comment "assistant.documents.id."@fr ;
+    rdfs:range xsd:integer .
+
+afi:identifiantVersion a owl:DatatypeProperty ;
+    rdfs:comment "assistant.document_versions.id (version lue)."@fr ;
+    rdfs:range xsd:integer .
+
+afi:identifiantPassage a owl:DatatypeProperty ;
+    rdfs:comment "assistant.document_chunks.id (UUID), identique à l'identifiant du point Qdrant."@fr ;
+    rdfs:domain afi:Passage ;
+    rdfs:range xsd:string .
+
+afi:numeroArticle a owl:DatatypeProperty ;
+    rdfs:domain afi:Passage ;
+    rdfs:range xsd:string .
+
+# ---------------------------------------------------------------------
 # L'AFI
 # ---------------------------------------------------------------------
 
