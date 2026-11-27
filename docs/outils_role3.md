@@ -84,6 +84,14 @@ Résultat sur le dump du 13/11/2026 : lot 37 de Ras El Morj Monastir, port de So
 
 `backend/app/processing/avantages.py` définit le protocole `SourceIncitations.rechercher(activite, gouvernorat, zone_id, limite)`, qui renvoie une liste d'`Incitation` (intitulé, extrait exact, organisme, URL ou document + page, date). On le branche au démarrage avec `brancher_source(impl)`. Une incitation sans URL ni document est écartée.
 
+## Confidentialité et contrôle de la réponse (à reprendre dans l'agent du rôle 1)
+
+Essai en conditions réelles du 27/11/2026 avec Gemini ; le banc (`backend/app/banc/`) applique déjà ces trois protections :
+
+- **Aucune donnée personnelle vers le LLM (BNF9)** : `masquer()` (`processing/confidentialite.py`) remplace le nom annoncé (« esmi … », « je m'appelle … »), la CIN ou le passeport, le téléphone et l'e-mail par des marques (`[nom masqué]`…). L'agent dit alors de les saisir sur la page du formulaire. Limite : un nom donné sans annonce n'est pas reconnu.
+- **Contrôle sur toute la conversation** : un nombre, une adresse ou une balise doit venir d'un outil **de la conversation**, pas seulement du dernier tour. Cas réel corrigé : une adresse de l'AFI inventée.
+- **Balises abîmées** : une URL de PDF recopiée de travers est rétablie d'après les balises des outils (jamais d'un lot à un autre). Si le contrôle trouve encore un défaut, le modèle reçoit **une seule** demande de correction.
+
 ## Limites connues
 
 - **Données :** elles datent du dump du 13/11/2026, sans lecture en direct du site AFI. Statuts et prix peuvent avoir changé : le 26/11, le site listait 720 lots, et 80 lots notés 1 ou 4 dans le dump n'y figuraient plus.
@@ -92,5 +100,6 @@ Résultat sur le dump du 13/11/2026 : lot 37 de Ras El Morj Monastir, port de So
 - **Proximité :** la distance aux équipements est celle saisie par l'AFI (`zone_commodites.value`), ou celle d'OSM pour les services. Les distances « depuis un point » sont à vol d'oiseau, d'après les coordonnées de la zone.
 - **Orientation BF22 :** elle repose sur les synonymes de l'ontologie (saisis par l'équipe, en attendant l'apprentissage BF18) et les mots-clés des fiches de l'AFI. La compréhension par le sens (BF17) reste à faire.
 - **Lieu de dépôt :** la page de l'AFI ne le donne que pour l'acquisition ; pour les autres services, l'agent oriente vers le contact de l'AFI.
+- **Qualité du tunisien :** avec `gemini-3.5-flash-lite`, les réponses en arabizi mélangent souvent français et arabizi. `gemini-3.5-flash` écrit plus naturellement mais a mis 25 s pour une phrase le 27/11 (limite du projet : 35 s par réponse).
 - **Guidage :** la position est portée par la conversation (argument `position`) ; l'enregistrer côté serveur demandera une table de sessions (migration à relire).
 - **Formulaires :** l'agent ne demande jamais l'identité dans le chat (nom, société, CIN, passeport, adresse, téléphone, e-mail) : l'investisseur la saisit sur la page. La page d'acquisition « confirmation » (pages 3-4 des PDF, à renvoyer dans les 6 mois) n'est pas encore proposée.

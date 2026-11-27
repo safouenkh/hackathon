@@ -88,3 +88,54 @@ def test_boucle_appelle_l_outil_puis_repond():
     # Contrôle des balises : celle de l'outil est acceptée, une balise inventée est signalée
     assert banc.balises_inventees("[[LOT:7079:Lot 37 - Ras El Morj Monastir]]") == []
     assert banc.balises_inventees("Voir [[LOT:7079]]") == ["[[LOT:7079]]"]
+
+
+def _texte(txt):
+    return _reponse(genai_types.Part.from_text(text=txt))
+
+
+@pytest.mark.usefixtures("base_disponible")
+def test_controle_sur_toute_la_conversation_pas_seulement_le_dernier_tour():
+    """Une réponse sans nouvel appel d'outil peut reprendre un résultat du tour précédent."""
+    client = _FauxClient([
+        _reponse(genai_types.Part.from_function_call(name="details_lot", args={"lot_id": 7079})),
+        _texte("Le lot 37 fait 3122 m²."),
+        _texte("Son prix total indicatif est de 218540 DT."),          # aucun outil appelé dans ce tour
+    ])
+    banc = Banc(client, "faux", journal=lambda _l: None)
+    banc.poser("Fiche du lot 7079 ?")
+    assert banc.poser("et son prix ?") == "Son prix total indicatif est de 218540 DT."
+    assert banc.controler("et son prix ?", "Son prix total indicatif est de 218540 DT.")["ok"]
+    assert len(client.models.appels) == 3                            # aucune correction demandée
+
+
+def test_une_seule_correction_demandee_quand_le_contact_est_invente():
+    client = _FauxClient([_texte("Contactez-nous : 18, Rue 8011, Charguia, +216 71 785 233"),
+                          _texte("Je n'ai pas d'adresse à vous donner pour le moment.")])
+    banc = Banc(client, "faux", journal=lambda _l: None)
+    assert banc.poser("où est l'AFI ?") == "Je n'ai pas d'adresse à vous donner pour le moment."
+    envoye = client.models.appels[1][-1].parts[0].text
+    assert envoye.startswith("Contrôle automatique") and "8011" in envoye
+
+
+def test_la_correction_n_est_demandee_qu_une_fois_meme_si_le_defaut_persiste():
+    client = _FauxClient([_texte("Appelez le +216 71 785 233"), _texte("Appelez le +216 71 785 366")])
+    banc = Banc(client, "faux", journal=lambda _l: None)
+    assert banc.poser("contact ?") == "Appelez le +216 71 785 366"      # 2 appels au modèle, pas plus
+    assert len(client.models.appels) == 2
+
+
+def test_message_technique_du_banc_pas_controle():
+    banc = Banc(_FauxClient([]), "faux", journal=lambda _l: None)
+    assert banc.controler("q", "[modèle indisponible : a HTTP 429 — réessayer plus tard]")["ok"]
+
+
+def test_donnees_personnelles_jamais_envoyees_au_llm():
+    client = _FauxClient([_texte("D'accord, saisissez vos coordonnées sur la page du formulaire.")])
+    banc = Banc(client, "faux", journal=lambda _l: None)
+    banc.poser("esmi Ahmed Test, CIN 01234567, tel 99 000 000, 7adherli el talab")
+    envoye = client.models.appels[0][0].parts[0].text
+    assert "Ahmed" not in envoye and "01234567" not in envoye and "99 000 000" not in envoye
+    assert "[nom masqué]" in envoye and "7adherli el talab" in envoye
+    assert banc.donnees_masquees == ("identite", "telephone", "nom")
+    assert "01234567" not in str(banc.historique)

@@ -58,10 +58,24 @@ def test_les_8_services_viennent_de_la_base():
     ("il me faut une copie conforme de mon contrat", "copie_conforme"),
     ("ma société de leasing veut vendre le lot", "autorisation_vente_leasing"),
     ("comment obtenir la mainlevée", "mainlevee"),
+    # Essai en conditions réelles du 27/11/2026 : arabizi tunisien et fautes de frappe
+    ("nheb na3mel raf3 yed 3la lot mta3i, chnouwa lazemni?", "mainlevee"),
+    ("7adhrelli talab mta3 raf3 yed lel lot 7079", "mainlevee"),
+    ("rafg yed", "mainlevee"),                                           # faute de frappe du LLM
+    ("el banka t7eb wara9a bech t3tini el 9ardh", "insertion_hypotheque"),
+    ("wa9tech el mazad el jeya", "encheres"),
+    ("kteb tawdhihi", "acte_precision"),
+    ("ijar maleya", "autorisation_vente_leasing"),
 ])
 def test_orientation_bf22(besoin, attendu):
     r = services_afi(ServicesAfiEntree(besoin=besoin))
     assert r.donnees.candidats and r.donnees.candidats[0].service.id == attendu
+
+
+@pytest.mark.parametrize("besoin", ["nheb nabni dar fi tounes", "nechra", "mon voisin fait du bruit"])
+def test_mot_proche_mais_different_n_est_pas_reconnu(besoin):
+    """La tolérance aux fautes ne s'applique qu'aux mots-clés d'au moins 7 caractères."""
+    assert services_afi(ServicesAfiEntree(besoin=besoin)).donnees.candidats == []
 
 
 def test_besoin_non_reconnu_donne_les_choix_et_le_contact():

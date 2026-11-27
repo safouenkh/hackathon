@@ -7,6 +7,7 @@ ou bascule sur une réponse neutre.
 from __future__ import annotations
 
 import re
+from difflib import SequenceMatcher
 from typing import Any
 
 BALISE_RE = re.compile(r"\[\[(?:ZONE|LOT|CHOIX|PDF):[^\]]*\]\]")
@@ -83,3 +84,54 @@ def controler(reponse: str, sorties_outils: list[dict], balises_outils: set[str]
         "chiffres_modifies": list(dict.fromkeys(modifies)),
         "balises_inventees": list(dict.fromkeys(inventees)),
     }
+
+
+_SEUIL_BALISE = 0.9     # ressemblance minimale pour rétablir une balise PDF ou CHOIX abîmée
+
+
+def reparer_balises(texte: str, valides: set[str]) -> tuple[str, list[tuple[str, str]]]:
+    """Rétablit une balise recopiée de travers (URL percent-encodée abîmée, libellé changé).
+
+    - LOT et ZONE : seulement si un identifiant identique existe parmi les balises des outils ;
+      jamais de rapprochement « proche » (un chiffre de différence = un autre lot).
+    - PDF et CHOIX : la balise des outils la plus ressemblante (au moins 90 %).
+    Une balise sans équivalent reste telle quelle : le contrôle la signale comme inventée.
+    """
+    remplacees: list[tuple[str, str]] = []
+
+    def corriger(m: re.Match) -> str:
+        b = m.group(0)
+        if b in valides:
+            return b
+        type_ = b[2:].split(":", 1)[0]
+        candidates = [v for v in valides if v.startswith(f"[[{type_}:")]
+        if type_ in ("LOT", "ZONE"):
+            ident = b.split(":")[1] if b.count(":") >= 1 else ""
+            memes = [v for v in candidates if v.split(":")[1] == ident]
+            meilleure = memes[0] if len(memes) == 1 else None
+        else:
+            meilleure = max(candidates, key=lambda v: SequenceMatcher(None, b, v).ratio(), default=None)
+            if meilleure and SequenceMatcher(None, b, meilleure).ratio() < _SEUIL_BALISE:
+                meilleure = None
+        if meilleure is None:
+            return b
+        remplacees.append((b, meilleure))
+        return meilleure
+
+    return BALISE_RE.sub(corriger, texte or ""), remplacees
+
+
+def message_correction(c: dict[str, Any]) -> str:
+    """Message envoyé au modèle quand le contrôle trouve un défaut (une seule fois par question)."""
+    court = lambda x: x if len(x) <= 80 else x[:77] + "..."
+    defauts = []
+    if c["nombres_non_trouves"]:
+        defauts.append("nombres absents des outils : " + ", ".join(c["nombres_non_trouves"][:10]))
+    if c["chiffres_modifies"]:
+        defauts.append("approximations interdites : " + ", ".join(c["chiffres_modifies"][:5]))
+    if c["balises_inventees"]:
+        defauts.append("balises absentes des outils : " + ", ".join(court(b) for b in c["balises_inventees"][:5]))
+    return ("Contrôle automatique de ta réponse précédente : " + " ; ".join(defauts) + ". Réécris-la en gardant la "
+            "même langue. N'utilise que des valeurs et des balises fournies par les outils de cette conversation ; "
+            "si une information manque (adresse ou téléphone de l'AFI, par exemple), appelle l'outil qui la donne "
+            "(services_afi pour le contact AFI) ou dis que tu ne l'as pas.")

@@ -13,6 +13,7 @@ de dépôt absent des sources, renvoie au contact de l'AFI, jamais à une démar
 from __future__ import annotations
 
 import re
+from difflib import SequenceMatcher
 
 from sqlalchemy import Connection
 
@@ -65,10 +66,25 @@ _ARABE = re.compile(r"[؀-ۿ]")
 _PREFIXES_AR = r"(?:[وفبلك])?(?:ال|لل)?"
 
 
+_SEUIL_FAUTE = 0.86     # ressemblance minimale (0 à 1) pour accepter une faute de frappe
+_LONGUEUR_FAUTE = 7     # seuls les mots-clés d'au moins 7 caractères tolèrent une faute (évite « nechra » ≈ « nechri »)
+
+
 def _present(mot: str, texte: str) -> bool:
     """`mot` et `texte` sont normalisés ; le mot doit être entier."""
     prefixe = _PREFIXES_AR if _ARABE.search(mot) else ""
     return re.search(rf"(?<!\w){prefixe}{re.escape(mot)}(?!\w)", texte) is not None
+
+
+def _proche(mot: str, texte: str) -> bool:
+    """Faute de frappe (« rafg yed » pour « raf3 yed ») : mot-clé latin assez long, comparé à la
+    suite de mots du texte de même longueur. Le texte arabe n'est pas touché."""
+    if len(mot) < _LONGUEUR_FAUTE or _ARABE.search(mot):
+        return False
+    n = len(mot.split())
+    mots = texte.split()
+    return any(SequenceMatcher(None, mot, " ".join(mots[i:i + n])).ratio() >= _SEUIL_FAUTE
+               for i in range(len(mots) - n + 1))
 
 
 def _mots_cles(service: ServiceAfi, onto: Ontologie, fiches: dict[int, dict]) -> list[str]:
@@ -90,7 +106,7 @@ def services_afi(entree: ServicesAfiEntree, conn: Connection | None = None) -> S
     if entree.besoin:
         texte = normaliser(entree.besoin)
         for s in services.values():
-            reconnus = [m for m in _mots_cles(s, onto, fiches) if _present(m, texte)]
+            reconnus = [m for m in _mots_cles(s, onto, fiches) if _present(m, texte) or _proche(m, texte)]
             if reconnus:
                 # Un mot-clé long ou composé (« leasing », « copie conforme ») pèse plus qu'un mot
                 # générique (« lot ») : score = nombre total de caractères reconnus.

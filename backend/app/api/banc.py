@@ -72,11 +72,13 @@ def message(m: Message) -> dict:
         reponse = b.poser(m.message)
         duree = time.perf_counter() - debut
         appels = list(b.dernier_tour)
-        controle = b.controler(m.message, reponse)
+        controle = b.controler(b.question_masquee, reponse)
+        masquees = list(b.donnees_masquees)
     return {
         "reponse": reponse,
         "appels": appels,
         "controle": controle,
+        "donnees_masquees": masquees,       # types de données personnelles retirées avant l'envoi au LLM
         "duree_s": round(duree, 1),
         "jetons": {"entree": b.jetons["entree"] - entree_avant, "sortie": b.jetons["sortie"] - sortie_avant},
         "modele": b.modele_utilise or b.modele,

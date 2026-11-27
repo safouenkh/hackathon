@@ -111,6 +111,9 @@ Le client relit, puis il imprime ou enregistre en PDF depuis le navigateur. Il p
 La page affiche la conversation, et pour chaque question :
 - les appels d'outils (arguments, durée, avertissements, JSON complet) ;
 - le **contrôle après rédaction** (prototype BNF1), qui signale les nombres absents des données, les chiffres modifiés et les balises inventées.
+- le **masquage des données personnelles** : nom annoncé, CIN, téléphone et e-mail sont retirés avant l'envoi au modèle (BNF9), avec un avertissement dans la page.
+
+Le contrôle porte sur toute la conversation. Un lien PDF abîmé est rétabli, et le modèle reçoit au plus une demande de correction par question.
 
 Elle est désactivée par défaut : à ne jamais activer en production (aucune authentification, conversations gardées en mémoire). La même chose existe en ligne de commande : `.\.venv\Scripts\python.exe -m scripts.banc_llm_gemini`.
 

@@ -258,6 +258,10 @@
       }
       const m = ajouter("dalila", rendreMessage(corps.reponse));
       m.appendChild(rendreControle(corps.controle));
+      if (corps.donnees_masquees && corps.donnees_masquees.length) {
+        m.appendChild(el("div", "controle ok", "🔒 Retiré avant l'envoi au modèle : " + corps.donnees_masquees.join(", ")
+          + ". Ces informations se saisissent sur la page du formulaire."));
+      }
       const meta = el("div", "meta");
       meta.appendChild(el("span", "", corps.modele + (corps.repli ? " (modèle de repli)" : "")));
       meta.appendChild(el("span", "", corps.duree_s + " s"));

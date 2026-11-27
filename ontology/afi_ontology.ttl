@@ -3,7 +3,7 @@
 # - Les services, leurs parcours et leur contenu sont dans PostgreSQL (schéma `assistant`) ;
 #   ce graphe garde seulement les codes, les synonymes par langue et les liens stables
 #   (AFI_Pipeline_Architecture.md §8, cahier des charges BF16, BF17 et BNF19).
-# - Les synonymes de ce fichier ont été saisis par l'équipe le 2026-11-27 : ils ne viennent
+# - Les synonymes de ce fichier ont été saisis par l'équipe le 2026-11-27 (arabizi complété après un essai en conditions réelles) : ils ne viennent
 #   pas d'une source de l'AFI et seront enrichis par l'apprentissage contrôlé (BF18).
 # - Les numéros de fiches renvoient à afi.chatbot_connaissances (cahier §IV.6, colonne
 #   « Fiches existantes » ; la fiche 12 est une ancienne version des fiches 13 et 14).
@@ -86,7 +86,7 @@ id:service-acquisition a afi:ServiceAFI ;
         "kaufen"@de, "grundstück"@de,
         "arsa"@tr, "satın al"@tr,
         "شراء"@ar, "ارض"@ar, "أرض"@ar, "قطعة"@ar,
-        "n7eb terrain"@ar-Latn-TN, "nechri"@ar-Latn-TN, "9at3a"@ar-Latn-TN .
+        "n7eb terrain"@ar-Latn-TN, "nechri"@ar-Latn-TN, "nechtri"@ar-Latn-TN, "9at3a"@ar-Latn-TN, "9it3a"@ar-Latn-TN .
 
 id:service-encheres a afi:ServiceAFI ;
     afi:code "encheres" ;
@@ -95,13 +95,14 @@ id:service-encheres a afi:ServiceAFI ;
     dcterms:source "Carte publique de l'AFI : statut « Mis aux enchères » (docs/statuts_lots.md)." ;
     skos:altLabel "enchère"@fr, "enchères"@fr, "adjudication"@fr, "vente publique"@fr,
         "auction"@en, "versteigerung"@de, "ihale"@tr,
-        "مزاد"@ar, "بتة"@ar, "betta"@ar-Latn-TN .
+        "مزاد"@ar, "بتة"@ar, "betta"@ar-Latn-TN, "mazad"@ar-Latn-TN, "el mazad"@ar-Latn-TN .
 
 id:service-situation-fonciere a afi:ServiceAFI ;
     afi:code "situation_fonciere" ;
     afi:ficheConnaissance 18 ;
     skos:altLabel "situation foncière"@fr, "situation du lot"@fr, "situation juridique"@fr,
-        "land status"@en, "وضعية عقارية"@ar, "شهادة في الوضعية"@ar .
+        "land status"@en, "وضعية عقارية"@ar, "شهادة في الوضعية"@ar,
+        "wad3iya 3a9ariya"@ar-Latn-TN, "wadh3iya 3a9ariya"@ar-Latn-TN, "wad3iya el 3a9ariya"@ar-Latn-TN .
 
 id:service-insertion-hypotheque a afi:ServiceAFI ;
     afi:code "insertion_hypotheque" ;
@@ -110,13 +111,14 @@ id:service-insertion-hypotheque a afi:ServiceAFI ;
         "bank"@en, "loan"@en, "mortgage"@en,
         "hypothek"@de, "kredi"@tr, "ipotek"@tr,
         "رهن"@ar, "قرض"@ar, "بنك"@ar,
-        "karedi"@ar-Latn-TN, "credi"@ar-Latn-TN .
+        "karedi"@ar-Latn-TN, "credi"@ar-Latn-TN, "banka"@ar-Latn-TN, "rahn"@ar-Latn-TN, "9ardh"@ar-Latn-TN .
 
 id:service-mainlevee a afi:ServiceAFI ;
     afi:code "mainlevee" ;
     afi:ficheConnaissance 23 ;
     skos:altLabel "mainlevée"@fr, "main levée"@fr, "lever l'hypothèque"@fr, "radiation"@fr,
-        "release"@en, "رفع الرهن"@ar, "رفع اليد"@ar .
+        "release"@en, "رفع الرهن"@ar, "رفع اليد"@ar,
+        "raf3 yed"@ar-Latn-TN, "raf3 el yed"@ar-Latn-TN, "rafaa yed"@ar-Latn-TN, "rfa3 el yed"@ar-Latn-TN, "raf3 el rahn"@ar-Latn-TN .
 
 id:service-acte-precision a afi:ServiceAFI ;
     afi:code "acte_precision" ;
@@ -125,20 +127,23 @@ id:service-acte-precision a afi:ServiceAFI ;
     rdfs:comment "La fiche 20 explique à quoi sert l'acte ; les étapes de la page « Nos services » décrivent l'achat d'un lot (voir corrections.json)."@fr ;
     skos:altLabel "acte de précision"@fr, "contrat final"@fr, "acte définitif"@fr, "titre foncier"@fr,
         "propriété distincte"@fr, "final contract"@en, "title deed"@en,
-        "عقد نهائي"@ar, "رسم عقاري"@ar .
+        "عقد نهائي"@ar, "رسم عقاري"@ar,
+        "ktab tawdhihi"@ar-Latn-TN, "kteb tawdhihi"@ar-Latn-TN, "3a9d nihai"@ar-Latn-TN .
 
 id:service-autorisation-vente-leasing a afi:ServiceAFI ;
     afi:code "autorisation_vente_leasing" ;
     afi:ficheConnaissance 21 ;
     skos:altLabel "leasing"@fr, "crédit bail"@fr, "autorisation de vente"@fr, "revendre"@fr,
-        "ليزينغ"@ar, "إيجار مالي"@ar, "ترخيص في البيع"@ar .
+        "ليزينغ"@ar, "إيجار مالي"@ar, "ترخيص في البيع"@ar,
+        "ijar mali"@ar-Latn-TN, "ijar maleya"@ar-Latn-TN .
 
 id:service-copie-conforme a afi:ServiceAFI ;
     afi:code "copie_conforme" ;
     afi:ficheConnaissance 22 ;
     skos:altLabel "copie conforme"@fr, "copie"@fr, "duplicata"@fr,
         "copy"@en, "kopie"@de, "kopya"@tr,
-        "نسخة مطابقة"@ar, "نسخة"@ar .
+        "نسخة مطابقة"@ar, "نسخة"@ar,
+        "noskha mtabe9a"@ar-Latn-TN, "nos5a mtabe9a"@ar-Latn-TN, "noskha motabi9a"@ar-Latn-TN .
 
 # ---------------------------------------------------------------------
 # Vocabulaire des démarches (repère des phrases dans les fiches publiées)
