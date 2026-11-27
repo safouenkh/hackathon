@@ -1,0 +1,171 @@
+{
+ "date": "2026-11-27_2235",
+ "modele": "gemini-3.5-flash-lite",
+ "scenarios": [
+  {
+   "id": "S24",
+   "profil": "Préparation d'une demande (BF11)",
+   "domaine": "préparer la demande",
+   "tours": [
+    {
+     "question": "Je cherche un lot disponible à Gabès pour une usine",
+     "attentes": {
+      "texte": "Je cherche un lot disponible à Gabès pour une usine",
+      "outils": [
+       "chercher_lots"
+      ],
+      "langue": "fr",
+      "ecriture": "latine",
+      "organismes": null,
+      "note": "",
+      "contient": null
+     },
+     "reponse": "Voici plusieurs lots disponibles dans le gouvernorat de Gabès (dans les zones [[ZONE:88888:Gabes I & II & III]] et [[ZONE:931104:Gabes III]]). \n\nLes prix et les disponibilités sont donnés à titre indicatif (instantané du 13/11/2026) et sont à reconfirmer auprès de l'AFI. La compatibilité de votre activité d'usine avec la zone doit être vérifiée dans le cahier des charges de la zone.\n\nQuelques exemples de lots disponibles :\n- [[LOT:4836:Lot 19 -9 - Gabes I & II & III]] : surface de 153 m², prix total indicatif de 7650 DT (50 Dt/m²)\n- [[LOT:6572:Lot 19 -09 - Gabes III]] : surface de 153 m², prix total indicatif de 7650 DT (50 Dt/m²)\n- [[LOT:4827:Lot 19 -1 - Gabes I & II & III]] : surface de 234 m², prix total indicatif de 11700 DT (50 Dt/m²)\n- [[LOT:4830:Lot 19 -3 - Gabes I & II & III]] : surface de 234 m², prix total indicatif de 11700 DT (50 Dt/m²)\n- [[LOT:6564:Lot 19 -01 - Gabes III]] : surface de 234 m², prix total indicatif de 11700 DT (50 Dt/m²)\n- [[LOT:6566:Lot 19 -03 - Gabes III]] : surface de 234 m², prix total indicatif de 11700 DT (50 Dt/m²)\n- [[LOT:4832:Lot 19 -5 - Gabes I & II & III]] : surface de 236 m², prix total indicatif de 11800 DT (50 Dt/m²)\n- [[LOT:6568:Lot 19 -05 - Gabes III]] : surface de 236 m², prix total indicatif de 11800 DT (50 Dt/m²)\n- [[LOT:4828:Lot 19 -10 - Gabes I & II & III]] : surface de 284 m², prix total indicatif de 14200 DT (50 Dt/m²)\n- [[LOT:4831:Lot 19 -4 - Gabes I & II & III]] : surface de 284 m², prix total indicatif de 14200 DT (50 Dt/m²)\n\nPour affiner votre recherche (surface souhaitée, budget maximal ou équipements à proximité comme un port ou une route), n'hésitez pas à me le préciser !",
+     "duree_s": 3.3,
+     "modele": "gemini-3.5-flash-lite",
+     "donnees_masquees": [],
+     "appels": [
+      {
+       "outil": "chercher_lots",
+       "arguments": {
+        "statuts": [
+         "disponible"
+        ],
+        "gouvernorat": "Gabès"
+       },
+       "ms": 94.7,
+       "avertissements": [
+        "resultats_tronques",
+        "prix_indicatif",
+        "valeur_complementaire",
+        "donnee_non_fraiche"
+       ],
+       "erreur": null
+      }
+     ],
+     "lots": [
+      4827,
+      4828,
+      4830,
+      4831,
+      4832,
+      4836,
+      6564,
+      6566,
+      6568,
+      6572
+     ],
+     "evaluation": {
+      "ok": true,
+      "defauts": []
+     }
+    },
+    {
+     "question": "Prépare la demande d'acquisition pour le premier lot",
+     "attentes": {
+      "texte": "Prépare la demande d'acquisition pour le premier lot",
+      "outils": [
+       "demarche",
+       "preparer_demande"
+      ],
+      "langue": "fr",
+      "ecriture": "latine",
+      "organismes": null,
+      "note": "le parcours se choisit d'abord (parcours_a_choisir)",
+      "contient": null
+     },
+     "reponse": "Pour l'acquisition du premier lot ([[LOT:4836:Lot 19 -9 - Gabes I & II & III]]), la zone de Gabès relève des zones de développement régional. Veuillez choisir le parcours correspondant :\n\n[[CHOIX:zones de développement régional]]\n[[CHOIX:zones littorales et le grand Tunis]]",
+     "duree_s": 3.7,
+     "modele": "gemini-3.5-flash-lite",
+     "donnees_masquees": [],
+     "appels": [
+      {
+       "outil": "services_afi",
+       "arguments": {
+        "besoin": "acquisition de lot industriel"
+       },
+       "ms": 115.4,
+       "avertissements": [],
+       "erreur": null
+      },
+      {
+       "outil": "demarche",
+       "arguments": {
+        "service": "acquisition"
+       },
+       "ms": 50.0,
+       "avertissements": [
+        "parcours_a_choisir",
+        "frais_non_chiffres",
+        "point_a_verifier",
+        "frais_non_chiffres",
+        "point_a_verifier"
+       ],
+       "erreur": null
+      }
+     ],
+     "lots": [],
+     "evaluation": {
+      "ok": true,
+      "defauts": []
+     }
+    },
+    {
+     "question": "zones de développement régional",
+     "attentes": {
+      "texte": "zones de développement régional",
+      "outils": [
+       "preparer_demande"
+      ],
+      "langue": "fr",
+      "ecriture": "latine",
+      "organismes": null,
+      "note": "lien du formulaire prérempli, aucun dépôt",
+      "contient": "/formulaire/"
+     },
+     "reponse": "Voici le résumé préparé pour l'acquisition du lot [[LOT:4836:Lot 19 -9 - Gabes I & II & III]] (surface de 153 m², prix total indicatif de 7650 DT, à reconfirmer auprès de l'AFI) :\n\n- **Activité :** usine\n- **Gouvernorat :** Gabès\n\nVous pouvez accéder au formulaire prérempli (en français ou en arabe) pour compléter les informations de votre projet (comme l'investissement ou le nombre d'emplois), relire, imprimer ou envoyer :\n- [Formulaire en français (AFI)](http://127.0.0.1:8020/formulaire/acquisition-developpement-regional?langue=fr&lots=4836&activite=usine&surface_souhaitee_m2=153&gouvernorat=Gab%C3%A8s)\n- [Formulaire en arabe (AFI)](http://127.0.0.1:8020/formulaire/acquisition-developpement-regional?langue=ar&lots=4836&activite=usine&surface_souhaitee_m2=153&gouvernorat=Gab%C3%A8s)\n\n### Pièces à préparer :\n**I – Phase de réservation :**\n1. Demande d’acquisition d’un lot industriel\n2. Confirmation d’acquisition du lot industriel\n3. Rapport motivé justifiant la superficie demandée\n4. Étude économique et technique du projet\n5. Attestation de dépôt du projet auprès de l’Agence de Promotion de l’Industrie et de l’Innovation (APII)\n\n**II – Phase d’attribution :**\n6. Décision d’octroi d’avantages financiers pour les régions de développement régional (APII)\n7. Documents juridiques de l’entreprise + copie de la carte d’identité du représentant légal\n8. Copie de la carte d’identité pour les personnes physiques\n9. Autorisations administratives nécessaires pour l’activité projetée\n\n**III – Phase de paiement :**\n10. Prix du lot industriel (indicatif)\n11. Frais de rédaction du contrat de vente (sans montant chiffré)\n12. Frais de délimitation topographique (sans montant chiffré)\n13. Validation de l’étude d’impact environnemental par l’Agence Nationale de Protection de l’Environnement (ANPE)\n\n### Lieu de dépôt :\n- Au bureau d’ordre central, dans les délégations ou représentations régionales de l’AFI.\n- Au gouvernorat territorialement compétent, à l’attention du président du comité régional de suivi des zones industrielles.",
+     "duree_s": 2.9,
+     "modele": "gemini-3.5-flash-lite",
+     "donnees_masquees": [],
+     "appels": [
+      {
+       "outil": "preparer_demande",
+       "arguments": {
+        "lot_ids": [
+         4836
+        ],
+        "parcours": "acquisition-developpement-regional",
+        "projet": {
+         "activite": "usine",
+         "gouvernorat": "Gabès",
+         "surface_souhaitee_m2": 153
+        },
+        "service": "acquisition"
+       },
+       "ms": 90.0,
+       "avertissements": [
+        "confirmation_requise",
+        "prix_indicatif",
+        "valeur_complementaire",
+        "donnee_non_fraiche",
+        "frais_non_chiffres",
+        "point_a_verifier"
+       ],
+       "erreur": null
+      }
+     ],
+     "lots": [],
+     "evaluation": {
+      "ok": true,
+      "defauts": []
+     }
+    }
+   ]
+  }
+ ],
+ "coherence": {},
+ "jetons": {
+  "entree": 94797,
+  "sortie": 1515
+ }
+}

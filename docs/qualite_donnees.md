@@ -86,3 +86,8 @@ Analyse du 26 novembre 2026 sur `afi.sql` (dump MariaDB généré le 13 nov. 202
   - les fiches 12 à 25 correspondent aux 8 services du cahier §IV.6 ;
   - la fiche 26 a pour question « Comment contacter l'Agence Foncière Industrielle (AFI) ? ». Elle est candidate pour BF24 (contenu de la réponse pas encore lu).
 - **`chatbot_sources`** : 150 extraits (sicad 127, tia 9, fipa 5, apia 5, apii 4).
+
+## Compléments du 27/11/2026
+
+- **`zone_commodites.zc_libelle_arabe`** : 974 lignes remplies, toutes identiques à `zc_libelle_francais` (après suppression des espaces), aucune ne contient de lettre arabe. La colonne n'apporte aucun libellé arabe : elle n'est pas utilisée.
+- **`chatbot_connaissances`** : la fiche 3 donne les numéros de l'AFI écrits à l'envers (« +216 260 124 71 » ; la fiche 26 donne « +216 71 124 260 »). Elle est écartée de la recherche (`afi:ficheEcartee`).
