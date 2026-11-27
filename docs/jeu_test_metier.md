@@ -4,12 +4,15 @@ Automatisé dans `tests/test_cas_metier.py`. Chaque valeur attendue vient d'une 
 
 - Sources : liste publique https://afi.e-industrie.gov.tn/liste.php (lue le 26/11/2026), fiches de `chatbot_connaissances` (dump du 13/11/2026), requête SQL écrite à part.
 - Résultat au 26/11/2026 : **20 tests sur 20 réussis** (M03b ajouté : BF10 en un seul appel).
+- 27/11/2026 : M03 et M03b changent avec les compléments de zone (migration 0003) : Gabès 88888 n'a pas de prix dans la base AFI, le JSON du paquet GraphRAG donne 50 Dt/m². M03c (valeur AFI jamais remplacée) et M03d (commodités complétées) ajoutés.
 
 | N° | Question / besoin | Outil(s) | Attendu | Source de l'attendu |
 |---|---|---|---|---|
 | M01 | Fiche du lot 117 d'Ariana Aéroport | `details_lot` | 34 735 m², 100 Dt/m², Ariana, aux enchères | liste.php : « Ariana \| ARIANA AEROPORT \| 117 \| 34735 \| 100 » ; carte publique : `LOT_ETAPE` 4 = « Mis aux enchères » |
 | M02 | Prix du lot 37 de Ras El Morj | `details_lot` | 3 122 m², 70 Dt/m² (dump), avec `prix_ecart_site_public` | liste.php : « … \| 37 \| 3122 \| 90 » ; dump : `prixunitaire` = 70 |
-| M03 | « Lot de 3 000 m² près d'un port, le moins cher » (BF10) | `lots_proches` + `chercher_lots` | Lots 7079 (218 540 DT), 7094 (247 450 DT), 7095 (255 570 DT) | Requête SQL indépendante (port ≤ 40 km, `LOT_ETAPE` = 1, surface ≥ 3 000 m²) |
+| M03 | « Lot de 3 000 m² près d'un port, le moins cher » (BF10) | `lots_proches` + `chercher_lots` | Lots 4799 (154 250 DT), 4858 (154 400 DT), 4859 (154 450 DT) à Gabès, avec `valeur_complementaire` (sans complément : 7079, 218 540 DT) | Requête SQL indépendante (port ≤ 40 km, `LOT_ETAPE` = 1, surface ≥ 3 000 m², prix AFI sinon complément) |
+| M03c | Prix de Ras El Morj (AFI 70, JSON 90) | `details_lot` | 70 Dt/m², sans `valeur_complementaire` | La base AFI n'est jamais remplacée |
+| M03d | Commodités de la zone 931300 | `details_lot` | Port 204 km, marqué `valeur_complementaire`, provenance `assistant.zone_complements` | `docs/revue_paquet_graphrag.md` |
 | M04 | Lots disponibles à Sfax | `chercher_lots` | 2 | SQL : `gouv_id` = 20 et `LOT_ETAPE` = 1 |
 | M05 | Lots disponibles de la zone 931103 (Tejra) | `chercher_lots` | 25 lots, gouvernorat Médenine | SQL ; liste.php range Tejra sous « Mednine » |
 | M06 | Même recherche écrite « Sfax », « sfax », « SFAX », « صفاقس », « gouvernorat de Sfax » (BNF13) | `chercher_lots` | Résultats identiques | Comparaison des sorties |

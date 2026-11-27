@@ -58,6 +58,7 @@ Résultat sur le dump du 13/11/2026 : lot 37 de Ras El Morj Monastir, port de So
 | `prix_indicatif` | Prix d'un instantané (13/11/2026), pas un prix actuel |
 | `prix_ecart_site_public` | Le site AFI affichait un autre prix le 26/11/2026 : à vérifier auprès de l'AFI |
 | `prix_inconnu`, `prix_suspect` | Pas de prix communicable : ne rien estimer |
+| `valeur_complementaire` | Prix ou commodité absent de la base AFI, repris de `assistant.zone_complements` (JSON du paquet GraphRAG, origine non documentée) : à confirmer auprès de l'AFI. Une valeur AFI présente n'est jamais remplacée |
 | `donnee_non_fraiche` | Disponibilité à reconfirmer auprès de l'AFI |
 | `statut_inconnu` | Lot « gris » : pas d'information |
 | `lot_orphelin` | Lot sans zone connue |

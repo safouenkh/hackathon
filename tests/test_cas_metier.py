@@ -29,11 +29,15 @@ def test_m02_prix_dump_different_du_site_signale():
 
 def test_m03_bf10_3000m2_pres_d_un_port_le_moins_cher():
     # « Lot de 3000 m² près d'un port, moins cher possible » : zones à ≤ 40 km d'un port, puis lots.
-    # Attendu par SQL indépendant : lot 7079 (Ras El Morj, lot 37), 3122 × 70 = 218 540 DT.
+    # Attendu par SQL indépendant (27/11/2026, avec assistant.zone_complements) : Gabès 88888 n'a pas de prix
+    # dans la base AFI ; le complément du JSON de l'équipe donne 50 Dt/m² -> lot 4799 (11:9), 3085 × 50 = 154 250 DT.
+    # Sans complément, l'attendu était le lot 7079 (Ras El Morj), 218 540 DT.
     zones = executer("lots_proches", {"type": "port", "distance_max_km": 40, "limite": 50}).donnees.zones
-    lots = executer("chercher_lots", {"zone_ids": [z.zone.zone_id for z in zones],
-                                      "surface_min_m2": 3000, "limite": 3}).donnees.lots
-    assert [(l.lot_id, l.prix_total_indicatif_dt) for l in lots] == [(7079, 218540), (7094, 247450), (7095, 255570)]
+    r = executer("chercher_lots", {"zone_ids": [z.zone.zone_id for z in zones], "surface_min_m2": 3000, "limite": 3})
+    assert [(l.lot_id, l.prix_total_indicatif_dt) for l in r.donnees.lots] == [(4799, 154250), (4858, 154400),
+                                                                                (4859, 154450)]
+    assert all(C.valeur_complementaire in l.avertissements for l in r.donnees.lots)
+    assert any(p.table == "assistant.zone_complements" and p.ids == ["88888"] for p in r.provenance)
 
 
 def test_m03b_bf10_en_un_seul_appel():
@@ -41,7 +45,24 @@ def test_m03b_bf10_en_un_seul_appel():
     lots = executer("chercher_lots", {"pres_de": "port", "distance_max_km": 40,
                                       "surface_min_m2": 3000, "limite": 3}).donnees.lots
     assert [(l.lot_id, l.prix_total_indicatif_dt, l.distance_equipement_km, l.equipement_nom) for l in lots] == [
-        (7079, 218540, 35.0, "Sousse"), (7094, 247450, 35.0, "Sousse"), (7095, 255570, 35.0, "Sousse")]
+        (4799, 154250, 0.0, "Gabes"), (4858, 154400, 0.0, "Gabes"), (4859, 154450, 0.0, "Gabes")]
+
+
+def test_m03c_valeur_afi_jamais_remplacee_par_le_complement():
+    # Ras El Morj 932119 : base AFI 70 Dt/m², JSON de l'équipe 90 -> la base AFI est gardée, sans complément.
+    lot = executer("details_lot", {"lot_id": 7079}).donnees.lot
+    assert lot.prix_indicatif_dt_m2 == 70 and C.valeur_complementaire not in lot.avertissements
+
+
+def test_m03d_commodites_completees_marquees_et_sourcees():
+    # Zone 931300 (Kasserine extension) : aucune distance dans afi.zone_commodites ; JSON de l'équipe :
+    # port 204 km, aéroport 200 km (docs/revue_paquet_graphrag.md).
+    r = executer("details_lot", {"lot_id": 46})
+    port = [x for x in r.donnees.commodites_zone if x.type.value == "port"]
+    assert [(x.distance_km, x.valeur_texte) for x in port] == [(204.0, "204 km")]
+    assert any(a.code is C.valeur_complementaire and a.detail.startswith("com_2 (ZONE_PORT_DIST)")
+               for a in r.avertissements)
+    assert any(p.table == "assistant.zone_complements" for p in r.provenance)
 
 
 def test_m04_comptage_disponibles_sfax():

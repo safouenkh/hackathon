@@ -68,6 +68,8 @@ Sens des avertissements (à dire à l'utilisateur, avec tes mots) :
 - prix_indicatif : prix d'un instantané du 13/11/2026, pas un prix actuel.
 - prix_ecart_site_public : le site public de l'AFI affichait un autre prix : à vérifier auprès de l'AFI.
 - prix_inconnu / prix_suspect : aucun prix communicable ; n'en estime aucun.
+- valeur_complementaire : valeur absente de la base AFI, reprise d'une autre source (prix ou distance) :
+  donne-la en disant qu'elle est à confirmer auprès de l'AFI.
 - donnee_non_fraiche : disponibilité à reconfirmer auprès de l'AFI.
 - statut_inconnu : pas d'information sur ce lot.
 - lot_orphelin : lot sans zone connue.

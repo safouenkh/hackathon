@@ -46,6 +46,9 @@ class CodeAvertissement(str, Enum):
     coordonnees_manquantes = "coordonnees_manquantes"
     distance_ambigue = "distance_ambigue"          # valeur de distance non exploitable (ex. « 127 - 115 km »)
     donnee_incoherente = "donnee_incoherente"      # ligne écartée (unité inattendue, valeur de test)
+    # Valeur absente de la base AFI, reprise d'une autre source (assistant.zone_complements) :
+    # à donner en précisant qu'elle est à confirmer auprès de l'AFI (detail = champ et source).
+    valeur_complementaire = "valeur_complementaire"
     activite_non_filtree = "activite_non_filtree"  # aucune donnée SQL sur les activités autorisées
     budget_non_verifiable = "budget_non_verifiable"  # lots sans prix exclus d'une recherche par budget
     resultats_tronques = "resultats_tronques"

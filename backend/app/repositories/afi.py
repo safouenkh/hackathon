@@ -85,9 +85,28 @@ def services_par_zone() -> dict[int, tuple[dict, ...]]:
     return {k: tuple(v) for k, v in idx.items()}
 
 
+@lru_cache
+def complements_par_zone() -> dict[int, dict[str, dict]]:
+    """Valeurs absentes de la base AFI, prises d'une autre source (migration 0003), avec cette source.
+    code_zone -> champ (« prixunitaire », « com_N ») -> {valeur, cle_source, source}."""
+    with get_engine().connect() as c:
+        rows = c.execute(text(
+            "SELECT zc.code_zone, zc.champ, zc.valeur, zc.cle_source, s.title AS source "
+            "FROM assistant.zone_complements zc "
+            "JOIN assistant.document_versions v ON v.id = zc.version_id "
+            "JOIN assistant.documents d ON d.id = v.document_id "
+            "JOIN assistant.sources s ON s.id = d.source_id "
+            "ORDER BY zc.code_zone, zc.champ LIMIT :n"), {"n": LIMITE_REFERENTIEL}).mappings().all()
+    idx: dict[int, dict[str, dict]] = {}
+    for r in rows:
+        idx.setdefault(r["code_zone"], {})[r["champ"]] = {"valeur": r["valeur"], "cle_source": r["cle_source"],
+                                                          "source": r["source"]}
+    return idx
+
+
 def vider_caches() -> None:
     for f in (zones, commodites, services_proximite, comptes_lots_par_zone_etape,
-              commodites_par_zone, services_par_zone):
+              commodites_par_zone, services_par_zone, complements_par_zone):
         f.cache_clear()
 
 
@@ -96,11 +115,15 @@ def vider_caches() -> None:
 _SELECT_LOT = """
     SELECT l.lot_id, l.zone_id AS zone_id_brut, l.lot_num AS numero, l.lot_sup_lotis AS surface,
            l.lot_etape AS etape, z.code_zone,
-           CASE WHEN l.lot_sup_lotis > 0 AND z.prixunitaire > 0
+           CASE WHEN l.lot_sup_lotis > 0 AND pu.prix > 0
                      AND NOT (z.code_zone = ANY(CAST(:prix_exclus AS integer[])))
-                THEN l.lot_sup_lotis::bigint * z.prixunitaire END AS prix_total
+                THEN l.lot_sup_lotis::bigint * pu.prix END AS prix_total
     FROM afi.lots l
     LEFT JOIN afi.zones z ON z.code_zone::text = l.zone_id
+    -- Prix AFI ; s'il est vide (null ou 0), complément entier sourcé (migration 0003)
+    LEFT JOIN assistant.zone_complements zp
+           ON zp.code_zone = z.code_zone AND zp.champ = 'prixunitaire' AND zp.valeur = trunc(zp.valeur)
+    CROSS JOIN LATERAL (SELECT CASE WHEN z.prixunitaire > 0 THEN z.prixunitaire ELSE zp.valeur END AS prix) pu
 """
 
 

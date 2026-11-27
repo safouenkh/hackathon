@@ -47,6 +47,10 @@ def prix_zone(code_zone: int | None) -> tuple[int | None, list[C]]:
         return None, [C.prix_suspect]
     p = _zones_par_code().get(code_zone, {}).get("prixunitaire")
     if not p or p <= 0:
+        # Prix AFI vide : complément sourcé (assistant.zone_complements), entier comme en SQL
+        comp = repo.complements_par_zone().get(code_zone, {}).get("prixunitaire")
+        if comp and comp["valeur"] == int(comp["valeur"]):
+            return int(comp["valeur"]), [C.prix_indicatif, C.valeur_complementaire]
         return None, [C.prix_inconnu]
     codes = [C.prix_indicatif]
     if code_zone in PRIX_ECART_SITE_PUBLIC:
@@ -122,10 +126,39 @@ def _avertissements_globaux(lots: list[Lot]) -> list[Avertissement]:
 
 def _prov_lots(lots: list[Lot]) -> list[Provenance]:
     zones = sorted({str(l.zone_id) for l in lots if l.zone_id is not None})
-    return [
+    prov = [
         Provenance(type="sql", table="afi.lots", ids=[str(l.lot_id) for l in lots], date_donnees=DATE_INSTANTANE_AFI),
         Provenance(type="sql", table="afi.zones", ids=zones, date_donnees=DATE_INSTANTANE_AFI),
     ]
+    completes = sorted({str(l.zone_id) for l in lots if C.valeur_complementaire in l.avertissements})
+    if completes:
+        prov.append(Provenance(type="sql", table="assistant.zone_complements", ids=completes))
+    return prov
+
+
+def _detail_complement(champ: str, comp: dict) -> str:
+    return f"{champ} ({comp['cle_source']}) : {comp['source']}"
+
+
+def lignes_commodites(code_zone: int) -> tuple[dict, ...]:
+    """Lignes AFI de la zone, plus un complément sourcé pour chaque commodité absente de la base AFI.
+    Un complément porte la clé « complement » ; sa valeur est écrite dans l'unité de la colonne AFI."""
+    afi = repo.commodites_par_zone().get(code_zone, ())
+    presentes = {r["com_id"] for r in afi}
+    ajouts = []
+    for champ, comp in sorted(repo.complements_par_zone().get(code_zone, {}).items()):
+        if not champ.startswith("com_"):
+            continue
+        com_id = int(champ[4:])
+        ref = COMMODITES.get(com_id)
+        if ref is None or com_id in presentes or len(ref[2]) != 1:
+            continue
+        unite = next(iter(ref[2]))
+        ajouts.append({"id": f"complement:{champ}", "code_zone": code_zone, "com_id": com_id,
+                       "zc_libelle_francais": None, "zc_unite": unite,
+                       "value": f"{float(comp['valeur']):g} {unite}",
+                       "complement": _detail_complement(champ, comp)})
+    return tuple(afi) + tuple(ajouts)
 
 
 def distance_depuis_texte(valeur: str | None) -> float | None:
@@ -136,13 +169,15 @@ def distance_depuis_texte(valeur: str | None) -> float | None:
 def commodites_de_zone(code_zone: int) -> tuple[list[Commodite], list[Avertissement]]:
     res: list[Commodite] = []
     avert: list[Avertissement] = []
-    for r in repo.commodites_par_zone().get(code_zone, ()):
+    for r in lignes_commodites(code_zone):
         ref = COMMODITES.get(r["com_id"])
         unite = (r["zc_unite"] or "").strip()
         if ref is None or unite not in ref[2]:
             avert.append(Avertissement(code=C.donnee_incoherente, zone_id=code_zone,
                                        detail=f"zone_commodites.id={r['id']}"))
             continue
+        if r.get("complement"):
+            avert.append(Avertissement(code=C.valeur_complementaire, zone_id=code_zone, detail=r["complement"]))
         type_, libelle, _ = ref
         valeur = (r["value"] or "").strip() or None
         distance = None
@@ -240,13 +275,16 @@ def chercher_lots(entree: ChercherLotsEntree, conn: Connection | None = None) ->
     # Proximité d'un équipement : distance par zone (données AFI pour port/gare/…, OSM pour les services)
     distances: dict[int, float] | None = None
     noms_equipement: dict[int, str | None] = {}
+    distances_completees: dict[int, str] = {}
     if entree.pres_de is not None:
         distances, ambigues = {}, 0
         for code in (zone_ids if zone_ids is not None else _zones_par_code()):
-            nom, km, ambigu = _equipement(code, entree.pres_de)
+            nom, km, ambigu, complement = _equipement(code, entree.pres_de)
             ambigues += ambigu and km is None
             if km is not None and (entree.distance_max_km is None or km <= entree.distance_max_km):
                 distances[code], noms_equipement[code] = km, nom
+                if complement:
+                    distances_completees[code] = complement
         if ambigues:
             avert.append(Avertissement(code=C.distance_ambigue, detail=f"{ambigues} zones écartées"))
         if not distances:
@@ -273,6 +311,8 @@ def chercher_lots(entree: ChercherLotsEntree, conn: Connection | None = None) ->
     if not lots:
         avert.append(Avertissement(code=C.aucun_resultat))
     avert += _avertissements_globaux(lots)
+    avert += [Avertissement(code=C.valeur_complementaire, zone_id=z, detail=distances_completees[z])
+              for z in sorted({l.zone_id for l in lots if l.zone_id in distances_completees})]
 
     zones_vues = {}
     for l in lots:
@@ -338,6 +378,9 @@ def details_lot(entree: DetailsLotEntree, conn: Connection | None = None) -> Sor
             Provenance(type="sql", table="afi.zone_documents", ids=[str(d.document_id) for d in documents],
                        date_donnees=DATE_INSTANTANE_AFI),
         ]
+        if any(a.code is C.valeur_complementaire for a in avert_com) and not any(
+                p.table == "assistant.zone_complements" for p in provenance):
+            provenance.append(Provenance(type="sql", table="assistant.zone_complements", ids=[str(lot.zone_id)]))
     return SortieOutil[DetailsLotDonnees](
         outil="details_lot",
         donnees=DetailsLotDonnees(lot=lot, zone=zone, commodites_zone=commodites or [],
@@ -398,24 +441,25 @@ def comparer_lots(entree: ComparerLotsEntree, conn: Connection | None = None) ->
 # lots_proches
 # =====================================================================
 
-def _equipement(code_zone: int, type_) -> tuple[str | None, float | None, bool]:
-    """(nom, distance_km, ambigu) de l'équipement le plus proche de ce type pour la zone."""
+def _equipement(code_zone: int, type_) -> tuple[str | None, float | None, bool, str | None]:
+    """(nom, distance_km, ambigu, complement) de l'équipement le plus proche de ce type pour la zone.
+    `complement` : détail de la source quand la distance vient de assistant.zone_complements."""
     if isinstance(type_, TypeCommodite):
-        meilleur, ambigu = (None, None), False
+        meilleur, ambigu = (None, None, None), False
         com_id = COM_ID_PAR_TYPE[type_]
-        for r in repo.commodites_par_zone().get(code_zone, ()):
+        for r in lignes_commodites(code_zone):
             if r["com_id"] != com_id or (r["zc_unite"] or "").strip() != "km":
                 continue
             d = distance_depuis_texte(r["value"])
             if d is None:
                 ambigu = True
             elif meilleur[1] is None or d < meilleur[1]:
-                meilleur = ((r["zc_libelle_francais"] or "").strip() or None, d)
-        return meilleur[0], meilleur[1], ambigu
+                meilleur = ((r["zc_libelle_francais"] or "").strip() or None, d, r.get("complement"))
+        return meilleur[0], meilleur[1], ambigu, meilleur[2]
     for s in services_de_zone(code_zone):
         if s.categorie == type_:
-            return s.nom, s.distance_km, False
-    return None, None, False
+            return s.nom, s.distance_km, False, None
+    return None, None, False, None
 
 
 def lots_proches(entree: LotsProchesEntree, conn: Connection | None = None) -> SortieOutil[LotsProchesDonnees]:
@@ -474,6 +518,7 @@ def lots_proches(entree: LotsProchesEntree, conn: Connection | None = None) -> S
     etapes_ench, _ = etapes_pour([StatutLot.aux_encheres])
     sans_coord, ambigus = 0, 0
     candidats: list[ZoneProche] = []
+    complets: list[Avertissement] = []
     for code, z in zones_idx.items():
         if gouv_id is not None and z["gouv_id"] != gouv_id:
             continue
@@ -481,9 +526,9 @@ def lots_proches(entree: LotsProchesEntree, conn: Connection | None = None) -> S
         n_ench = sum(comptes.get((code, e), 0) for e in etapes_ench)
         if entree.uniquement_avec_lots_disponibles and n_dispo == 0:
             continue
-        eq_nom, eq_dist, ambigu = (None, None, False)
+        eq_nom, eq_dist, ambigu, complement = (None, None, False, None)
         if entree.type is not None:
-            eq_nom, eq_dist, ambigu = _equipement(code, entree.type)
+            eq_nom, eq_dist, ambigu, complement = _equipement(code, entree.type)
         if ref is None:
             if eq_dist is None:
                 ambigus += ambigu
@@ -497,6 +542,8 @@ def lots_proches(entree: LotsProchesEntree, conn: Connection | None = None) -> S
             cle, mode = round(haversine_km(ref, coords), 2), "vol_oiseau_depuis_reference"
         if entree.distance_max_km is not None and cle > entree.distance_max_km:
             continue
+        if complement:
+            complets.append(Avertissement(code=C.valeur_complementaire, zone_id=code, detail=complement))
         candidats.append(ZoneProche(
             zone=zone_resume(z), distance_km=cle, mode_distance=mode,
             equipement_nom=eq_nom, equipement_distance_km=eq_dist,
@@ -511,6 +558,11 @@ def lots_proches(entree: LotsProchesEntree, conn: Connection | None = None) -> S
     avert.append(Avertissement(code=C.donnee_non_fraiche, detail="comptes de lots du dump du 13/11/2026"))
     candidats.sort(key=lambda z: (z.distance_km, z.zone.zone_id))
     total = len(candidats)
+    gardees = {z.zone.zone_id for z in candidats[: entree.limite]}
+    avert += [a for a in complets if a.zone_id in gardees]
+    avert += [Avertissement(code=C.valeur_complementaire, zone_id=z.zone.zone_id, detail="prix")
+              for z in candidats[: entree.limite]
+              if C.valeur_complementaire in prix_zone(z.zone.zone_id)[1]]
     if total > entree.limite:
         avert.append(Avertissement(code=C.resultats_tronques, detail=f"{entree.limite}/{total}"))
     return sortie(candidats[: entree.limite], Coordonnees(lat=ref[0], lon=ref[1]) if ref else None, total)
