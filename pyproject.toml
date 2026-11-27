@@ -10,17 +10,23 @@ dependencies = [
     "sqlalchemy>=2.0.30",
     "psycopg[binary]>=3.2",
     "uvicorn>=0.30",
+    "rdflib>=7.1,<8",          # ontologie (Turtle, SKOS) : BSD-3-Clause
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.2",
     "httpx>=0.27",
+    "pypdf>=5",                # tests : libellés des formulaires comparés au texte des PDF (BSD-3-Clause)
 ]
 # Banc de test des outils avec un LLM (scripts/banc_llm_gemini.py) ; l'agent final est le travail du rôle 1.
 llm-test = [
     "google-genai>=1.30",
 ]
+
+# Seul `backend` est du code Python à installer (migrations/ et ontology/ sont des données).
+[tool.setuptools.packages.find]
+include = ["backend*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

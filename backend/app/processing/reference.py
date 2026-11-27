@@ -11,8 +11,7 @@ from enum import Enum
 
 URL_CARTE_PUBLIQUE = "https://afi.e-industrie.gov.tn/"
 URL_LISTE_LOTS_DISPONIBLES = "https://afi.e-industrie.gov.tn/liste.php"
-# Cité tel quel par les fiches 13 à 26 de chatbot_connaissances (« www.afi.nat.tn/fr/nos-services/ »).
-URL_SERVICES_AFI = "https://www.afi.nat.tn/fr/nos-services/"
+# L'URL source des services vient de la base (assistant.sources), plus du code.
 
 # ---------- Gouvernorats (zones.gouv_id) ----------
 # Source : colonne « Gvt » de liste.php (26/11/2026) pour les zones rattachées à un code_zone.

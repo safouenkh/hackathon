@@ -1,120 +1,231 @@
+"""Outils services AFI (BF22, BF23, BF24, BF11) et guidage pas à pas, sur la base `dalila`.
+
+Les services et parcours sont lus dans le schéma `assistant` (versions publiées). Les valeurs
+attendues viennent des fiches sources (afi-services-markdown) et de la page « Nos services »
+lue le 2026-11-27, pas du code.
+"""
+from pathlib import Path
+
 import pytest
 
 from app.processing.avantages import avantages, brancher_source, SourceIncitationsIndisponible
 from app.processing.demande import preparer_demande
 from app.processing.schemas import (
-    AvantagesEntree, CodeAvertissement as C, DemarcheEntree, Incitation, PreparerDemandeEntree, Projet,
-    ServiceAfiId, ServicesAfiEntree, StatutLot, VarianteAcquisition,
+    AvantagesEntree, CodeAvertissement as C, DemarcheEntree, GuiderServiceEntree, Incitation,
+    PreparerDemandeEntree, Projet, ServicesAfiEntree, StatutLot,
 )
-from app.processing.services import SERVICES, analyser_fiche, demarche, services_afi
+from app.processing.services import demarche, guider_service, services_afi
 from tests.conftest import LOT_ENCHERES_ARIANA, LOT_ORPHELIN, LOT_RAS_EL_MORJ_37
 
 pytestmark = pytest.mark.usefixtures("base_disponible")
+
+CORPUS = Path(__file__).resolve().parents[1] / "afi-services-markdown" / "data" / "documents" / "services"
+URL_NOS_SERVICES = "https://www.afi.nat.tn/fr/nos-services/"
+SERVICES = ["acquisition", "encheres", "situation_fonciere", "insertion_hypotheque", "mainlevee",
+            "acte_precision", "autorisation_vente_leasing", "copie_conforme"]     # cahier §IV.6
 
 
 def codes(sortie):
     return {a.code for a in sortie.avertissements}
 
 
+def tous(elements):
+    for e in elements:
+        yield e
+        yield from tous(e.enfants)
+
+
+def lignes(p):
+    return [e for liste in (p.description, p.pour_qui, p.conditions, p.etapes, p.pieces, p.frais, p.liens,
+                            p.remarques) for e in tous(liste)]
+
+
 # ---------- services_afi ----------
 
-def test_les_8_services():
+def test_les_8_services_viennent_de_la_base():
     r = services_afi(ServicesAfiEntree())
-    assert len(r.donnees.services) == 8 == len(SERVICES)
+    assert [s.id for s in r.donnees.services] == SERVICES
     assert len([b for b in r.balises if b.type == "CHOIX"]) == 8
+    assert r.donnees.services[3].fiches == [19]                       # lien de l'ontologie
 
 
 @pytest.mark.parametrize("besoin, attendu", [
-    ("La banque me demande un papier pour mon prêt", ServiceAfiId.insertion_hypotheque),
-    ("I need a document for my bank loan", ServiceAfiId.insertion_hypotheque),
-    ("البنك طلب مني وثيقة للقرض", ServiceAfiId.insertion_hypotheque),
-    ("n7eb nechri terrain f Sfax", ServiceAfiId.acquisition),
-    ("je veux participer à une enchère", ServiceAfiId.encheres),
-    ("il me faut une copie conforme de mon contrat", ServiceAfiId.copie_conforme),
-    ("ma société de leasing veut vendre le lot", ServiceAfiId.autorisation_vente_leasing),
-    ("comment obtenir la mainlevée", ServiceAfiId.mainlevee),
+    ("La banque me demande un papier pour mon prêt", "insertion_hypotheque"),
+    ("I need a document for my bank loan", "insertion_hypotheque"),
+    ("البنك طلب مني وثيقة للقرض", "insertion_hypotheque"),
+    ("n7eb nechri terrain f Sfax", "acquisition"),
+    ("je veux participer à une enchère", "encheres"),
+    ("il me faut une copie conforme de mon contrat", "copie_conforme"),
+    ("ma société de leasing veut vendre le lot", "autorisation_vente_leasing"),
+    ("comment obtenir la mainlevée", "mainlevee"),
 ])
 def test_orientation_bf22(besoin, attendu):
     r = services_afi(ServicesAfiEntree(besoin=besoin))
-    assert r.donnees.candidats and r.donnees.candidats[0].service.id is attendu
+    assert r.donnees.candidats and r.donnees.candidats[0].service.id == attendu
 
 
 def test_besoin_non_reconnu_donne_les_choix_et_le_contact():
     r = services_afi(ServicesAfiEntree(besoin="mon voisin fait du bruit"))
     assert r.donnees.candidats == [] and C.besoin_non_reconnu in codes(r)
     assert len(r.balises) == 8
-    assert r.donnees.contact_afi.telephone == "+216 71 124 260"
+    assert r.donnees.contact_afi.telephone == "+216 71 124 260"          # fiche 26
 
 
 # ---------- demarche ----------
 
-FRAIS_SOURCES = {                        # montants lus dans les fiches 18 à 23
-    ServiceAfiId.situation_fonciere: 50,
-    ServiceAfiId.insertion_hypotheque: 50,
-    ServiceAfiId.mainlevee: 50,
-    ServiceAfiId.acte_precision: 150,
-    ServiceAfiId.copie_conforme: 15,
-}
+@pytest.mark.parametrize("service", SERVICES)
+def test_chaque_service_a_un_parcours_publie_et_source(service):
+    r = demarche(DemarcheEntree(service=service))
+    assert r.donnees.service.id == service and r.donnees.parcours
+    for p in r.donnees.parcours:
+        assert p.url_source == URL_NOS_SERVICES and p.version >= 1
+        assert p.conditions or p.etapes or p.pieces
+    assert any(x.type == "url" and x.url == URL_NOS_SERVICES for x in r.provenance)
 
 
-@pytest.mark.parametrize("service", list(ServiceAfiId))
-def test_chaque_service_a_une_fiche_sourcee(service):
-    r = demarche(DemarcheEntree(service=service.value))
-    assert r.donnees.service.id is service and r.donnees.fiches
-    for f in r.donnees.fiches:
-        assert f.url_source == "https://www.afi.nat.tn/fr/nos-services/"
-        assert f.pieces or f.etapes or f.conditions
-        # Rien n'est réécrit : chaque élément extrait figure dans le texte de la fiche.
-        for x in f.conditions + f.etapes + [p for g in f.pieces for p in g.pieces] + f.lieu_depot:
-            assert x in f.texte_source.replace("\n", " ") or x in f.texte_source
-        for frais in f.frais:
-            assert frais.texte_source in f.texte_source
+@pytest.mark.skipif(not CORPUS.is_dir(), reason="corpus afi-services-markdown absent")
+@pytest.mark.parametrize("service", SERVICES)
+def test_rien_n_est_reecrit(service):
+    """Chaque ligne non corrigée figure telle quelle dans la fiche source ; chaque correction a sa note."""
+    for p in demarche(DemarcheEntree(service=service)).donnees.parcours:
+        source = (CORPUS / p.code / "fr.md").read_text(encoding="utf-8")
+        for e in lignes(p):
+            if e.corrige:
+                assert e.a_verifier and "Preuve : https://www.afi.nat.tn/" in e.note_verification
+            else:
+                assert e.texte in source, e.texte
 
 
-@pytest.mark.parametrize("service, montant", FRAIS_SOURCES.items())
-def test_frais_exacts_de_la_source(service, montant):
-    r = demarche(DemarcheEntree(service=service.value))
-    montants = [x.montant_dt for f in r.donnees.fiches for x in f.frais if x.montant_dt is not None]
-    assert montants == [montant]
+@pytest.mark.parametrize("service, montants", [            # page « Nos services », 2026-11-27
+    ("situation_fonciere", [(50.0, None)]),
+    ("insertion_hypotheque", [(50.0, None)]),
+    ("mainlevee", [(50.0, None)]),
+    ("acte_precision", [(150.0, None)]),
+    ("copie_conforme", [(15.0, "par copie")]),
+    ("autorisation_vente_leasing", []),
+    ("encheres", []),                                     # seulement des pourcentages
+])
+def test_frais_exacts_de_la_source(service, montants):
+    r = demarche(DemarcheEntree(service=service))
+    assert [(f.montant_dt, f.unite_montant) for p in r.donnees.parcours for f in p.frais] == montants
 
 
-def test_acquisition_deux_variantes_et_lieu_de_depot():
+def test_acquisition_deux_parcours_a_choisir():
     r = demarche(DemarcheEntree(service="acquisition"))
-    assert {f.variante for f in r.donnees.fiches} == set(VarianteAcquisition)
-    assert {b.texte for b in r.balises} == {"[[CHOIX:Zone de développement régional]]",
-                                            "[[CHOIX:Zone littorale ou Grand Tunis]]"}
-    lieux = [l for f in r.donnees.fiches for l in f.lieu_depot]
-    assert any("bureau d'ordre central" in l for l in lieux)
-    assert any("gouvernorat compétent" in l for l in lieux)
-    assert C.frais_non_chiffres in codes(r)         # frais de rédaction / délimitation sans montant
+    assert [p.code for p in r.donnees.parcours] == ["acquisition-developpement-regional",
+                                                    "acquisition-littoral-grand-tunis"]
+    assert C.parcours_a_choisir in codes(r)
+    assert {b.texte for b in r.balises if b.type == "CHOIX"} == {
+        "[[CHOIX:zones de développement régional]]", "[[CHOIX:zones littorales et le grand Tunis]]"}
+    assert {f for p in r.donnees.parcours for f in (x.fiche for x in r.donnees.fiches_afi)} == {13, 14, 15, 16, 17}
 
 
-def test_acquisition_une_variante():
-    r = demarche(DemarcheEntree(service="acquisition", variante="littoral_grand_tunis"))
-    assert [f.fiche for f in r.donnees.fiches] == [15, 16, 17] and r.balises == []
-    etapes = r.donnees.fiches[1].etapes
-    assert len(etapes) == 6 and "30 jours" in etapes[2]
+def test_acquisition_lieu_de_depot_et_frais_non_chiffres():
+    r = demarche(DemarcheEntree(service="acquisition", parcours="acquisition-developpement-regional"))
+    (p,) = r.donnees.parcours
+    assert C.parcours_a_choisir not in codes(r)
+    assert any("bureau d’ordre central" in l for l in p.lieu_depot)
+    assert any("déposée au gouvernorat" in l for l in p.lieu_depot)
+    assert C.lieu_depot_non_precise not in codes(r)
+    assert set(p.frais_sans_montant) >= {"Prix du lot industriel.", "Frais de rédaction du contrat de vente."}
+    assert C.frais_non_chiffres in codes(r)
+    assert [f.code for f in p.formulaires] == ["demande_acquisition"]
+    assert {b.id for b in r.balises if b.type == "PDF"} == {
+        "https://www.afi.nat.tn/wp-content/uploads/2024/04/DEMANDE-dacquisition-FR.pdf",
+        "https://www.afi.nat.tn/wp-content/uploads/2024/05/%D9%85%D8%B7%D9%84%D8%A8-%D8%A5%D9%82%D8%AA%D9%86%D8%A7%D8%A1-%D8%A8%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9.pdf"}
 
 
-def test_lieu_non_precise_signale():
+def test_situation_fonciere_lieu_non_precise_et_formulaire_administratif():
     r = demarche(DemarcheEntree(service="situation_fonciere"))
-    assert C.lieu_depot_non_precise in codes(r)
-    f = r.donnees.fiches[0]
-    assert len(f.etapes) == 6 and len(f.pieces[0].pieces) == 4
+    (p,) = r.donnees.parcours
+    assert p.lieu_depot == [] and C.lieu_depot_non_precise in codes(r)
+    (f,) = p.formulaires
+    assert f.code == "demande_service_administratif" and f.valeurs_imposees == {"document_demande": "1"}
+    assert f.a_verifier and C.point_a_verifier in codes(r)
+
+
+def test_mainlevee_corrigee_d_apres_la_page_arabe():
+    (p,) = demarche(DemarcheEntree(service="mainlevee")).donnees.parcours
+    assert not [e for e in p.etapes if "livres explicatifs" in e.texte]
+    assert len(p.pieces) == 10 and p.pieces[-1].texte.startswith("Reçu de paiement des frais du certificat")
+    assert sum(e.corrige for e in lignes(p)) == 5
+    assert any("GMG" in l for l in p.frais_sans_montant)
+
+
+def test_acte_de_precision_etapes_d_achat_signalees_et_fiche_20():
+    r = demarche(DemarcheEntree(service="acte_precision"))
+    (p,) = r.donnees.parcours
+    assert [e.a_verifier for e in p.etapes] == [True, True, True, True, False]
+    assert p.lieu_depot == []                    # la seule mention (étape 1) est à vérifier : écartée
+    assert [f.fiche for f in r.donnees.fiches_afi] == [20]
 
 
 def test_service_hors_liste_bf24():
     r = demarche(DemarcheEntree(service="permis de construire"))
-    assert r.donnees.service is None and r.donnees.fiches == []
-    assert C.service_non_couvert in codes(r)
+    assert r.donnees.service is None and r.donnees.parcours == []
+    assert C.service_non_couvert in codes(r) and len(r.balises) == 8
     c = r.donnees.contact_afi
     assert c.telephone == "+216 71 124 260" and c.site == "www.afi.nat.tn"
     assert c.adresse == "9 et 13 rue Chott Mariem, Montplaisir, 1002 Tunis Belvédère"
 
 
-def test_analyse_fiche_format_inattendu():
-    fiche, cs = analyser_fiche(999, "Q ?", "Texte libre sans section.", None)
-    assert C.extraction_partielle in cs and fiche.description == ["Texte libre sans section."]
+def test_parcours_inconnu():
+    r = demarche(DemarcheEntree(service="mainlevee", parcours="n-existe-pas"))
+    assert r.donnees.parcours == [] and C.parcours_inconnu in codes(r)
+
+
+# ---------- guider_service ----------
+
+def _guide_complet(parcours):
+    points, position = [], 0
+    while position is not None:
+        r = guider_service(GuiderServiceEntree(parcours=parcours, position=position))
+        points.append(r)
+        position = r.donnees.suivant
+    return points
+
+
+def test_guide_mainlevee_point_par_point():
+    pts = _guide_complet("main-levee")
+    d0 = pts[0].donnees
+    assert d0.total == len(pts) and d0.precedent is None and d0.url_source == URL_NOS_SERVICES
+    assert sum(e.nombre for e in d0.plan) == d0.total
+    assert [e.rubrique for e in d0.plan] == ["piece", "formulaire", "etape", "frais", "lieu_depot"]
+    # chaque ligne racine de la fiche est montrée une fois, sauf les liens (repris par le formulaire)
+    (p,) = demarche(DemarcheEntree(service="mainlevee")).donnees.parcours
+    attendus = [e.id for e in p.pieces + p.etapes + p.frais]
+    vus = [r.donnees.point.element.id for r in pts if r.donnees.point.element]
+    assert sorted(vus) == sorted(attendus)
+    dernier = pts[-1]
+    assert dernier.donnees.point.rubrique == "lieu_depot" and dernier.donnees.point.lieu_depot == []
+    assert dernier.donnees.point.contact_afi.telephone == "+216 71 124 260"
+    assert C.lieu_depot_non_precise in codes(dernier)
+    formulaire = next(r for r in pts if r.donnees.point.rubrique == "formulaire")
+    assert formulaire.donnees.point.formulaire.valeurs_imposees == {"document_demande": "3"}
+    assert [b.type for b in formulaire.balises] == ["PDF"]
+    recu = next(r for r in pts if r.donnees.point.element and r.donnees.point.element.texte.startswith("Reçu"))
+    assert C.point_a_verifier in codes(recu)
+
+
+def test_guide_acte_de_precision_commence_par_la_fiche_20():
+    r = guider_service(GuiderServiceEntree(parcours="acte-precision-contrats-finaux"))
+    assert r.donnees.point.rubrique == "presentation"
+    assert [f.fiche for f in r.donnees.point.fiches_afi] == [20]
+    assert r.donnees.suivant == 1
+
+
+def test_guide_acquisition_lieu_de_depot_donne():
+    dernier = _guide_complet("acquisition-littoral-grand-tunis")[-1]
+    assert dernier.donnees.point.lieu_depot and dernier.donnees.point.contact_afi is None
+    assert C.lieu_depot_non_precise not in codes(dernier)
+
+
+def test_guide_hors_limites_et_parcours_inconnu():
+    r = guider_service(GuiderServiceEntree(parcours="copie-conforme", position=400))
+    assert r.donnees.point is None and C.position_hors_parcours in codes(r)
+    assert r.donnees.precedent == r.donnees.total - 1
+    r = guider_service(GuiderServiceEntree(parcours="inconnu"))
+    assert r.donnees.point is None and C.parcours_inconnu in codes(r) and r.donnees.total == 0
 
 
 # ---------- avantages ----------
@@ -148,7 +259,7 @@ def test_avantages_ecarte_une_incitation_sans_source():
 
 def test_preparer_demande_nominal():
     r = preparer_demande(PreparerDemandeEntree(
-        lot_ids=[LOT_RAS_EL_MORJ_37], variante="littoral_grand_tunis",
+        service="acquisition", parcours="acquisition-littoral-grand-tunis", lot_ids=[LOT_RAS_EL_MORJ_37],
         projet=Projet(activite="textile", nombre_emplois=40, gouvernorat="monastir")))
     d = r.donnees
     assert d.depot_effectue is False and d.confirmation_requise is True
@@ -156,12 +267,14 @@ def test_preparer_demande_nominal():
     assert d.surface_totale_m2 == 3122 and d.prix_total_indicatif_dt == 3122 * 70
     assert d.projet.gouvernorat == "Monastir"
     assert set(d.informations_projet_manquantes) == {"investissement_dt", "surface_souhaitee_m2"}
-    assert d.pieces_a_preparer and d.lieu_depot
-    assert {l.url for l in d.liens} == {"https://www.afi.nat.tn/fr/nos-services/", "https://afi.e-industrie.gov.tn/"}
+    assert d.parcours == ["acquisition-littoral-grand-tunis"]
+    assert d.pieces_a_preparer and d.lieu_depot and [f.code for f in d.formulaires] == ["demande_acquisition"]
+    assert {l.url for l in d.liens} == {URL_NOS_SERVICES, "https://afi.e-industrie.gov.tn/"}
 
 
 def test_preparer_demande_lot_aux_encheres_et_orphelin():
-    r = preparer_demande(PreparerDemandeEntree(lot_ids=[LOT_ENCHERES_ARIANA, LOT_ORPHELIN, 99_999_999]))
+    r = preparer_demande(PreparerDemandeEntree(service="acquisition",
+                                               lot_ids=[LOT_ENCHERES_ARIANA, LOT_ORPHELIN, 99_999_999]))
     d = r.donnees
     assert [l.statut for l in d.lots][0] is StatutLot.aux_encheres
     assert any(a.code is C.lot_non_disponible and a.lot_id == LOT_ENCHERES_ARIANA for a in r.avertissements)
@@ -172,4 +285,4 @@ def test_preparer_demande_lot_aux_encheres_et_orphelin():
 
 def test_preparer_demande_refuse_les_donnees_personnelles():
     with pytest.raises(ValueError):
-        PreparerDemandeEntree.model_validate({"projet": {"nom": "X", "cin": "01234567"}})
+        PreparerDemandeEntree.model_validate({"service": "acquisition", "projet": {"nom": "X", "cin": "01234567"}})

@@ -15,9 +15,16 @@ class Settings(BaseSettings):
     postgres_admin_password: SecretStr = SecretStr("")
     postgres_ro_user: str = "dalila_ro"
     postgres_ro_password: SecretStr = SecretStr("")
+    # Compte d'écriture : ajoute seulement les demandes envoyées et les besoins non couverts
+    postgres_rw_user: str = "dalila_rw"
+    postgres_rw_password: SecretStr = SecretStr("")
     afi_dump_path: str = "Chatbot Dalila/Dalila use case 1/afi.sql"
     # URL publique de base des fichiers zone_documents.fichier (inconnue au 26/11/2026 : vide = pas de lien)
     afi_documents_base_url: str = ""
+    # Adresse publique du front (pages formulaire) ; vide = liens relatifs « /formulaire/... »
+    frontend_base_url: str = ""
+    # Ontologie (Turtle) : vide = ontology/afi_ontology.ttl du dépôt
+    ontologie_path: str = ""
     # Banc de test LLM (scripts/banc_llm_gemini.py) : clé jamais affichée ni committée
     gemini_api_key: SecretStr = SecretStr("")
     gemini_model: str = "gemini-flash-latest"

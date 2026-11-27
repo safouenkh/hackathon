@@ -1,8 +1,14 @@
-"""Outils services AFI : services_afi (orientation, BF22) et demarche (fiche de service, BF23/BF24).
+"""Outils services AFI : services_afi (orientation, BF22), demarche (fiche, BF23/BF24) et
+guider_service (un point à la fois).
 
-Le contenu vient uniquement de `afi.chatbot_connaissances` (réponses validées par l'AFI) :
-les sections (conditions, étapes, pièces, frais) sont extraites du texte des fiches, sans réécriture.
-Un service hors liste renvoie au contact AFI (fiche 26), jamais à une démarche inventée.
+Sources, sans rien réécrire :
+- versions PUBLIÉES du schéma `assistant` (fiches de la page « Nos services », relues et
+  publiées ; corrections sourcées marquées « à vérifier ») : la référence ;
+- fiches validées de `afi.chatbot_connaissances` : compléments (explications, contact) ;
+- ontologie (ontology/afi_ontology.ttl) : synonymes, liens vers les fiches, vocabulaire du
+  lieu de dépôt et des frais.
+Aucun service, synonyme ou numéro de fiche n'est écrit ici. Un service hors liste, ou un lieu
+de dépôt absent des sources, renvoie au contact de l'AFI, jamais à une démarche inventée.
 """
 from __future__ import annotations
 
@@ -11,168 +17,48 @@ import re
 from sqlalchemy import Connection
 
 from app.processing.lots import _connexion
-from app.processing.reference import URL_SERVICES_AFI, normaliser
+from app.processing.reference import normaliser
 from app.processing.schemas import (
     Avertissement, Balise, CodeAvertissement as C, ContactAfi, DemarcheDonnees, DemarcheEntree,
-    FicheDemarche, Frais, GroupePieces, Provenance, ServiceAfi, ServiceAfiId, ServiceCandidat,
-    ServicesAfiDonnees, ServicesAfiEntree, SortieOutil, VarianteAcquisition,
+    ElementDemarche, EtapePlan, FicheAfi, FormulaireService, GuiderServiceDonnees, GuiderServiceEntree,
+    ParcoursDemarche, PointGuide, Provenance, ServiceAfi, ServiceCandidat, ServicesAfiDonnees,
+    ServicesAfiEntree, SortieOutil, VarianteFormulaire,
 )
 from app.repositories import afi as repo
+from app.repositories import assistant as repo_assistant
+from app.semantique.ontologie import Ontologie, ontologie
+from app.sources.fiche_service import _MONTANT
 
-FICHE_CONTACT = 26
+TABLE_CONNAISSANCES = "afi.chatbot_connaissances"
+TABLE_VERSIONS = "assistant.parcours_versions"
 
-# Les 8 services du cahier des charges §IV.6 (nom, besoin, fiches existantes).
-# Fiche 12 écartée : ancienne version du contenu repris par les fiches 13 et 14.
-SERVICES: dict[ServiceAfiId, ServiceAfi] = {s.id: s for s in [
-    ServiceAfi(id=ServiceAfiId.acquisition, nom="Acquisition d'un lot", besoin="Acheter un lot industriel",
-               fiches=[13, 14, 15, 16, 17]),
-    ServiceAfi(id=ServiceAfiId.encheres, nom="Vente aux enchères", besoin="Participer à une vente publique",
-               fiches=[24, 25]),
-    ServiceAfi(id=ServiceAfiId.situation_fonciere, nom="Attestation de situation foncière",
-               besoin="Connaître la situation d'un lot", fiches=[18]),
-    ServiceAfi(id=ServiceAfiId.insertion_hypotheque, nom="Attestation d'insertion d'hypothèque",
-               besoin="Obtenir un prêt bancaire", fiches=[19]),
-    ServiceAfi(id=ServiceAfiId.mainlevee, nom="Attestation de mainlevée",
-               besoin="Obtenir la mainlevée sur son terrain", fiches=[23]),
-    ServiceAfi(id=ServiceAfiId.acte_precision, nom="Acte de précision ou contrat final",
-               besoin="Isoler le lot comme propriété distincte", fiches=[20]),
-    ServiceAfi(id=ServiceAfiId.autorisation_vente_leasing, nom="Autorisation de vente",
-               besoin="Vente d'un lot par une société de leasing", fiches=[21]),
-    ServiceAfi(id=ServiceAfiId.copie_conforme, nom="Copie conforme",
-               besoin="Obtenir une copie du contrat ou de l'acte", fiches=[22]),
-]}
-
-VARIANTES_ACQUISITION: dict[VarianteAcquisition, list[int]] = {
-    VarianteAcquisition.developpement_regional: [13, 14],
-    VarianteAcquisition.littoral_grand_tunis: [15, 16, 17],
-}
-
-# Mots-clés d'orientation (complètent `mots_cles` des fiches). Filet de sécurité multilingue :
-# la compréhension fine (dialectes, arabizi) relève des rôles 2 et 4.
-MOTS_CLES_SUPPLEMENTAIRES: dict[ServiceAfiId, list[str]] = {
-    ServiceAfiId.acquisition: ["acheter", "achat", "acquerir", "acquisition", "terrain", "lot", "reserver",
-                               "buy", "plot", "land", "kaufen", "grundstuck", "arsa", "satin al",
-                               "شراء", "ارض", "أرض", "قطعة", "n7eb terrain", "nechri", "9at3a"],
-    ServiceAfiId.encheres: ["enchere", "encheres", "adjudication", "vente publique", "auction",
-                            "versteigerung", "ihale", "مزاد", "بتة", "betta"],
-    ServiceAfiId.situation_fonciere: ["situation fonciere", "situation du lot", "situation juridique",
-                                      "land status", "وضعية عقارية", "شهادة في الوضعية"],
-    ServiceAfiId.insertion_hypotheque: ["hypotheque", "pret", "banque", "credit", "bank", "loan", "mortgage",
-                                        "kredi", "ipotek", "hypothek", "رهن", "قرض", "بنك", "karedi", "credi"],
-    ServiceAfiId.mainlevee: ["mainlevee", "main levee", "lever l hypotheque", "radiation", "release",
-                             "رفع الرهن", "رفع اليد"],
-    ServiceAfiId.acte_precision: ["acte de precision", "contrat final", "acte definitif", "titre foncier",
-                                  "propriete distincte", "final contract", "title deed", "عقد نهائي",
-                                  "رسم عقاري"],
-    ServiceAfiId.autorisation_vente_leasing: ["leasing", "credit bail", "autorisation de vente", "revendre",
-                                              "ليزينغ", "إيجار مالي", "ترخيص في البيع"],
-    ServiceAfiId.copie_conforme: ["copie conforme", "copie", "duplicata", "copy", "kopie", "kopya",
-                                  "نسخة مطابقة", "نسخة"],
-}
-
-# ---------- Extraction des sections d'une fiche ----------
-
-_LABEL_RE = re.compile(
-    r"(?im)^(?:[^\n:]*?—\s*)?(conditions|étapes|déroulement|documents requis)\b[^:\n]*:[ \t]*")
-_PHASE_RE = re.compile(r"(?m)^\s*(I{1,3}|IV)\.\s*([^:\n]+?)\s*:\s*(.*)$")
-_NUM_RE = re.compile(r"(?:^|\s)(\d{1,2})\)\s*")
-_SOURCE_RE = re.compile(r"\(Source[^)]*?(www\.[^\s)]+)[^)]*\)", re.I)
-_FRAIS_RE = re.compile(r"frais\s*:\s*(\d+)\s*DT([^.\n]*)", re.I)
+# ---------- Contact et services ----------
 
 
-def _items(texte: str) -> list[str]:
-    """Découpe une section en éléments : listes numérotées « 1) », sinon séparateur « ; »."""
-    texte = texte.strip()
-    if _NUM_RE.search(texte):
-        morceaux = _NUM_RE.split(texte)
-        items = [morceaux[i + 1] for i in range(1, len(morceaux) - 1, 2)]
-    else:
-        items = texte.split(";")
-    return [i.strip().rstrip(";").rstrip(".").strip() for i in items if i.strip().rstrip(".;").strip()]
-
-
-def analyser_fiche(fiche_id: int, question: str, reponse: str,
-                   variante: VarianteAcquisition | None) -> tuple[FicheDemarche, list[C]]:
-    codes: list[C] = []
-    m_src = _SOURCE_RE.search(reponse)
-    url = None
-    if m_src:
-        url = URL_SERVICES_AFI if "nos-services" in m_src.group(1) else "https://" + m_src.group(1).rstrip("/.")
-    corps = _SOURCE_RE.sub("", reponse).strip()
-
-    labels = list(_LABEL_RE.finditer(corps))
-    entete = corps[: labels[0].start()] if labels else corps
-    lignes_entete = [l.strip() for l in entete.splitlines() if l.strip()]
-    description = list(lignes_entete)
-
-    conditions, etapes, pieces = [], [], []
-    for i, m in enumerate(labels):
-        fin = labels[i + 1].start() if i + 1 < len(labels) else len(corps)
-        bloc = corps[m.end():fin].strip()
-        label = m.group(1).lower()
-        if label == "documents requis":
-            phases = list(_PHASE_RE.finditer(bloc))
-            if phases:
-                pieces += [GroupePieces(phase=p.group(2).strip(), pieces=_items(p.group(3))) for p in phases]
-            else:
-                pieces.append(GroupePieces(phase=None, pieces=_items(bloc)))
-        elif label == "conditions":
-            lignes = bloc.splitlines()
-            conditions += _items(" ".join(lignes) if not _NUM_RE.search(bloc) else bloc.replace("\n", " "))
-        else:  # étapes, déroulement
-            # Une phrase après la dernière étape (ex. délai de 3 ans) est gardée en description.
-            if _NUM_RE.search(bloc) and "\n" in bloc:
-                lignes = [l.strip() for l in bloc.splitlines() if l.strip()]
-                num = [l for l in lignes if re.match(r"\d{1,2}\)", l)]
-                description += [l for l in lignes if not re.match(r"\d{1,2}\)", l)]
-                etapes += _items(" ".join(num))
-            else:
-                etapes += _items(bloc)
-
-    frais: list[Frais] = []
-    m_frais = _FRAIS_RE.search(lignes_entete[0] if lignes_entete else "")
-    if m_frais:
-        complement = m_frais.group(2).strip()
-        frais.append(Frais(libelle="frais du service" + (f" ({complement})" if complement else ""),
-                           montant_dt=int(m_frais.group(1)), texte_source=m_frais.group(0).strip()))
-    for groupe in pieces:
-        for p in groupe.pieces:
-            if re.match(r"(?i)(frais|prix du lot|paiement des frais)", p):
-                frais.append(Frais(libelle=p, montant_dt=None, texte_source=p))
-    if any(f.montant_dt is None for f in frais):
-        codes.append(C.frais_non_chiffres)
-
-    # « Dépôt », « dépose », « déposé » : phrases de la source qui disent où déposer.
-    lieu = [x for x in conditions + etapes if re.search(r"(?i)\bd[ée]p[oô][st]", x)]
-    if not (conditions or etapes or pieces):
-        codes.append(C.extraction_partielle)
-    return FicheDemarche(
-        fiche=fiche_id, titre=question.strip(), variante=variante, description=description,
-        conditions=conditions, etapes=etapes, pieces=pieces, frais=frais, lieu_depot=lieu,
-        texte_source=reponse, url_source=url,
-    ), codes
-
-
-def _contact(c: Connection) -> ContactAfi:
-    fiche = repo.connaissances(c, [FICHE_CONTACT]).get(FICHE_CONTACT)
+def _contact(c: Connection, onto: Ontologie) -> ContactAfi:
+    fid = onto.fiche_contact
+    fiche = repo.connaissances(c, [fid]).get(fid) if fid is not None else None
     texte = fiche["reponse"] if fiche else ""
     adresse = re.search(r"Siège de l'Agence Foncière Industrielle\s*:\s*([^.]+)\.", texte)
     tel = re.search(r"téléphone\s*(\+?[\d ]{8,})", texte)
     site = re.search(r"\b(www\.[a-z0-9.-]+\.[a-z]{2,})\b", texte)
     return ContactAfi(adresse=adresse.group(1).strip() if adresse else None,
                       telephone=tel.group(1).strip() if tel else None,
-                      site=site.group(1) if site else None, fiche=FICHE_CONTACT)
+                      site=site.group(1) if site else None, fiche=fid if fiche else None)
+
+
+def services_par_code(c: Connection, onto: Ontologie) -> dict[str, ServiceAfi]:
+    return {s["code"]: ServiceAfi(id=s["code"], nom=s["nom"], besoin=s["besoin"],
+                                  fiches=list(onto.service(s["code"]).fiches))
+            for s in repo_assistant.services(c)}
+
+
+def _provenance_fiches(ids: list[int | None]) -> list[Provenance]:
+    ids = sorted({i for i in ids if i is not None})
+    return [Provenance(type="sql", table=TABLE_CONNAISSANCES, ids=[str(i) for i in ids])] if ids else []
 
 
 # ---------- services_afi ----------
-
-def _mots_cles(service: ServiceAfi, fiches: dict[int, dict]) -> list[str]:
-    mots = list(MOTS_CLES_SUPPLEMENTAIRES[service.id])
-    for fid in service.fiches:
-        mots += [m for m in (fiches.get(fid, {}).get("mots_cles") or "").split(",") if m.strip()]
-    vus = dict.fromkeys(normaliser(m) for m in mots)
-    return [m for m in vus if m]
-
 
 _ARABE = re.compile(r"[؀-ۿ]")
 # Proclitiques arabes collés au mot (و ف ب ل ك + article ال / لل) : « البنك », « للقرض ».
@@ -180,85 +66,266 @@ _PREFIXES_AR = r"(?:[وفبلك])?(?:ال|لل)?"
 
 
 def _present(mot: str, texte: str) -> bool:
+    """`mot` et `texte` sont normalisés ; le mot doit être entier."""
     prefixe = _PREFIXES_AR if _ARABE.search(mot) else ""
     return re.search(rf"(?<!\w){prefixe}{re.escape(mot)}(?!\w)", texte) is not None
 
 
+def _mots_cles(service: ServiceAfi, onto: Ontologie, fiches: dict[int, dict]) -> list[str]:
+    mots = [service.nom, *onto.service(service.id).synonymes]
+    for fid in service.fiches:
+        mots += [m for m in (fiches.get(fid, {}).get("mots_cles") or "").split(",") if m.strip()]
+    vus = dict.fromkeys(normaliser(m) for m in mots)
+    return [m for m in vus if m]
+
+
 def services_afi(entree: ServicesAfiEntree, conn: Connection | None = None) -> SortieOutil[ServicesAfiDonnees]:
-    tous = [fid for s in SERVICES.values() for fid in s.fiches]
+    onto = ontologie()
     with _connexion(conn) as c:
-        fiches = repo.connaissances(c, tous)
-        contact = _contact(c)
+        services = services_par_code(c, onto)
+        fiches = repo.connaissances(c, sorted({f for s in services.values() for f in s.fiches}))
+        contact = _contact(c, onto)
     avert: list[Avertissement] = []
     candidats: list[ServiceCandidat] = []
     if entree.besoin:
         texte = normaliser(entree.besoin)
-        for s in SERVICES.values():
-            reconnus = [m for m in _mots_cles(s, fiches) if _present(m, texte)]
+        for s in services.values():
+            reconnus = [m for m in _mots_cles(s, onto, fiches) if _present(m, texte)]
             if reconnus:
                 # Un mot-clé long ou composé (« leasing », « copie conforme ») pèse plus qu'un mot
                 # générique (« lot ») : score = nombre total de caractères reconnus.
-                score = sum(len(m) for m in reconnus)
-                candidats.append(ServiceCandidat(service=s, score=score, mots_cles_reconnus=reconnus))
-        candidats.sort(key=lambda x: (-x.score, list(SERVICES).index(x.service.id)))
+                candidats.append(ServiceCandidat(service=s, score=sum(len(m) for m in reconnus),
+                                                 mots_cles_reconnus=reconnus))
+        ordre = list(services)
+        candidats.sort(key=lambda x: (-x.score, ordre.index(x.service.id)))
         if not candidats:
             avert.append(Avertissement(code=C.besoin_non_reconnu))
-    choix = [x.service for x in candidats] or list(SERVICES.values())
+    choix = [x.service for x in candidats] or list(services.values())
     return SortieOutil[ServicesAfiDonnees](
         outil="services_afi",
-        donnees=ServicesAfiDonnees(services=list(SERVICES.values()), candidats=candidats, contact_afi=contact),
-        provenance=[Provenance(type="sql", table="afi.chatbot_connaissances",
-                               ids=[str(i) for i in sorted(set(tous) | {FICHE_CONTACT})]),
-                    Provenance(type="document", url=None, table=None,
-                               ids=["cahier des charges §IV.6"])],
+        donnees=ServicesAfiDonnees(services=list(services.values()), candidats=candidats, contact_afi=contact),
+        provenance=[Provenance(type="sql", table="assistant.services", ids=list(services))]
+                   + _provenance_fiches(list(fiches) + [contact.fiche]),
         avertissements=avert,
         balises=[Balise(type="CHOIX", libelle=s.nom) for s in choix],
     )
 
 
+# ---------- Construction des parcours publiés ----------
+
+_LISTES = {"description": "description", "pour_qui": "pour_qui", "condition": "conditions", "etape": "etapes",
+           "piece": "pieces", "frais": "frais", "lien": "liens", "remarque": "remarques"}
+
+
+def _arbres(lignes: list[dict]) -> dict[int, list[ElementDemarche]]:
+    """Racines par version, avec leurs sous-éléments, dans l'ordre du document."""
+    noeuds: dict[int, ElementDemarche] = {}
+    racines: dict[int, list[ElementDemarche]] = {}
+    for l in lignes:
+        e = ElementDemarche(
+            id=l["id"], type=l["type"], groupe=l["groupe"], ordre=l["ordre"], texte=l["texte"], url=l["url"],
+            montant_dt=float(l["montant_dt"]) if l["montant_dt"] is not None else None,
+            unite_montant=l["unite_montant"], a_verifier=l["a_verifier"],
+            note_verification=l["note_verification"], corrige=l["modifie_par_admin"])
+        noeuds[l["id"]] = e
+        if l["parent_id"] is None:
+            racines.setdefault(l["version_id"], []).append(e)
+        else:
+            noeuds[l["parent_id"]].enfants.append(e)
+    return racines
+
+
+def _tous(elements: list[ElementDemarche]):
+    for e in elements:
+        yield e
+        yield from _tous(e.enfants)
+
+
+def _contient(texte: str, libelles: tuple[str, ...]) -> bool:
+    t = normaliser(texte)
+    return any(_present(l, t) for l in libelles)
+
+
+def _lieu_depot(racines: list[ElementDemarche], onto: Ontologie) -> list[str]:
+    """Phrases qui disent où déposer ; une ligne « à vérifier » n'est jamais donnée comme lieu."""
+    return [e.texte for e in _tous([r for r in racines if r.type not in ("frais", "lien")])
+            if not e.a_verifier and _contient(e.texte, onto.lieu_depot)]
+
+
+def _chiffre(e: ElementDemarche) -> bool:
+    return any(_MONTANT.search(x.texte) for x in _tous([e]))
+
+
+def _frais_sans_montant(racines: list[ElementDemarche], onto: Ontologie) -> list[str]:
+    return [e.texte for e in _tous([r for r in racines if r.type not in ("frais", "lien")])
+            if _contient(e.texte, onto.frais) and not _chiffre(e)]
+
+
+def _formulaires(lignes: list[dict]) -> dict[int, list[FormulaireService]]:
+    par_parcours: dict[int, dict[str, FormulaireService]] = {}
+    for l in lignes:
+        f = par_parcours.setdefault(l["parcours_id"], {}).setdefault(l["code"], FormulaireService(
+            code=l["code"], titre=l["titre"], valeurs_imposees=l["valeurs_imposees"] or {},
+            a_verifier=l["a_verifier"], note_verification=l["note_verification"], variantes=[]))
+        if l["langue"]:
+            f.variantes.append(VarianteFormulaire(langue=l["langue"], titre_officiel=l["titre_officiel"],
+                                                  url_page=l["url_page"], url_fichier=l["url_fichier"]))
+    return {pid: list(fs.values()) for pid, fs in par_parcours.items()}
+
+
+def _parcours(c: Connection, onto: Ontologie, service: str | None = None,
+              parcours: str | None = None) -> tuple[list[ParcoursDemarche], list[dict]]:
+    lignes = repo_assistant.parcours_publies(c, service, parcours)
+    if not lignes:
+        return [], []
+    racines = _arbres(repo_assistant.elements(c, [l["version_id"] for l in lignes]))
+    formulaires = _formulaires(repo_assistant.formulaires(c, [l["id"] for l in lignes]))
+    resultat = []
+    for l in lignes:
+        r = racines.get(l["version_id"], [])
+        listes = {nom: [e for e in r if e.type == t] for t, nom in _LISTES.items()}
+        resultat.append(ParcoursDemarche(
+            code=l["code"], titre=l["titre"], critere_choix=l["critere_choix"], version=l["numero"],
+            publie_le=l["publie_le"], url_source=l["url_source"], date_collecte=l["date_collecte"],
+            lieu_depot=_lieu_depot(r, onto), frais_sans_montant=_frais_sans_montant(r, onto),
+            formulaires=formulaires.get(l["id"], []), **listes))
+    return resultat, lignes
+
+
+def _fiches_afi(c: Connection, ids: tuple[int, ...] | list[int]) -> list[FicheAfi]:
+    fiches = repo.connaissances(c, list(ids)) if ids else {}
+    return [FicheAfi(fiche=i, question=fiches[i]["question"].strip(), reponse=fiches[i]["reponse"])
+            for i in ids if i in fiches and fiches[i]["actif"]]
+
+
+def _a_verifier(p: ParcoursDemarche) -> bool:
+    return any(e.a_verifier for e in _tous(sum((p.description, p.pour_qui, p.conditions, p.etapes, p.pieces,
+                                                p.frais, p.liens, p.remarques), []))) \
+        or any(f.a_verifier for f in p.formulaires)
+
+
+def _balises_pdf(formulaires: list[FormulaireService]) -> list[Balise]:
+    return [Balise(type="PDF", id=v.url_fichier, libelle=f"{v.titre_officiel} ({v.langue})")
+            for f in formulaires for v in f.variantes if v.url_fichier]
+
+
+def _provenance_parcours(lignes: list[dict]) -> list[Provenance]:
+    prov = [Provenance(type="sql", table=TABLE_VERSIONS, ids=[str(l["version_id"]) for l in lignes])]
+    urls = {(l["url_source"], l["date_collecte"]) for l in lignes if l["url_source"]}
+    return prov + [Provenance(type="url", url=u, date_donnees=d) for u, d in sorted(urls, key=str)]
+
+
 # ---------- demarche ----------
 
 def demarche(entree: DemarcheEntree, conn: Connection | None = None) -> SortieOutil[DemarcheDonnees]:
-    try:
-        sid = ServiceAfiId(entree.service)
-    except ValueError:
-        sid = None
+    onto = ontologie()
     with _connexion(conn) as c:
-        contact = _contact(c)
-        if sid is None:
+        contact = _contact(c, onto)
+        services = services_par_code(c, onto)
+        service = services.get(entree.service)
+        if service is None:
             return SortieOutil[DemarcheDonnees](
-                outil="demarche", donnees=DemarcheDonnees(service=None, fiches=[], contact_afi=contact),
-                provenance=[Provenance(type="sql", table="afi.chatbot_connaissances", ids=[str(FICHE_CONTACT)])],
+                outil="demarche",
+                donnees=DemarcheDonnees(service=None, parcours=[], fiches_afi=[], contact_afi=contact),
+                provenance=[Provenance(type="sql", table="assistant.services", ids=list(services))]
+                           + _provenance_fiches([contact.fiche]),
                 avertissements=[Avertissement(code=C.service_non_couvert, detail=entree.service)],
-                balises=[Balise(type="CHOIX", libelle=s.nom) for s in SERVICES.values()])
-        service = SERVICES[sid]
-        if sid is ServiceAfiId.acquisition:
-            variantes = [entree.variante] if entree.variante else list(VARIANTES_ACQUISITION)
-            plan = [(fid, v) for v in variantes for fid in VARIANTES_ACQUISITION[v]]
-        else:
-            plan = [(fid, None) for fid in service.fiches]
-        fiches_brutes = repo.connaissances(c, [fid for fid, _ in plan])
+                balises=[Balise(type="CHOIX", libelle=s.nom) for s in services.values()])
+        parcours, lignes = _parcours(c, onto, service.id, entree.parcours)
+        fiches = _fiches_afi(c, service.fiches)
 
-    fiches, codes = [], []
-    for fid, var in plan:
-        f = fiches_brutes.get(fid)
-        if f is None or not f["actif"]:
-            codes.append(C.extraction_partielle)
-            continue
-        fiche, cs = analyser_fiche(fid, f["question"], f["reponse"], var)
-        fiches.append(fiche)
-        codes += cs
-    if not any(f.lieu_depot for f in fiches):
-        codes.append(C.lieu_depot_non_precise)
-    avert = [Avertissement(code=x) for x in dict.fromkeys(codes)]
-    balises = []
-    if sid is ServiceAfiId.acquisition and entree.variante is None:
-        balises = [Balise(type="CHOIX", libelle="Zone de développement régional"),
-                   Balise(type="CHOIX", libelle="Zone littorale ou Grand Tunis")]
-    urls = sorted({f.url_source for f in fiches if f.url_source})
+    avert: list[Avertissement] = []
+    balises: list[Balise] = []
+    if not parcours:
+        avert.append(Avertissement(code=C.parcours_inconnu if entree.parcours else C.demarche_non_publiee,
+                                   detail=entree.parcours or service.id))
+    elif len(parcours) > 1:
+        avert.append(Avertissement(code=C.parcours_a_choisir, detail=service.id))
+        balises += [Balise(type="CHOIX", libelle=p.critere_choix or p.titre) for p in parcours]
+    for p in parcours:
+        if not p.lieu_depot:
+            avert.append(Avertissement(code=C.lieu_depot_non_precise, detail=p.code))
+        if p.frais_sans_montant:
+            avert.append(Avertissement(code=C.frais_non_chiffres, detail=p.code))
+        if _a_verifier(p):
+            avert.append(Avertissement(code=C.point_a_verifier, detail=p.code))
+    balises += _balises_pdf([f for p in parcours for f in p.formulaires])
     return SortieOutil[DemarcheDonnees](
-        outil="demarche", donnees=DemarcheDonnees(service=service, fiches=fiches, contact_afi=contact),
-        provenance=[Provenance(type="sql", table="afi.chatbot_connaissances",
-                               ids=[str(f.fiche) for f in fiches] + [str(FICHE_CONTACT)])]
-                   + [Provenance(type="url", url=u) for u in urls],
+        outil="demarche",
+        donnees=DemarcheDonnees(service=service, parcours=parcours, fiches_afi=fiches, contact_afi=contact),
+        provenance=_provenance_parcours(lignes) + _provenance_fiches([f.fiche for f in fiches] + [contact.fiche]),
+        avertissements=avert, balises=list({b.texte: b for b in balises}.values()))
+
+
+# ---------- guider_service ----------
+
+def _points(p: ParcoursDemarche, presentation: list[FicheAfi], contact: ContactAfi) -> list[PointGuide]:
+    """Ordre du guidage : présentation, conditions, pièces, formulaire, étapes, frais, lieu de dépôt."""
+    pts = [PointGuide(rubrique="presentation", fiches_afi=presentation)] if presentation else []
+    for rubrique, liste in (("description", p.description), ("pour_qui", p.pour_qui),
+                            ("condition", p.conditions), ("piece", p.pieces)):
+        pts += [PointGuide(rubrique=rubrique, groupe=e.groupe, element=e) for e in liste]
+    pts += [PointGuide(rubrique="formulaire", formulaire=f) for f in p.formulaires]
+    for rubrique, liste in (("etape", p.etapes), ("frais", p.frais), ("remarque", p.remarques)):
+        pts += [PointGuide(rubrique=rubrique, groupe=e.groupe, element=e) for e in liste]
+    pts.append(PointGuide(rubrique="lieu_depot", lieu_depot=p.lieu_depot,
+                          contact_afi=None if p.lieu_depot else contact))
+    return pts
+
+
+def _plan(points: list[PointGuide]) -> list[EtapePlan]:
+    plan: list[EtapePlan] = []
+    for i, pt in enumerate(points):
+        if plan and plan[-1].rubrique == pt.rubrique:
+            plan[-1].nombre += 1
+        else:
+            plan.append(EtapePlan(rubrique=pt.rubrique, debut=i, nombre=1))
+    return plan
+
+
+def guider_service(entree: GuiderServiceEntree, conn: Connection | None = None) -> SortieOutil[GuiderServiceDonnees]:
+    onto = ontologie()
+    with _connexion(conn) as c:
+        contact = _contact(c, onto)
+        parcours, lignes = _parcours(c, onto, parcours=entree.parcours)
+        service = services_par_code(c, onto).get(lignes[0]["service"]) if lignes else None
+        presentation = _fiches_afi(c, onto.service(service.id).fiches_presentation) if service else []
+
+    if not parcours:
+        return SortieOutil[GuiderServiceDonnees](
+            outil="guider_service",
+            donnees=GuiderServiceDonnees(service=None, parcours=entree.parcours, titre=None, url_source=None,
+                                         position=entree.position, total=0, point=None, precedent=None,
+                                         suivant=None, plan=[]),
+            provenance=_provenance_fiches([contact.fiche]),
+            avertissements=[Avertissement(code=C.parcours_inconnu, detail=entree.parcours)])
+
+    p = parcours[0]
+    points = _points(p, presentation, contact)
+    total, pos = len(points), entree.position
+    point = points[pos] if pos < total else None
+    avert: list[Avertissement] = []
+    balises: list[Balise] = []
+    if point is None:
+        avert.append(Avertissement(code=C.position_hors_parcours, detail=str(pos)))
+    else:
+        if point.element is not None:
+            if any(e.a_verifier for e in _tous([point.element])):
+                avert.append(Avertissement(code=C.point_a_verifier, detail=p.code))
+            if any(e.texte in p.frais_sans_montant for e in _tous([point.element])):
+                avert.append(Avertissement(code=C.frais_non_chiffres, detail=p.code))
+        if point.formulaire is not None:
+            if point.formulaire.a_verifier:
+                avert.append(Avertissement(code=C.point_a_verifier, detail=p.code))
+            balises = _balises_pdf([point.formulaire])
+        if point.rubrique == "lieu_depot" and not point.lieu_depot:
+            avert.append(Avertissement(code=C.lieu_depot_non_precise, detail=p.code))
+    return SortieOutil[GuiderServiceDonnees](
+        outil="guider_service",
+        donnees=GuiderServiceDonnees(
+            service=service, parcours=p.code, titre=p.titre, url_source=p.url_source, position=pos, total=total,
+            point=point, precedent=min(pos, total) - 1 if pos > 0 else None,
+            suivant=pos + 1 if pos + 1 < total else None, plan=_plan(points)),
+        provenance=_provenance_parcours(lignes)
+                   + _provenance_fiches([f.fiche for f in presentation] + [contact.fiche]),
         avertissements=avert, balises=balises)

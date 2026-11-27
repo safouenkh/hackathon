@@ -2,12 +2,12 @@
 
 Chaque valeur attendue vient d'une source indépendante de l'outil testé : ligne de la liste
 publique https://afi.e-industrie.gov.tn/liste.php (lue le 26/11/2026), texte d'une fiche de
-chatbot_connaissances, ou requête SQL écrite à part. Détail et preuves : docs/jeu_test_metier.md.
+chatbot_connaissances, page « Nos services » de l'AFI, ou requête SQL écrite à part. Détail et preuves : docs/jeu_test_metier.md.
 """
 import pytest
 
 from app.processing.registre import executer
-from app.processing.schemas import CodeAvertissement as C, ServiceAfiId, StatutLot
+from app.processing.schemas import CodeAvertissement as C, StatutLot
 
 pytestmark = pytest.mark.usefixtures("base_disponible")
 
@@ -62,29 +62,28 @@ def test_m06_bnf13_meme_resultat_quelle_que_soit_l_ecriture(ecriture):
     assert executer("chercher_lots", {"gouvernorat": ecriture, "limite": 50}).donnees.lots == reference
 
 
-@pytest.mark.parametrize("service, texte_source, montant", [
-    ("situation_fonciere", "frais : 50 DT", 50),          # fiche 18
-    ("insertion_hypotheque", "frais : 50 DT", 50),        # fiche 19
-    ("acte_precision", "frais : 150 DT", 150),            # fiche 20
-    ("copie_conforme", "frais : 15 DT par copie", 15),    # fiche 22
-    ("mainlevee", "frais : 50 DT", 50),                   # fiche 23
+@pytest.mark.parametrize("service, extrait, montant", [   # page « Nos services », lue le 27/11/2026
+    ("situation_fonciere", "s’élevant à **50 dinars tunisiens (DT)**", 50),
+    ("insertion_hypotheque", "d’un montant de 50 Dinar.", 50),
+    ("acte_precision", "d’un montant de 150 Dinar", 150),
+    ("copie_conforme", "(15 dinars par copie)", 15),
+    ("mainlevee", "s’élevant à 50 dinars.", 50),            # étape 5 corrigée d'après la page arabe (50د)
 ])
-def test_m07_bf23_frais_de_la_source(service, texte_source, montant):
-    frais = [x for f in executer("demarche", {"service": service}).donnees.fiches for x in f.frais
-             if x.montant_dt is not None]
-    assert [(x.texte_source, x.montant_dt) for x in frais] == [(texte_source, montant)]
+def test_m07_bf23_frais_de_la_source(service, extrait, montant):
+    frais = [x for p in executer("demarche", {"service": service}).donnees.parcours for x in p.frais]
+    assert [(extrait in x.texte, x.montant_dt) for x in frais] == [(True, montant)]
 
 
 def test_m08_bf22_papier_pour_le_pret():
     # Exemple du cahier des charges, BF22
     r = executer("services_afi", {"besoin": "La banque me demande un papier pour mon prêt"})
-    assert r.donnees.candidats[0].service.id is ServiceAfiId.insertion_hypotheque
+    assert r.donnees.candidats[0].service.id == "insertion_hypotheque"
 
 
 def test_m09_bf24_service_hors_liste():
     # Fiche 26 : « téléphone +216 71 124 260 »
     r = executer("demarche", {"service": "permis de construire"})
-    assert r.donnees.fiches == [] and r.donnees.contact_afi.telephone == "+216 71 124 260"
+    assert r.donnees.parcours == [] and r.donnees.contact_afi.telephone == "+216 71 124 260"
     assert C.service_non_couvert in {a.code for a in r.avertissements}
 
 
@@ -95,5 +94,5 @@ def test_m10_lot_orphelin_jamais_rattache():
 
 
 def test_m11_bf11_rien_n_est_depose():
-    d = executer("preparer_demande", {"lot_ids": [7079]}).donnees
+    d = executer("preparer_demande", {"service": "acquisition", "lot_ids": [7079]}).donnees
     assert d.depot_effectue is False and d.confirmation_requise is True

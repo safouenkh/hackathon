@@ -1,0 +1,128 @@
+:root {
+  --encre: #17324d;
+  --texte: #1f2933;
+  --doux: #5b6773;
+  --fond: #f5f7fa;
+  --carte: #ffffff;
+  --bord: #d6dde4;
+  --accent: #0f6e6a;
+  --accent-fonce: #0b5552;
+  --alerte-fond: #fff6e0;
+  --alerte-bord: #e0a526;
+  --erreur: #b42318;
+  font-family: system-ui, 'Segoe UI', 'Noto Sans', 'Noto Sans Arabic', Tahoma, sans-serif;
+  color: var(--texte);
+  background: var(--fond);
+  line-height: 1.5;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, textarea { font: inherit; }
+
+.entete { background: var(--encre); color: #fff; padding: 0.75rem 1rem; }
+.marque { font-weight: 600; letter-spacing: 0.02em; }
+
+.page, .message { max-width: 52rem; margin: 0 auto; padding: 1rem; }
+.message.erreur, .erreur { color: var(--erreur); }
+
+.bandeau {
+  background: var(--alerte-fond); border-inline-start: 4px solid var(--alerte-bord);
+  padding: 0.75rem 1rem; margin: 0 0 1rem; border-radius: 4px;
+}
+
+.etapes { display: flex; gap: 0.5rem; list-style: none; padding: 0; margin: 0 0 1rem; flex-wrap: wrap; }
+.etapes li { padding: 0.25rem 0.75rem; border-radius: 999px; background: #e6ebf0; color: var(--doux); font-size: 0.9rem; }
+.etapes li[aria-current] { background: var(--accent); color: #fff; }
+
+.titre h1 { font-size: 1.4rem; color: var(--encre); margin: 0; }
+.sous-titre { color: var(--doux); margin: 0.25rem 0 0.75rem; }
+
+.liens { display: flex; gap: 1rem; flex-wrap: wrap; margin: 0 0 1rem; }
+a { color: var(--accent); }
+
+.avertissements { background: var(--carte); border: 1px solid var(--alerte-bord); border-radius: 6px; padding: 0.5rem 1rem; margin-bottom: 1rem; }
+.avertissements h2 { font-size: 1rem; margin: 0.25rem 0; }
+.avertissements ul { margin: 0.25rem 0; padding-inline-start: 1.25rem; }
+
+.langues { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.langues button { border: 1px solid var(--bord); background: var(--carte); border-radius: 4px; padding: 0.3rem 0.8rem; cursor: pointer; }
+.langues button.actif { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+.section, .recap, .envoye, .accord {
+  background: var(--carte); border: 1px solid var(--bord); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;
+}
+.section h2, .recap h2, .envoye h2 { font-size: 1.05rem; color: var(--encre); margin: 0 0 0.75rem; }
+.section.reserve { opacity: 0.75; }
+
+.champ { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.9rem; border: 0; padding: 0; }
+.libelle { display: flex; flex-direction: column; }
+.officiel { font-weight: 600; }
+.unite, .aide-officielle { color: var(--doux); font-weight: 400; }
+.traduction { display: block; color: var(--doux); font-size: 0.85rem; font-weight: 400; }
+h2 .traduction { margin-top: 0.15rem; }
+
+.champ input[type='text'], .champ input[type='date'], .champ textarea {
+  width: 100%; padding: 0.5rem 0.6rem; border: 1px solid var(--bord); border-radius: 4px; background: #fff;
+}
+.champ input:focus-visible, .champ textarea:focus-visible, button:focus-visible, input[type='checkbox']:focus-visible {
+  outline: 3px solid #7cc4c1; outline-offset: 1px;
+}
+.champ input[readonly], .champ textarea[readonly] { background: #eef2f5; }
+
+.choix { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+.option { display: inline-flex; gap: 0.4rem; align-items: baseline; }
+.option:has(input:checked) { font-weight: 600; color: var(--accent-fonce); }
+.option:has(input:checked:disabled) { background: #e3f2f1; border-radius: 4px; padding: 0 0.4rem; }
+
+.etiquette { align-self: flex-start; font-size: 0.75rem; padding: 0.05rem 0.5rem; border-radius: 999px; }
+.etiquette.prerempli { background: #e3f2f1; color: var(--accent-fonce); }
+.etiquette.contact { background: #e8edf7; color: #2b4a7a; }
+.etiquette.fixe { background: #eceff2; color: var(--doux); }
+
+.champ.main, .champ.reserve { border-bottom: 1px dashed var(--bord); padding-bottom: 0.5rem; }
+.note-main { color: var(--doux); font-size: 0.85rem; font-style: italic; }
+
+.mention { font-size: 0.85rem; color: var(--doux); margin: 0.5rem 0 0; }
+
+.actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1rem 0; }
+button { border: 1px solid var(--bord); background: var(--carte); border-radius: 6px; padding: 0.6rem 1.1rem; cursor: pointer; }
+button.principal { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.principal:hover:not(:disabled) { background: var(--accent-fonce); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.aide { color: var(--doux); font-size: 0.85rem; }
+
+.recap dl { margin: 0; }
+.recap dl > div { display: grid; grid-template-columns: minmax(10rem, 40%) 1fr; gap: 0.5rem; padding: 0.35rem 0; border-bottom: 1px solid #eef1f4; }
+.recap dt { color: var(--doux); }
+.recap dd { margin: 0; overflow-wrap: anywhere; }
+.recap .vide dd { color: #9aa5b1; }
+
+.accord label { display: flex; gap: 0.6rem; align-items: flex-start; }
+.accord input { margin-top: 0.3rem; }
+
+.reference strong { font-size: 1.3rem; letter-spacing: 0.08em; }
+
+/* Version imprimable : cachée à l'écran. */
+.impression { display: none; }
+
+@media (max-width: 40rem) {
+  .recap dl > div { grid-template-columns: 1fr; gap: 0; }
+  .titre h1 { font-size: 1.2rem; }
+}
+
+@media print {
+  @page { margin: 15mm; }
+  body, :root { background: #fff; }
+  .app > *:not(.page), .page > *:not(.impression) { display: none !important; }
+  .page { padding: 0; max-width: none; }
+  .impression { display: block; color: #000; font-size: 11pt; }
+  .impression h1 { font-size: 15pt; text-align: center; margin: 0 0 6mm; }
+  .impression h2 { font-size: 12pt; margin: 5mm 0 2mm; text-decoration: underline; }
+  .impression .ligne { display: flex; gap: 2mm; align-items: baseline; margin: 1.6mm 0; break-inside: avoid; }
+  .impression .lib { white-space: nowrap; }
+  .impression .val { flex: 1; border-bottom: 1px solid #000; padding-inline-start: 1mm; overflow-wrap: anywhere; white-space: normal; }
+  .impression .pointilles { flex: 1; border-bottom: 1px dotted #000; min-height: 1.2em; }
+  .impression .cases { display: flex; flex-wrap: wrap; gap: 2mm 6mm; }
+  .impression .mention { font-size: 9pt; margin: 1.5mm 0; }
+}

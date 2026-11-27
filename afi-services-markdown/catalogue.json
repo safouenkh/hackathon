@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "description": "Correspondance entre les fichiers du corpus et le catalogue des services de Dalila. Lu par scripts/importer_services.py ; aucune de ces informations n'est écrite dans le code.",
+  "date": "2026-11-27",
+  "sources": [
+    {
+      "cle": "afi_nos_services",
+      "organisation": "AFI",
+      "title": "Nos services",
+      "url": "https://www.afi.nat.tn/fr/nos-services/",
+      "ingestion_mode": "manuel"
+    },
+    {
+      "cle": "afi_demande_acquisition_fr",
+      "organisation": "AFI",
+      "title": "Demande d'acquisition",
+      "url": "https://www.afi.nat.tn/fr/docs/demande-dacquisition/",
+      "ingestion_mode": "manuel"
+    },
+    {
+      "cle": "afi_demande_acquisition_ar",
+      "organisation": "AFI",
+      "title": "إستمارة إقتناء باعث صناعي",
+      "url": "https://www.afi.nat.tn/docs/%d8%a5%d8%b3%d8%aa%d9%85%d8%a7%d8%b1%d8%a9-%d8%a8%d8%a7%d8%b9%d8%ab-%d8%b5%d9%86%d8%a7%d8%b9%d9%8a/",
+      "ingestion_mode": "manuel"
+    },
+    {
+      "cle": "afi_service_administratif_ar",
+      "organisation": "AFI",
+      "title": "بيانات حول طالب الخدمة",
+      "url": "https://www.afi.nat.tn/docs/%d8%a8%d9%8a%d8%a7%d9%86%d8%a7%d8%aa-%d8%ad%d9%88%d9%84-%d8%b7%d8%a7%d9%84%d8%a8-%d8%a7%d9%84%d8%ae%d8%af%d9%85%d8%a9/",
+      "ingestion_mode": "manuel"
+    }
+  ],
+  "services": [
+    {"code": "acquisition", "nom": "Acquisition d'un lot", "besoin": "Acheter un lot industriel", "ordre": 1, "source": "Cahier des charges du hackathon, §IV.6"},
+    {"code": "encheres", "nom": "Vente aux enchères", "besoin": "Participer à une vente publique", "ordre": 2, "source": "Cahier des charges du hackathon, §IV.6"},
+    {"code": "situation_fonciere", "nom": "Attestation de situation foncière", "besoin": "Connaître la situation d'un lot", "ordre": 3, "source": "Cahier des charges du hackathon, §IV.6"},
+    {"code": "insertion_hypotheque", "nom": "Attestation d'insertion d'hypothèque", "besoin": "Obtenir un prêt bancaire", "ordre": 4, "source": "Cahier des charges du hackathon, §IV.6"},
+    {"code": "mainlevee", "nom": "Attestation de mainlevée", "besoin": "Obtenir la mainlevée sur son terrain", "ordre": 5, "source": "Cahier des charges du hackathon, §IV.6"},
+    {"code": "acte_precision", "nom": "Acte de précision ou contrat final", "besoin": "Isoler le lot comme propriété distincte", "ordre": 6, "source": "Cahier des charges du hackathon, §IV.6"},
+    {"code": "autorisation_vente_leasing", "nom": "Autorisation de vente", "besoin": "Vente d'un lot par une société de leasing", "ordre": 7, "source": "Cahier des charges du hackathon, §IV.6"},
+    {"code": "copie_conforme", "nom": "Copie conforme", "besoin": "Obtenir une copie du contrat ou de l'acte", "ordre": 8, "source": "Cahier des charges du hackathon, §IV.6"}
+  ],
+  "parcours": [
+    {"code": "acquisition-developpement-regional", "service": "acquisition", "ordre": 1, "fichier": "data/documents/services/acquisition-developpement-regional/fr.md", "source": "afi_nos_services", "critere_choix": "zones de développement régional"},
+    {"code": "acquisition-littoral-grand-tunis", "service": "acquisition", "ordre": 2, "fichier": "data/documents/services/acquisition-littoral-grand-tunis/fr.md", "source": "afi_nos_services", "critere_choix": "zones littorales et le grand Tunis"},
+    {"code": "vente-encheres-publiques", "service": "encheres", "ordre": 1, "fichier": "data/documents/services/vente-encheres-publiques/fr.md", "source": "afi_nos_services", "critere_choix": null},
+    {"code": "situation-fonciere", "service": "situation_fonciere", "ordre": 1, "fichier": "data/documents/services/situation-fonciere/fr.md", "source": "afi_nos_services", "critere_choix": null},
+    {"code": "insertion-hypotheque", "service": "insertion_hypotheque", "ordre": 1, "fichier": "data/documents/services/insertion-hypotheque/fr.md", "source": "afi_nos_services", "critere_choix": null},
+    {"code": "main-levee", "service": "mainlevee", "ordre": 1, "fichier": "data/documents/services/main-levee/fr.md", "source": "afi_nos_services", "critere_choix": null},
+    {"code": "acte-precision-contrats-finaux", "service": "acte_precision", "ordre": 1, "fichier": "data/documents/services/acte-precision-contrats-finaux/fr.md", "source": "afi_nos_services", "critere_choix": null},
+    {"code": "autorisation-vente-leasing", "service": "autorisation_vente_leasing", "ordre": 1, "fichier": "data/documents/services/autorisation-vente-leasing/fr.md", "source": "afi_nos_services", "critere_choix": null},
+    {"code": "copie-conforme", "service": "copie_conforme", "ordre": 1, "fichier": "data/documents/services/copie-conforme/fr.md", "source": "afi_nos_services", "critere_choix": null}
+  ],
+  "formulaires": [
+    {
+      "code": "demande_acquisition",
+      "titre": "Demande d'acquisition de terrain",
+      "variantes": [
+        {
+          "langue": "fr",
+          "titre_officiel": "DEMANDE D’ACQUISITION DE TERRAIN — ENQUETE RELATIVE A L’ACTIVITE INDUSTRIELLE",
+          "fichier": "data/documents/formulaire/DEMANDE-dacquisition-FR.pdf",
+          "source": "afi_demande_acquisition_fr",
+          "url_fichier": "https://www.afi.nat.tn/wp-content/uploads/2024/04/DEMANDE-dacquisition-FR.pdf",
+          "provenance": "Fichier déposé par l'utilisateur ; SHA-256 identique au fichier en ligne le 2026-11-27"
+        },
+        {
+          "langue": "ar",
+          "titre_officiel": "مطلب اقتناء قطعة أرض — بطاقة ارشادات",
+          "fichier": "data/documents/formulaire/مطلب-إقتناء-بالعربية.pdf",
+          "source": "afi_demande_acquisition_ar",
+          "url_fichier": "https://www.afi.nat.tn/wp-content/uploads/2024/05/%D9%85%D8%B7%D9%84%D8%A8-%D8%A5%D9%82%D8%AA%D9%86%D8%A7%D8%A1-%D8%A8%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9.pdf",
+          "provenance": "Téléchargé depuis le site de l'AFI le 2026-11-27"
+        }
+      ]
+    },
+    {
+      "code": "demande_service_administratif",
+      "titre": "Demande de service administratif",
+      "variantes": [
+        {
+          "langue": "ar",
+          "titre_officiel": "مطلب خدمة إدارية",
+          "fichier": "data/documents/formulaire/مطلب-خدمة-إدارية-أكتوبر-2021-نسخة-الحريف-1.pdf",
+          "source": "afi_service_administratif_ar",
+          "url_fichier": "https://www.afi.nat.tn/wp-content/uploads/2023/04/%D9%85%D8%B7%D9%84%D8%A8-%D8%AE%D8%AF%D9%85%D8%A9-%D8%A5%D8%AF%D8%A7%D8%B1%D9%8A%D8%A9-%D8%A3%D9%83%D8%AA%D9%88%D8%A8%D8%B1-2021-%D9%86%D8%B3%D8%AE%D8%A9-%D8%A7%D9%84%D8%AD%D8%B1%D9%8A%D9%81-1.pdf",
+          "provenance": "Fichier déposé par l'utilisateur ; SHA-256 identique au fichier en ligne le 2026-11-27"
+        }
+      ]
+    }
+  ],
+  "parcours_formulaires": [
+    {"parcours": "acquisition-developpement-regional", "formulaire": "demande_acquisition", "valeurs_imposees": {},
+     "note_verification": "Délai de confirmation : le formulaire français dit « au bout de 6 mois », la version arabe « في أجل ستة أشهر » (dans un délai de six mois) ; la fiche du service ne cite pas ce délai. À confirmer auprès de l'AFI."},
+    {"parcours": "acquisition-littoral-grand-tunis", "formulaire": "demande_acquisition", "valeurs_imposees": {},
+     "note_verification": "Délai de confirmation : le formulaire français dit « au bout de 6 mois », la version arabe « في أجل ستة أشهر » (dans un délai de six mois) ; la fiche du service ne cite pas ce délai. À confirmer auprès de l'AFI."},
+    {"parcours": "situation-fonciere", "formulaire": "demande_service_administratif", "valeurs_imposees": {"document_demande": "1"},
+     "note_verification": "La fiche du site renvoie au formulaire de demande d'acquisition ; le formulaire administratif liste cette attestation en ligne 1. Formulaire administratif retenu par Safouen le 2026-11-27, à confirmer auprès de l'AFI."},
+    {"parcours": "insertion-hypotheque", "formulaire": "demande_service_administratif", "valeurs_imposees": {"document_demande": "2"}, "note_verification": null},
+    {"parcours": "main-levee", "formulaire": "demande_service_administratif", "valeurs_imposees": {"document_demande": "3"},
+     "note_verification": "Le formulaire exige une déclaration sur l'honneur à signature légalisée (« معرف به ») et cite les 50 DT parmi les pièces obligatoires ; la fiche dit « avec signature » et cite les 50 DT dans les étapes. À confirmer auprès de l'AFI."},
+    {"parcours": "acte-precision-contrats-finaux", "formulaire": "demande_service_administratif", "valeurs_imposees": {"document_demande": "4"}, "note_verification": null},
+    {"parcours": "autorisation-vente-leasing", "formulaire": "demande_service_administratif", "valeurs_imposees": {"document_demande": "5"}, "note_verification": null},
+    {"parcours": "copie-conforme", "formulaire": "demande_service_administratif", "valeurs_imposees": {"document_demande": "6"},
+     "note_verification": "Le formulaire demande de payer les 15 DT au dépôt de la demande ; la fiche place le paiement après la préparation des copies. À confirmer auprès de l'AFI."}
+  ]
+}

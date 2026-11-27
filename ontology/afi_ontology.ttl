@@ -1,0 +1,159 @@
+# Ontologie de Dalila (AFI) : famille « Service de l'AFI » et vocabulaire des démarches.
+#
+# - Les services, leurs parcours et leur contenu sont dans PostgreSQL (schéma `assistant`) ;
+#   ce graphe garde seulement les codes, les synonymes par langue et les liens stables
+#   (AFI_Pipeline_Architecture.md §8, cahier des charges BF16, BF17 et BNF19).
+# - Les synonymes de ce fichier ont été saisis par l'équipe le 2026-11-27 : ils ne viennent
+#   pas d'une source de l'AFI et seront enrichis par l'apprentissage contrôlé (BF18).
+# - Les numéros de fiches renvoient à afi.chatbot_connaissances (cahier §IV.6, colonne
+#   « Fiches existantes » ; la fiche 12 est une ancienne version des fiches 13 et 14).
+# - URI de démonstration (architecture §7) : à remplacer par un espace de noms stable avant production.
+
+@prefix afi:     <https://example.org/afi/ontology#> .
+@prefix id:      <https://example.org/afi/resource/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/afi/ontology> a owl:Ontology ;
+    rdfs:label "Ontologie de Dalila (AFI)"@fr ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:created "2026-11-27"^^xsd:date ;
+    dcterms:creator "Équipe Dalila (hackathon Agentic AFI)" .
+
+# ---------------------------------------------------------------------
+# Classes et propriétés
+# ---------------------------------------------------------------------
+
+afi:ServiceAFI a owl:Class ;
+    rdfs:label "Service de l'AFI"@fr, "AFI service"@en, "خدمة الوكالة العقارية الصناعية"@ar .
+
+afi:Organisme a owl:Class ;
+    rdfs:label "Organisme"@fr, "Organisation"@en .
+
+afi:code a owl:DatatypeProperty ;
+    rdfs:comment "Code du service dans assistant.services.code."@fr ;
+    rdfs:domain afi:ServiceAFI ;
+    rdfs:range xsd:string .
+
+afi:ficheConnaissance a owl:DatatypeProperty ;
+    rdfs:comment "Identifiant d'une fiche de afi.chatbot_connaissances (réponses validées par l'AFI)."@fr ;
+    rdfs:range xsd:integer .
+
+afi:fichePresentation a owl:DatatypeProperty ;
+    rdfs:subPropertyOf afi:ficheConnaissance ;
+    rdfs:comment "Fiche à montrer au début du guidage, car elle explique le service mieux que la page source."@fr ;
+    rdfs:range xsd:integer .
+
+afi:ficheContact a owl:DatatypeProperty ;
+    rdfs:comment "Fiche de afi.chatbot_connaissances qui donne le contact de l'organisme."@fr ;
+    rdfs:domain afi:Organisme ;
+    rdfs:range xsd:integer .
+
+afi:exigeStatutLot a owl:DatatypeProperty ;
+    rdfs:comment "Statut que doit avoir un lot pour ce service (valeur de StatutLot)."@fr ;
+    rdfs:domain afi:ServiceAFI ;
+    rdfs:range xsd:string .
+
+afi:serviceDuStatutLot a owl:DatatypeProperty ;
+    rdfs:comment "Statut de lot (valeur de StatutLot) qui oriente vers ce service."@fr ;
+    rdfs:domain afi:ServiceAFI ;
+    rdfs:range xsd:string .
+
+# ---------------------------------------------------------------------
+# L'AFI
+# ---------------------------------------------------------------------
+
+id:afi a afi:Organisme ;
+    skos:prefLabel "Agence Foncière Industrielle"@fr, "الوكالة العقارية الصناعية"@ar ;
+    skos:altLabel "AFI"@fr ;
+    afi:ficheContact 26 .
+
+# ---------------------------------------------------------------------
+# Les 8 services (cahier §IV.6) ; noms et parcours : assistant.services, assistant.parcours
+# ---------------------------------------------------------------------
+
+id:service-acquisition a afi:ServiceAFI ;
+    afi:code "acquisition" ;
+    afi:ficheConnaissance 13, 14, 15, 16, 17 ;
+    afi:exigeStatutLot "disponible" ;
+    dcterms:source "Page « Nos services » de l'AFI : « L'attribution est soumise à la disponibilité des terrains industriels à vendre »." ;
+    skos:altLabel "acheter"@fr, "achat"@fr, "acquérir"@fr, "acquisition"@fr, "terrain"@fr, "lot"@fr, "réserver"@fr,
+        "buy"@en, "plot"@en, "land"@en,
+        "kaufen"@de, "grundstück"@de,
+        "arsa"@tr, "satın al"@tr,
+        "شراء"@ar, "ارض"@ar, "أرض"@ar, "قطعة"@ar,
+        "n7eb terrain"@ar-Latn-TN, "nechri"@ar-Latn-TN, "9at3a"@ar-Latn-TN .
+
+id:service-encheres a afi:ServiceAFI ;
+    afi:code "encheres" ;
+    afi:ficheConnaissance 24, 25 ;
+    afi:serviceDuStatutLot "aux_encheres" ;
+    dcterms:source "Carte publique de l'AFI : statut « Mis aux enchères » (docs/statuts_lots.md)." ;
+    skos:altLabel "enchère"@fr, "enchères"@fr, "adjudication"@fr, "vente publique"@fr,
+        "auction"@en, "versteigerung"@de, "ihale"@tr,
+        "مزاد"@ar, "بتة"@ar, "betta"@ar-Latn-TN .
+
+id:service-situation-fonciere a afi:ServiceAFI ;
+    afi:code "situation_fonciere" ;
+    afi:ficheConnaissance 18 ;
+    skos:altLabel "situation foncière"@fr, "situation du lot"@fr, "situation juridique"@fr,
+        "land status"@en, "وضعية عقارية"@ar, "شهادة في الوضعية"@ar .
+
+id:service-insertion-hypotheque a afi:ServiceAFI ;
+    afi:code "insertion_hypotheque" ;
+    afi:ficheConnaissance 19 ;
+    skos:altLabel "hypothèque"@fr, "prêt"@fr, "banque"@fr, "crédit"@fr,
+        "bank"@en, "loan"@en, "mortgage"@en,
+        "hypothek"@de, "kredi"@tr, "ipotek"@tr,
+        "رهن"@ar, "قرض"@ar, "بنك"@ar,
+        "karedi"@ar-Latn-TN, "credi"@ar-Latn-TN .
+
+id:service-mainlevee a afi:ServiceAFI ;
+    afi:code "mainlevee" ;
+    afi:ficheConnaissance 23 ;
+    skos:altLabel "mainlevée"@fr, "main levée"@fr, "lever l'hypothèque"@fr, "radiation"@fr,
+        "release"@en, "رفع الرهن"@ar, "رفع اليد"@ar .
+
+id:service-acte-precision a afi:ServiceAFI ;
+    afi:code "acte_precision" ;
+    afi:ficheConnaissance 20 ;
+    afi:fichePresentation 20 ;
+    rdfs:comment "La fiche 20 explique à quoi sert l'acte ; les étapes de la page « Nos services » décrivent l'achat d'un lot (voir corrections.json)."@fr ;
+    skos:altLabel "acte de précision"@fr, "contrat final"@fr, "acte définitif"@fr, "titre foncier"@fr,
+        "propriété distincte"@fr, "final contract"@en, "title deed"@en,
+        "عقد نهائي"@ar, "رسم عقاري"@ar .
+
+id:service-autorisation-vente-leasing a afi:ServiceAFI ;
+    afi:code "autorisation_vente_leasing" ;
+    afi:ficheConnaissance 21 ;
+    skos:altLabel "leasing"@fr, "crédit bail"@fr, "autorisation de vente"@fr, "revendre"@fr,
+        "ليزينغ"@ar, "إيجار مالي"@ar, "ترخيص في البيع"@ar .
+
+id:service-copie-conforme a afi:ServiceAFI ;
+    afi:code "copie_conforme" ;
+    afi:ficheConnaissance 22 ;
+    skos:altLabel "copie conforme"@fr, "copie"@fr, "duplicata"@fr,
+        "copy"@en, "kopie"@de, "kopya"@tr,
+        "نسخة مطابقة"@ar, "نسخة"@ar .
+
+# ---------------------------------------------------------------------
+# Vocabulaire des démarches (repère des phrases dans les fiches publiées)
+# ---------------------------------------------------------------------
+
+id:lieu-depot a skos:Concept ;
+    skos:prefLabel "lieu de dépôt"@fr ;
+    rdfs:comment "Expressions qui, dans une fiche de service, disent OÙ déposer la demande. « Bureau d'accueil » n'en fait pas partie : la page l'indique comme lieu où le formulaire est disponible."@fr ;
+    skos:altLabel "bureau d'ordre central"@fr, "bureau d'enregistrement central"@fr,
+        "déposée au gouvernorat"@fr, "déposé auprès du gouvernorat"@fr,
+        "central control office"@en, "central registration office"@en,
+        "مكتب الضبط المركزي"@ar, "بالولاية مرجع النظر"@ar .
+
+id:frais a skos:Concept ;
+    skos:prefLabel "frais"@fr ;
+    rdfs:comment "Mots qui signalent un paiement dans une fiche ; une ligne qui en contient sans montant en dinars donne l'avertissement frais_non_chiffres."@fr ;
+    skos:altLabel "frais"@fr, "prix du lot"@fr, "redevance"@fr, "quittance"@fr,
+        "fees"@en, "معلوم"@ar, "معاليم"@ar .

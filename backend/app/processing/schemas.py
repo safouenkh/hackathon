@@ -9,9 +9,9 @@ Un champ inconnu vaut `null` et s'accompagne d'un avertissement.
 """
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from enum import Enum
-from typing import Generic, Literal, TypeVar
+from typing import Any, Generic, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
@@ -56,8 +56,15 @@ class CodeAvertissement(str, Enum):
     lieu_depot_non_precise = "lieu_depot_non_precise"
     frais_non_chiffres = "frais_non_chiffres"      # la source cite des frais sans montant
     extraction_partielle = "extraction_partielle"  # fiche source au format inattendu
+    point_a_verifier = "point_a_verifier"          # une ligne porte une note : à confirmer auprès de l'AFI
+    demarche_non_publiee = "demarche_non_publiee"  # aucun parcours publié : orienter vers le contact AFI
+    parcours_a_choisir = "parcours_a_choisir"      # le service a plusieurs parcours : demander lequel
+    parcours_inconnu = "parcours_inconnu"
+    position_hors_parcours = "position_hors_parcours"
     source_indisponible = "source_indisponible"    # module de retrieval (rôle 2) non branché
     confirmation_requise = "confirmation_requise"  # rien n'est déposé sans l'investisseur (BF11)
+    valeur_non_preremplie = "valeur_non_preremplie"  # lots aux valeurs différentes : le client choisit (detail = champ)
+    formulaire_indisponible = "formulaire_indisponible"  # le parcours n'a pas de formulaire (ex. enchères)
 
 
 class Avertissement(_Strict):
@@ -305,22 +312,14 @@ class LotsProchesDonnees(_Strict):
 # Services AFI et démarches
 # =====================================================================
 
-class ServiceAfiId(str, Enum):
-    acquisition = "acquisition"
-    encheres = "encheres"
-    situation_fonciere = "situation_fonciere"
-    insertion_hypotheque = "insertion_hypotheque"
-    mainlevee = "mainlevee"
-    acte_precision = "acte_precision"
-    autorisation_vente_leasing = "autorisation_vente_leasing"
-    copie_conforme = "copie_conforme"
-
+# Les services, leurs parcours et leur contenu viennent du schéma `assistant` (versions publiées) ;
+# les synonymes et les liens vers les fiches de l'AFI, de l'ontologie (ontology/afi_ontology.ttl).
 
 class ServiceAfi(_Strict):
-    id: ServiceAfiId
+    id: str                             # assistant.services.code
     nom: str
-    besoin: str                         # besoin de l'investisseur (cahier §IV.6)
-    fiches: list[int]                   # chatbot_connaissances.id
+    besoin: str | None                  # besoin de l'investisseur (cahier §IV.6)
+    fiches: list[int]                   # afi.chatbot_connaissances.id liées (ontologie)
 
 
 class ServiceCandidat(_Strict):
@@ -333,7 +332,7 @@ class ContactAfi(_Strict):
     adresse: str | None
     telephone: str | None
     site: str | None
-    fiche: int
+    fiche: int | None                   # afi.chatbot_connaissances.id d'où vient le contact
 
 
 class ServicesAfiEntree(_Strict):
@@ -341,50 +340,124 @@ class ServicesAfiEntree(_Strict):
 
 
 class ServicesAfiDonnees(_Strict):
-    services: list[ServiceAfi]          # les 8 services couverts
+    services: list[ServiceAfi]          # services actifs, dans l'ordre de la base
     candidats: list[ServiceCandidat]    # triés, si un besoin est donné
     contact_afi: ContactAfi
 
 
-class VarianteAcquisition(str, Enum):
-    developpement_regional = "developpement_regional"
-    littoral_grand_tunis = "littoral_grand_tunis"
-
-
 class DemarcheEntree(_Strict):
-    service: str = Field(max_length=100)   # ServiceAfiId attendu ; autre valeur -> contact AFI
-    variante: VarianteAcquisition | None = None
+    service: str = Field(max_length=100, description="Code d'un service renvoyé par services_afi (champ id).")
+    parcours: str | None = Field(
+        default=None, max_length=100,
+        description="Code du parcours choisi quand le service en a plusieurs (ex. selon la zone) ; sinon vide.")
 
 
-class GroupePieces(_Strict):
-    phase: str | None
-    pieces: list[str]
+class ElementDemarche(_Strict):
+    """Une ligne d'une fiche publiée, telle quelle, avec ses sous-lignes."""
+    id: int                             # assistant.parcours_elements.id
+    type: str                           # condition, etape, piece, frais, lien, description…
+    groupe: str | None                  # ex. « I – Phase de réservation : »
+    ordre: int
+    texte: str
+    url: str | None = None
+    montant_dt: float | None = None     # seulement pour type = frais
+    unite_montant: str | None = None    # ex. « par copie »
+    a_verifier: bool = False            # écart entre sources : à confirmer auprès de l'AFI
+    note_verification: str | None = None
+    corrige: bool = False               # texte différent de la fiche source (correction sourcée)
+    enfants: list["ElementDemarche"] = Field(default_factory=list)
 
 
-class Frais(_Strict):
-    libelle: str
-    montant_dt: int | None              # null : la source ne donne pas de montant
-    texte_source: str
+class VarianteFormulaire(_Strict):
+    langue: str
+    titre_officiel: str
+    url_page: str | None
+    url_fichier: str | None
 
 
-class FicheDemarche(_Strict):
-    fiche: int
+class FormulaireService(_Strict):
+    code: str
     titre: str
-    variante: VarianteAcquisition | None
-    description: list[str]
-    conditions: list[str]
-    etapes: list[str]
-    pieces: list[GroupePieces]
-    frais: list[Frais]
-    lieu_depot: list[str]               # phrases de la source qui indiquent où déposer
-    texte_source: str                   # texte intégral de la fiche, pour vérification
+    valeurs_imposees: dict[str, Any]    # ex. {"document_demande": "3"} : ligne à cocher
+    a_verifier: bool
+    note_verification: str | None
+    variantes: list[VarianteFormulaire]
+
+
+class ParcoursDemarche(_Strict):
+    code: str
+    titre: str                          # intitulé d'origine
+    critere_choix: str | None           # ex. « zones de développement régional »
+    version: int
+    publie_le: datetime
     url_source: str | None
+    date_collecte: date | None
+    description: list[ElementDemarche]
+    pour_qui: list[ElementDemarche]
+    conditions: list[ElementDemarche]
+    etapes: list[ElementDemarche]
+    pieces: list[ElementDemarche]
+    frais: list[ElementDemarche]        # montants en dinars cités par la fiche
+    liens: list[ElementDemarche]
+    remarques: list[ElementDemarche]
+    lieu_depot: list[str]               # phrases de la fiche qui disent où déposer (vide : non précisé)
+    frais_sans_montant: list[str]       # lignes qui citent un paiement sans montant
+    formulaires: list[FormulaireService]
+
+
+class FicheAfi(_Strict):
+    fiche: int                          # afi.chatbot_connaissances.id
+    question: str
+    reponse: str                        # texte intégral validé par l'AFI
 
 
 class DemarcheDonnees(_Strict):
     service: ServiceAfi | None
-    fiches: list[FicheDemarche]
+    parcours: list[ParcoursDemarche]    # référence : fiches publiées
+    fiches_afi: list[FicheAfi]          # compléments : réponses validées par l'AFI
     contact_afi: ContactAfi
+
+
+# ---------- guider_service : un point à la fois ----------
+
+# Les liens de la fiche sont repris par le formulaire et par le texte des pièces : pas de rubrique à part.
+RubriqueGuide = Literal["presentation", "description", "pour_qui", "condition", "piece", "formulaire",
+                        "etape", "frais", "remarque", "lieu_depot"]
+
+
+class GuiderServiceEntree(_Strict):
+    parcours: str = Field(max_length=100, description="Code du parcours (champ parcours[].code de demarche).")
+    position: int = Field(default=0, ge=0, le=500,
+                          description="Point à montrer : 0 au début, puis la valeur `suivant` de la réponse précédente.")
+
+
+class PointGuide(_Strict):
+    rubrique: RubriqueGuide
+    groupe: str | None = None
+    element: ElementDemarche | None = None
+    formulaire: FormulaireService | None = None
+    fiches_afi: list[FicheAfi] = Field(default_factory=list)
+    lieu_depot: list[str] = Field(default_factory=list)
+    contact_afi: ContactAfi | None = None
+
+
+class EtapePlan(_Strict):
+    rubrique: RubriqueGuide
+    debut: int                          # position du premier point de cette rubrique
+    nombre: int
+
+
+class GuiderServiceDonnees(_Strict):
+    service: ServiceAfi | None
+    parcours: str
+    titre: str | None
+    url_source: str | None
+    position: int
+    total: int
+    point: PointGuide | None
+    precedent: int | None
+    suivant: int | None                 # null : dernier point
+    plan: list[EtapePlan]
 
 
 # =====================================================================
@@ -426,10 +499,10 @@ class Projet(_Strict):
 
 
 class PreparerDemandeEntree(_Strict):
+    service: str = Field(max_length=100, description="Code du service (services_afi), ex. celui de l'acquisition.")
+    parcours: str | None = Field(default=None, max_length=100, description="Code du parcours choisi, si plusieurs.")
     lot_ids: list[int] = Field(default_factory=list, max_length=10)
     projet: Projet = Field(default_factory=Projet)
-    service: ServiceAfiId = ServiceAfiId.acquisition
-    variante: VarianteAcquisition | None = None
 
 
 class LienAction(_Strict):
@@ -437,16 +510,133 @@ class LienAction(_Strict):
     url: str
 
 
+class ChampACompleter(_Strict):
+    code: str
+    libelle: str                                # libellé officiel dans la langue du formulaire
+
+
+class FormulairePrerempli(_Strict):
+    """Page du formulaire préremplie : le client y complète son contact, relit, imprime ou envoie."""
+    parcours: str
+    formulaire: str
+    langue: str                                 # langue officielle de cette variante
+    url_page: str                               # page de Dalila (aucune donnée de contact dans l'URL)
+    valeurs: dict[str, str]                     # champs « projet » préremplis ou imposés, par code
+    champs_projet_a_completer: list[ChampACompleter]  # l'agent peut les demander dans le chat
+
+
 class PreparerDemandeDonnees(_Strict):
-    service: ServiceAfi
+    service: ServiceAfi | None
+    parcours: list[str]                         # codes des parcours utilisés
     lots: list[Lot]
     surface_totale_m2: int | None
     prix_total_indicatif_dt: int | None
     projet: Projet
     informations_projet_manquantes: list[str]   # champs de Projet non renseignés
-    pieces_a_preparer: list[GroupePieces]
-    frais: list[Frais]
+    pieces_a_preparer: list[ElementDemarche]
+    frais: list[ElementDemarche]
+    frais_sans_montant: list[str]
     lieu_depot: list[str]
+    formulaires: list[FormulaireService]
+    formulaires_preremplis: list[FormulairePrerempli]
     liens: list[LienAction]
     depot_effectue: Literal[False] = False      # l'outil ne dépose jamais rien
     confirmation_requise: Literal[True] = True
+
+
+# ---------------------------------------------------------------------
+# BF24 : question hors des services, notée pour l'analyse des besoins
+# ---------------------------------------------------------------------
+
+class NoterBesoinEntree(_Strict):
+    question: str = Field(min_length=1, max_length=500,
+                          description="La question de l'investisseur, telle quelle, sans nom ni numéro personnel.")
+    langue: str | None = Field(default=None, max_length=20)
+
+
+class NoterBesoinDonnees(_Strict):
+    note: bool                                  # false : enregistrement indisponible (rien n'est perdu côté client)
+
+
+# ---------------------------------------------------------------------
+# Page formulaire (front React) et envoi d'une demande
+# ---------------------------------------------------------------------
+
+CategorieChamp = Literal["projet", "contact", "non_enregistre", "reserve_afi"]
+
+
+class ChoixPage(_Strict):
+    valeur: str
+    libelle: str | None                         # dans la langue du formulaire
+    traduction: str | None                      # dans la langue d'aide, si différente
+
+
+class ChampPage(_Strict):
+    code: str
+    type: str
+    categorie: CategorieChamp
+    unite: str | None
+    obligatoire: bool | None                    # null : le formulaire ne le précise pas
+    libelle: str                                # libellé officiel de la variante
+    aide: str | None                            # texte imprimé à côté (ex. « (Norme AFI =100 Kva/Ha) »)
+    traduction: str | None                      # libellé dans la langue d'aide ; officiel=false si traduction
+    traduction_officielle: bool | None
+    choix: list[ChoixPage] | None
+    valeur: str | None                          # préremplie ou imposée (champs « projet » seulement)
+    origine_valeur: str | None                  # ex. « lot.zone_nom », « projet.activite », « parcours »
+    impose: bool
+
+
+class MentionPage(_Strict):
+    texte: str
+    si_champ: str | None
+    si_valeur: str | None
+
+
+class SectionPage(_Strict):
+    code: str
+    libelle: str | None
+    traduction: str | None
+    champs: list[ChampPage]
+    mentions: list[MentionPage]
+
+
+class Consentement(_Strict):
+    version: str
+    texte: str
+
+
+class FormulairePage(_Strict):
+    parcours: str
+    parcours_titre: str
+    service: str
+    version: int                                # version publiée du parcours
+    formulaire: str
+    titre_officiel: str
+    langue: str                                 # langue officielle affichée
+    langues: list[str]                          # variantes officielles disponibles
+    langue_aide: str | None                     # langue des traductions affichées
+    url_fichier: str | None                     # PDF vierge officiel
+    url_source: str | None                      # page AFI du service
+    sections: list[SectionPage]
+    lots: list[Lot]
+    avertissements: list[Avertissement]
+    note_verification: str | None               # point du formulaire à confirmer auprès de l'AFI
+    consentement: Consentement
+
+
+class EnvoiDemande(_Strict):
+    parcours: str = Field(max_length=100)
+    langue: str = Field(max_length=10)
+    lot_ids: list[int] = Field(default_factory=list, max_length=10)
+    valeurs: dict[str, str] = Field(default_factory=dict, max_length=80)    # champs « projet »
+    contact: dict[str, str] = Field(default_factory=dict, max_length=30)    # champs « contact »
+    consentement: bool
+    consentement_version: str = Field(max_length=40)
+    langue_aide: str | None = Field(default=None, max_length=10)   # langue du texte d'accord affiché
+
+
+class DemandeEnvoyee(_Strict):
+    reference: str
+    envoyee_le: datetime
+    depot_officiel_effectue: Literal[False] = False   # le client dépose encore le formulaire signé à l'AFI

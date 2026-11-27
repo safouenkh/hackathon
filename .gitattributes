@@ -1,0 +1,2 @@
+# Pages enregistrées comme preuves : octets conservés tels quels (leur SHA-256 est contrôlé).
+afi-services-markdown/data/documents/pages/*.html -text

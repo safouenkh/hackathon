@@ -24,7 +24,9 @@ APPELS = [
     ("avantages", {"activite": "textile", "gouvernorat": "Sfax"}),
     ("services_afi", {"besoin": "La banque me demande un papier pour mon prêt"}),
     ("demarche", {"service": "acquisition"}),
-    ("preparer_demande", {"lot_ids": [7079], "variante": "littoral_grand_tunis"}),
+    ("guider_service", {"parcours": "main-levee", "position": 3}),
+    ("preparer_demande", {"service": "acquisition", "parcours": "acquisition-littoral-grand-tunis",
+                          "lot_ids": [7079]}),
 ]
 
 

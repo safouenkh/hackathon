@@ -1,0 +1,8 @@
+{
+  "version": "2026-11-27",
+  "description": "Texte de l'accord affiché sous les champs de contact de la page formulaire. Le texte accepté est enregistré avec la demande. Écrit par l'équipe (pas un texte de l'AFI) ; une nouvelle rédaction exige une nouvelle version.",
+  "textes": {
+    "fr": "J’accepte que les coordonnées saisies sur cette page soient enregistrées et transmises à l’Agence Foncière Industrielle (AFI), uniquement pour traiter cette demande et me recontacter. Elles ne sont envoyées à aucun service d’intelligence artificielle. Ma carte d’identité, mon passeport et ma signature ne sont pas enregistrés.",
+    "ar": "أوافق على تسجيل بيانات الاتصال التي أدخلتها في هذه الصفحة وإحالتها إلى الوكالة العقارية الصناعية، فقط لمعالجة هذا المطلب والاتصال بي. لا تُرسل هذه البيانات إلى أي خدمة للذكاء الاصطناعي. لا يتم تسجيل بطاقة التعريف ولا جواز السفر ولا الإمضاء."
+  }
+}

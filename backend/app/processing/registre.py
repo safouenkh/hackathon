@@ -15,10 +15,12 @@ from app.processing.lots import chercher_lots, comparer_lots, details_lot, lots_
 from app.processing.schemas import (
     AvantagesDonnees, AvantagesEntree, ChercherLotsDonnees, ChercherLotsEntree, ComparerLotsDonnees,
     ComparerLotsEntree, DemarcheDonnees, DemarcheEntree, DetailsLotDonnees, DetailsLotEntree,
-    LotsProchesDonnees, LotsProchesEntree, PreparerDemandeDonnees, PreparerDemandeEntree,
-    ServicesAfiDonnees, ServicesAfiEntree, SortieOutil,
+    GuiderServiceDonnees, GuiderServiceEntree, LotsProchesDonnees, LotsProchesEntree, NoterBesoinDonnees,
+    NoterBesoinEntree, PreparerDemandeDonnees, PreparerDemandeEntree, ServicesAfiDonnees, ServicesAfiEntree,
+    SortieOutil,
 )
-from app.processing.services import demarche, services_afi
+from app.processing.formulaire import noter_besoin
+from app.processing.services import demarche, guider_service, services_afi
 
 
 @dataclass(frozen=True)
@@ -51,14 +53,22 @@ OUTILS: dict[str, Outil] = {o.nom: o for o in [
           LotsProchesEntree, LotsProchesDonnees, lots_proches),
     Outil("avantages", "Incitations applicables à une activité / région, uniquement avec leurs sources (retrieval du rôle 2).",
           AvantagesEntree, AvantagesDonnees, lambda e, conn=None: avantages(e)),
-    Outil("services_afi", "Les 8 services AFI et, si un besoin est donné, les services candidats (pour une question à choix).",
+    Outil("services_afi", "Les services AFI et, si un besoin est donné, les services candidats (pour une question à choix).",
           ServicesAfiEntree, ServicesAfiDonnees, services_afi),
-    Outil("demarche", "Conditions, étapes, pièces, frais, lieu de dépôt et lien source d'un service AFI ; "
-          "service hors liste : contact AFI.",
+    Outil("demarche", "Fiche publiée d'un service AFI : conditions, étapes, pièces, frais, lieu de dépôt, formulaire "
+          "et lien source, plus les fiches validées de l'AFI en complément. Plusieurs parcours (ex. selon la zone) : "
+          "demander lequel. Service hors liste : contact AFI.",
           DemarcheEntree, DemarcheDonnees, demarche),
-    Outil("preparer_demande", "Résumé prérempli d'une demande (lots, projet, pièces, frais) et liens vers l'AFI. "
-          "Ne dépose rien : l'investisseur confirme et dépose lui-même.",
+    Outil("guider_service", "Guide l'investisseur pas à pas dans un parcours : un point à la fois (condition, pièce, "
+          "formulaire, étape, frais, lieu de dépôt), avec sa source. Commencer à position=0, puis passer `suivant`.",
+          GuiderServiceEntree, GuiderServiceDonnees, guider_service),
+    Outil("preparer_demande", "Résumé prérempli d'une demande (lots, projet, pièces, frais, formulaire) et lien vers "
+          "la page du formulaire prérempli, où l'investisseur complète son contact, relit, imprime ou envoie. "
+          "Ne dépose rien. Ne jamais demander dans le chat le nom, la CIN, le passeport, le téléphone ou l'adresse.",
           PreparerDemandeEntree, PreparerDemandeDonnees, preparer_demande),
+    Outil("noter_besoin", "Note une question hors des services AFI pour l'analyse des besoins (BF24), après avoir "
+          "donné le contact AFI. Recopier la question sans nom ni numéro personnel.",
+          NoterBesoinEntree, NoterBesoinDonnees, noter_besoin),
 ]}
 
 

@@ -1,0 +1,184 @@
+[
+  {
+    "order": 1,
+    "service": "La vente des lots industriels dans les zones de développement régional : Conditions de vente :",
+    "path": "data/documents/services/acquisition-developpement-regional/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [
+      {
+        "label": "Demande d’acquisition d’un lot industriel",
+        "url": "https://www.afi.nat.tn/fr/docs/demande-dacquisition/",
+        "local_file": null,
+        "fields": null
+      }
+    ],
+    "sha256": "d218d8177a5c2ca5cf9a5d63f274aa33bb76563639f395abe7850afe17bf241d"
+  },
+  {
+    "order": 2,
+    "service": "La vente des lots industriels dans les zones littorales et le grand Tunis Conditions de vente :",
+    "path": "data/documents/services/acquisition-littoral-grand-tunis/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [
+      {
+        "label": "formulaire de demande d’acquisition",
+        "url": "https://www.afi.nat.tn/fr/docs/demande-dacquisition/",
+        "local_file": null,
+        "fields": null
+      }
+    ],
+    "sha256": "af8f476077476639f5e5e1065120a3e8fd74f58fa673818426cec9c828b05871"
+  },
+  {
+    "order": 3,
+    "service": "Attestation de situation foncière",
+    "path": "data/documents/services/situation-fonciere/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [
+      {
+        "label": "Formulaire",
+        "url": "https://www.afi.nat.tn/fr/docs/demande-dacquisition/",
+        "local_file": null,
+        "fields": null
+      }
+    ],
+    "sha256": "cc8163039bf70d7cc8a123231aad4f1fa945ac7d185a04d4c883d6732ed8686d"
+  },
+  {
+    "order": 4,
+    "service": "Attestation d'insertion d'hypothèque",
+    "path": "data/documents/services/insertion-hypotheque/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [
+      {
+        "label": "formulaire selon le modèle fourni au demandeur de services",
+        "url": "https://www.afi.nat.tn/docs/%d8%a8%d9%8a%d8%a7%d9%86%d8%a7%d8%aa-%d8%ad%d9%88%d9%84-%d8%b7%d8%a7%d9%84%d8%a8-%d8%a7%d9%84%d8%ae%d8%af%d9%85%d8%a9/",
+        "local_file": null,
+        "fields": null
+      }
+    ],
+    "sha256": "3bc57e5ee2d7a11336d26dd1da1bdec0d7f2ca225a359d0406076553e06e4cb1"
+  },
+  {
+    "order": 5,
+    "service": "Acte de précision ou de contrats finaux",
+    "path": "data/documents/services/acte-precision-contrats-finaux/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [
+      {
+        "label": "formulaire selon le modèle fourni au demandeur de services",
+        "url": "https://www.afi.nat.tn/docs/%d8%a8%d9%8a%d8%a7%d9%86%d8%a7%d8%aa-%d8%ad%d9%88%d9%84-%d8%b7%d8%a7%d9%84%d8%a8-%d8%a7%d9%84%d8%ae%d8%af%d9%85%d8%a9/",
+        "local_file": null,
+        "fields": null
+      }
+    ],
+    "sha256": "cbf74efd3eb8804e2e1c566699a1978f406d609392d95524ef2ee75aabf44481"
+  },
+  {
+    "order": 6,
+    "service": "Autorisation de vente réservée aux institutions de leasing",
+    "path": "data/documents/services/autorisation-vente-leasing/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [
+      {
+        "label": "formulaire selon le modèle fourni au demandeur de services",
+        "url": "https://www.afi.nat.tn/docs/%d8%a8%d9%8a%d8%a7%d9%86%d8%a7%d8%aa-%d8%ad%d9%88%d9%84-%d8%b7%d8%a7%d9%84%d8%a8-%d8%a7%d9%84%d8%ae%d8%af%d9%85%d8%a9/",
+        "local_file": null,
+        "fields": null
+      }
+    ],
+    "sha256": "f0ad3859c07a96bfb36fc7482030269396f83764e566c34696391608af2e7fec"
+  },
+  {
+    "order": 7,
+    "service": "Copie Conforme du Contrat de Vente, du Contrat Final ou Acte de Précision",
+    "path": "data/documents/services/copie-conforme/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [
+      {
+        "label": "formulaire selon le modèle fourni au demandeur du service",
+        "url": "https://www.afi.nat.tn/docs/%d8%a8%d9%8a%d8%a7%d9%86%d8%a7%d8%aa-%d8%ad%d9%88%d9%84-%d8%b7%d8%a7%d9%84%d8%a8-%d8%a7%d9%84%d8%ae%d8%af%d9%85%d8%a9/",
+        "local_file": null,
+        "fields": null
+      }
+    ],
+    "sha256": "59db43c11ec0583e0eda16e6bcd2cb897b9df54182d0e3dafedc0f0bf0d13262"
+  },
+  {
+    "order": 8,
+    "service": "Attestation de main levée",
+    "path": "data/documents/services/main-levee/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [
+      {
+        "label": "formulaire selon le modèle fourni au demandeur de services",
+        "url": "https://www.afi.nat.tn/docs/%d8%a8%d9%8a%d8%a7%d9%86%d8%a7%d8%aa-%d8%ad%d9%88%d9%84-%d8%b7%d8%a7%d9%84%d8%a8-%d8%a7%d9%84%d8%ae%d8%af%d9%85%d8%a9/",
+        "local_file": null,
+        "fields": null
+      }
+    ],
+    "sha256": "f9389ce0e6a6afabcf5431c695325e2f931ef7adbe50a46fea39cced0cc92893"
+  },
+  {
+    "order": 9,
+    "service": "Vente aux enchères publiques :",
+    "path": "data/documents/services/vente-encheres-publiques/fr.md",
+    "source_url": "https://www.afi.nat.tn/fr/nos-services/",
+    "retrieval_date": "2026-11-27",
+    "publication_date": null,
+    "language": "fr",
+    "original_page": null,
+    "downloaded_forms": null,
+    "arabic_version": null,
+    "forms": [],
+    "sha256": "ebf6898bce90e5b0c9639444496cb06c18321e55d4085d5412925f08a2927c67"
+  }
+]

@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "description": "Champs des formulaires officiels de l'AFI, relevés dans les PDF de data/documents/formulaire/. Lu par scripts/importer_formulaires.py ; aucune de ces informations n'est écrite dans le code. source = pdf_texte : libellé recopié du texte du PDF (contrôlé par tests/test_formulaires.py) ; pdf_image : recopié depuis l'image de la page, le texte du PDF étant illisible (à relire) ; traduction_equipe : traduction non officielle écrite par l'équipe. Catégories : projet (l'agent peut le demander et le préremplir), contact (saisi sur la page seulement, enregistré avec l'accord du client), non_enregistre (CIN, passeport, signature : jamais demandé ni enregistré), reserve_afi (rempli par l'AFI).",
+  "date": "2026-11-27",
+  "statut": "à relire par Safouen (libellés pdf_image et traductions)",
+  "formulaires": [
+    {
+      "code": "demande_acquisition",
+      "sections": [
+        {"code": "identification", "ordre": 1, "libelles": {
+          "fr": {"texte": "1-IDENTIFICATOIN DE L’ACQUEREUR", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "1-الباعث", "source": "pdf_image", "page": 1}}},
+        {"code": "nature_projet", "ordre": 2, "libelles": {
+          "fr": {"texte": "2-NATURE DE PROJET A RESALISER", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "2-المشروع المزمع انجازه", "source": "pdf_image", "page": 1}}},
+        {"code": "besoins", "ordre": 3, "libelles": {
+          "fr": {"texte": "3-BESOINS DU PROMOTEUR", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "3-حاجيات الباعث", "source": "pdf_image", "page": 1}}},
+        {"code": "declaration", "ordre": 4, "libelles": {
+          "fr": {"texte": "4-DEPOT DE DECLARATOIN (API) OU AUTRE ORGANISME", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "4-التصريح بالمشروع لدى وكالة النهوض بالصناعة او لدى مؤسسات اخرى حسب معطيات النشاط", "source": "pdf_image", "page": 2}}},
+        {"code": "investissement", "ordre": 5, "libelles": {
+          "fr": {"texte": "5-INVISTISSEMENT (DT)", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "5-حجم الاستثمار (د.ت)", "source": "pdf_image", "page": 2}}},
+        {"code": "financement", "ordre": 6, "libelles": {
+          "fr": {"texte": "6-FINANCEMENT", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "6-تمويل المشروع", "source": "pdf_image", "page": 2}}},
+        {"code": "environnement", "ordre": 7, "libelles": {
+          "fr": {"texte": "7-PROTECTION DE L’ENVIRONNEMNT", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "7-حماية المحيط", "source": "pdf_image", "page": 2}}},
+        {"code": "environnement_residus", "ordre": 8, "libelles": {
+          "fr": {"texte": "a-Résidus industriels (Indiquer les moyens d’évacuation des résidus prévus)", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "1- نوعية البقايا الصناعية", "source": "pdf_image", "page": 2}}},
+        {"code": "environnement_eaux", "ordre": 9, "libelles": {
+          "fr": {"texte": "b-Evacuation des eaux usées", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "2 – تصرف المياه المستعملة", "source": "pdf_image", "page": 2}}},
+        {"code": "environnement_incendie", "ordre": 10, "libelles": {
+          "fr": {"texte": "c-Protection incendie (Moyens de prévention et de lutte contre l’incendie)", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "3- الحماية من الحريق", "source": "pdf_image", "page": 2}}},
+        {"code": "signature", "ordre": 11, "libelles": {}}
+      ],
+      "champs": [
+        {"code": "nom_prenom", "section": "identification", "ordre": 1, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Nom & Prénom", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "الاسم واللقب", "source": "pdf_image", "page": 1}}},
+        {"code": "cin_numero", "section": "identification", "ordre": 2, "type": "texte", "categorie": "non_enregistre", "libelles": {
+          "fr": {"texte": "Carte d’identité nationale n°", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "رقم بطاقة التعريف", "source": "pdf_image", "page": 1}}},
+        {"code": "cin_date", "section": "identification", "ordre": 3, "type": "date", "categorie": "non_enregistre", "libelles": {
+          "fr": {"texte": "daté du", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "المؤرخة في", "source": "pdf_image", "page": 1}}},
+        {"code": "raison_sociale", "section": "identification", "ordre": 4, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Raison Social (société)", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "الاسم الجماعي (للشركة)", "source": "pdf_image", "page": 1}}},
+        {"code": "forme_juridique", "section": "identification", "ordre": 5, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Forme Juridique", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "الشكل القانوني", "source": "pdf_image", "page": 1}}},
+        {"code": "registre_commerce", "section": "identification", "ordre": 6, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Registre de Commerce n°", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "السجل التجاري : الرقم", "source": "pdf_image", "page": 1}}},
+        {"code": "taux_participation_tunisienne", "section": "identification", "ordre": 7, "type": "nombre", "categorie": "contact", "unite": "%", "libelles": {
+          "fr": {"texte": "Taux de participation tunisienne", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "نسبة المساهمة", "source": "pdf_image", "page": 1}}},
+        {"code": "taux_participation_non_residente", "section": "identification", "ordre": 8, "type": "nombre", "categorie": "contact", "unite": "%", "libelles": {
+          "fr": {"texte": "Taux de participation non résidente", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "الاجنبية", "source": "pdf_image", "page": 1}}},
+        {"code": "nationalite", "section": "identification", "ordre": 9, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Nationalité", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "الجنسية", "source": "pdf_image", "page": 1}}},
+        {"code": "passeport_numero", "section": "identification", "ordre": 10, "type": "texte", "categorie": "non_enregistre", "libelles": {
+          "fr": {"texte": "Passeport (étrangers) n°", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "رقم جواز السفر", "source": "pdf_image", "page": 1}}},
+        {"code": "adresse", "section": "identification", "ordre": 11, "type": "texte_long", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Adresse", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "العنوان", "source": "pdf_image", "page": 1}}},
+        {"code": "email", "section": "identification", "ordre": 12, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Adresse électronique", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "العنوان الالكتروني", "source": "pdf_image", "page": 1}}},
+        {"code": "telephone", "section": "identification", "ordre": 13, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Téléphone", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "الهاتف", "source": "pdf_image", "page": 1}}},
+        {"code": "fax", "section": "identification", "ordre": 14, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Fax", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "الفاكس", "source": "pdf_image", "page": 1}}},
+        {"code": "code_postal", "section": "identification", "ordre": 15, "type": "texte", "categorie": "contact", "libelles": {
+          "fr": {"texte": "Code postal (seulement sur la version arabe)", "source": "traduction_equipe"},
+          "ar": {"texte": "الترقيم البريدي", "source": "pdf_image", "page": 1}}},
+
+        {"code": "activite", "section": "nature_projet", "ordre": 16, "type": "texte_long", "categorie": "projet", "prerempli_depuis": ["projet.activite"], "libelles": {
+          "fr": {"texte": "Activité", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "طبيعة النشاط", "source": "pdf_image", "page": 1}}},
+        {"code": "nature", "section": "nature_projet", "ordre": 17, "type": "choix_unique", "categorie": "projet",
+         "choix": [
+           {"valeur": "creation", "libelles": {"fr": "Création", "ar": "احداث"}},
+           {"valeur": "extension", "libelles": {"fr": "Extension", "ar": "توسيع"}},
+           {"valeur": "transfert", "libelles": {"fr": "Transfert", "ar": "تحويل"}}],
+         "libelles": {
+          "fr": {"texte": "NATURE", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "نوعيته", "source": "pdf_image", "page": 1}}},
+        {"code": "regime", "section": "nature_projet", "ordre": 18, "type": "choix_unique", "categorie": "projet",
+         "choix": [
+           {"valeur": "local", "libelles": {"fr": "Local", "ar": "محلي"}},
+           {"valeur": "totalement_exportateur", "libelles": {"fr": "Totalement Exportateur", "ar": "مصدر كليا"}},
+           {"valeur": "partiellement_exportateur", "libelles": {"fr": "Partiellement Exportateur", "ar": "مصدر جزئيا"}}],
+         "libelles": {
+          "fr": {"texte": "REGIME", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "النظام", "source": "pdf_image", "page": 1}}},
+        {"code": "nombre_emplois", "section": "nature_projet", "ordre": 19, "type": "nombre", "categorie": "projet", "prerempli_depuis": ["projet.nombre_emplois"], "libelles": {
+          "fr": {"texte": "Nombre d’emploi à créer", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "عدد مواطن الشغل", "source": "pdf_image", "page": 1}}},
+
+        {"code": "lieu_implantation", "section": "besoins", "ordre": 20, "type": "texte", "categorie": "projet", "prerempli_depuis": ["lot.zone_nom", "projet.gouvernorat"], "libelles": {
+          "fr": {"texte": "Lieu D’implantation souhaité", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "مكان الانتصاب المطلوب", "source": "pdf_image", "page": 1}}},
+        {"code": "superficie_demandee", "section": "besoins", "ordre": 21, "type": "texte", "categorie": "projet", "prerempli_depuis": ["lot.surface_m2", "projet.surface_souhaitee_m2"], "libelles": {
+          "fr": {"texte": "Superficie demandée", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "مساحة قطعة الارض المطلوبة", "source": "pdf_image", "page": 1}}},
+        {"code": "superficie_construite", "section": "besoins", "ordre": 22, "type": "nombre", "categorie": "projet", "unite": "m²", "libelles": {
+          "fr": {"texte": "Superficie construite projetée (1)", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "المساحة المبنية (1)", "source": "pdf_image", "page": 1}}},
+        {"code": "superficie_phase1", "section": "besoins", "ordre": 23, "type": "nombre", "categorie": "projet", "unite": "m²", "libelles": {
+          "fr": {"texte": "en 1er phase", "aide": "30%", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "في مرحلة أولي", "aide": "(30%)", "source": "pdf_image", "page": 1}}},
+        {"code": "superficie_phase2", "section": "besoins", "ordre": 24, "type": "nombre", "categorie": "projet", "unite": "m²", "libelles": {
+          "fr": {"texte": "En 2eme phase", "aide": "20%", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "في مرحلة ثانية", "aide": "(20%)", "source": "pdf_image", "page": 1}}},
+        {"code": "puissance_kva", "section": "besoins", "ordre": 25, "type": "nombre", "categorie": "projet", "unite": "KVA", "libelles": {
+          "fr": {"texte": "Puissance installée en KVA", "aide": "(Norme AFI =100 Kva/Ha)", "source": "pdf_texte", "page": 1},
+          "ar": {"texte": "التزود بالطاقة الكهربائية بحساب KVA", "aide": "(توفر الوكالة KVA 100/ هكتار)", "source": "pdf_image", "page": 2}}},
+        {"code": "consommation_eau", "section": "besoins", "ordre": 26, "type": "nombre", "categorie": "projet", "unite": "m³/jour", "libelles": {
+          "fr": {"texte": "Consommation moyenne journalière en m3", "aide": "(Norme AFI= 40m3/jours/Ha)", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "التزواد بالماء الصالح للشراب : معدل استهلاك اليومي بحساب المتر المربع المكعب", "aide": "(توفر الوكالة40 م3 في اليوم للهكتار الواحد)", "source": "pdf_image", "page": 2}}},
+
+        {"code": "declaration_nature", "section": "declaration", "ordre": 27, "type": "texte", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Nature", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "نوعيته", "source": "pdf_image", "page": 2}}},
+        {"code": "declaration_numero", "section": "declaration", "ordre": 28, "type": "texte", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Numéro", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "الرقم", "source": "pdf_image", "page": 2}}},
+        {"code": "declaration_date", "section": "declaration", "ordre": 29, "type": "date", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Date (seulement sur la version arabe)", "source": "traduction_equipe"},
+          "ar": {"texte": "التاريخ", "source": "pdf_image", "page": 2}}},
+
+        {"code": "investissement", "section": "investissement", "ordre": 30, "type": "montant", "categorie": "projet", "unite": "DT", "prerempli_depuis": ["projet.investissement_dt"], "libelles": {
+          "fr": {"texte": "INVISTISSEMENT (DT)", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "حجم الاستثمار (د.ت)", "source": "pdf_image", "page": 2}}},
+
+        {"code": "fonds_propres", "section": "financement", "ordre": 31, "type": "montant", "categorie": "projet", "unite": "DT", "libelles": {
+          "fr": {"texte": "Fond Propre", "aide": "montant", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "تمويل ذاتي", "aide": "المبلغ", "source": "pdf_image", "page": 2}}},
+        {"code": "credit_bancaire", "section": "financement", "ordre": 32, "type": "montant", "categorie": "projet", "unite": "DT", "libelles": {
+          "fr": {"texte": "Crédit bancaire", "aide": "montant", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "قرض بنكي", "aide": "المبلغ", "source": "pdf_image", "page": 2}}},
+        {"code": "financement_autres", "section": "financement", "ordre": 33, "type": "montant", "categorie": "projet", "unite": "DT", "libelles": {
+          "fr": {"texte": "Autres", "aide": "montant", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "او مصادر اخرى", "aide": "المبلغ", "source": "pdf_image", "page": 2}}},
+
+        {"code": "residus_solides", "section": "environnement_residus", "ordre": 34, "type": "texte", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Résidus solides", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "صلبة", "source": "pdf_image", "page": 2}}},
+        {"code": "residus_liquides", "section": "environnement_residus", "ordre": 35, "type": "texte", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Résidus Liquides", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "سائلة", "source": "pdf_image", "page": 2}}},
+        {"code": "residus_gazeux", "section": "environnement_residus", "ordre": 36, "type": "texte", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Resideux Gazeux", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "غازية", "source": "pdf_image", "page": 2}}},
+        {"code": "eaux_residuelles", "section": "environnement_eaux", "ordre": 37, "type": "texte_long", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Caractéristiques des eaux résiduelles", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "خصائص بقايا المياه", "source": "pdf_image", "page": 2}}},
+        {"code": "traitement_avant_rejet", "section": "environnement_eaux", "ordre": 38, "type": "texte_long", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Caractéristiques des traitements avant rejet", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "طرق تصرف المياه قبل تصرفها", "source": "pdf_image", "page": 2}}},
+        {"code": "type_extincteurs", "section": "environnement_incendie", "ordre": 39, "type": "texte", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Type d’extincteurs", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "نوع مطفئ الحريق", "source": "pdf_image", "page": 2}}},
+        {"code": "nombre_extincteurs", "section": "environnement_incendie", "ordre": 40, "type": "nombre", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Nombre", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "العدد", "source": "pdf_image", "page": 2}}},
+
+        {"code": "fait_a", "section": "signature", "ordre": 41, "type": "texte", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Fait à", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "حرر بـ", "source": "pdf_image", "page": 2}}},
+        {"code": "date_signature", "section": "signature", "ordre": 42, "type": "date", "categorie": "projet", "libelles": {
+          "fr": {"texte": "Le", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "في", "source": "pdf_image", "page": 2}}},
+        {"code": "signature_promoteur", "section": "signature", "ordre": 43, "type": "texte", "categorie": "non_enregistre", "libelles": {
+          "fr": {"texte": "Le promoteur", "source": "pdf_texte", "page": 2},
+          "ar": {"texte": "امضاء الباعث", "source": "pdf_image", "page": 2}}}
+      ],
+      "mentions": [
+        {"langue": "fr", "section": "besoins", "ordre": 1, "source": "pdf_texte", "page": 1, "texte": "(1) D’une façon générale la superficie construite su sol (COS) doit être comprise entre un minium de 30% et un maximum de 50% de la sufrace du terrain"},
+        {"langue": "fr", "section": "besoins", "ordre": 2, "source": "pdf_texte", "page": 1, "texte": "La superficie du rez de chaussée et des étages réunis (CUF) ne doit pas dépasser 1,5 de la surface du terrain"},
+        {"langue": "fr", "section": "besoins", "ordre": 3, "source": "pdf_texte", "page": 1, "texte": "* Les retraits exigés : 10métres sur la (Les) façades (s) et de 5mtres à parti des clôtures séparatives avec les voisins"},
+        {"langue": "fr", "section": "besoins", "ordre": 4, "source": "pdf_texte", "page": 1, "texte": "Toutesfois, il y a lieu de conformer au cahiers des charges spécifiques de la zone industrielle d’implantation"},
+        {"langue": "fr", "section": "signature", "ordre": 1, "source": "pdf_texte", "page": 2, "texte": "Important : Le promoteur est tenu de confirmer sa demande au bout de 6 mois à dater de la présente"},
+        {"langue": "fr", "section": "signature", "ordre": 2, "source": "pdf_texte", "page": 2, "texte": "REMARQUE : La présente fiche sera remise à l’AFI dûment remplie accompagnée d’une copie de la carte d’identité"},
+        {"langue": "ar", "section": "besoins", "ordre": 1, "source": "pdf_image", "page": 1, "texte": "(1) بصفة عامة يكون استغلال الارض المقتناة كالاتي :"},
+        {"langue": "ar", "section": "besoins", "ordre": 2, "source": "pdf_image", "page": 1, "texte": "لا يجب ان تتعدى المساحة المبنية (COS) من مساحة قطعة الارض وان لا تقل عن 30%"},
+        {"langue": "ar", "section": "besoins", "ordre": 3, "source": "pdf_image", "page": 1, "texte": "لا يجب ان تتعدى المساحة المبنية ( الطوابق العلوي والطوابق مجتمعة (CUF) مرة ونصف من مساحة الارض الجملية"},
+        {"langue": "ar", "section": "besoins", "ordre": 4, "source": "pdf_image", "page": 1, "texte": "الارتفاع على الطوابق (retrait) : 10 امتار من الواجهة و5 امتار من السياج الفاصل للأجوار"},
+        {"langue": "ar", "section": "besoins", "ordre": 5, "source": "pdf_image", "page": 1, "texte": "الا ان المشتري مطالب باحترام كراس الشروط الخاصة بالمنطقة الصناعية التي سنجز بها المشروع"},
+        {"langue": "ar", "section": "signature", "ordre": 1, "source": "pdf_image", "page": 2, "texte": "هام : يتوجب على الباعث تأكيد طلبه في أجل ستة أشهر من تاريخ هذا الطلب"},
+        {"langue": "ar", "section": "signature", "ordre": 2, "source": "pdf_image", "page": 2, "texte": "ملاحظة : تسلم هذه الوثيقة الى الوكالة مستوفاة البيانات ومرفوقة بنسخة من بطاقة التعريف الوطنية"}
+      ]
+    },
+    {
+      "code": "demande_service_administratif",
+      "sections": [
+        {"code": "demandeur", "ordre": 1, "libelles": {
+          "ar": {"texte": "بيانات حول طالب الخدمة", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Renseignements sur le demandeur du service", "source": "traduction_equipe"}}},
+        {"code": "document", "ordre": 2, "libelles": {
+          "ar": {"texte": "بيانات حول الوثيقة الإدارية موضوع المطلب", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Renseignements sur le document administratif demandé", "source": "traduction_equipe"}}},
+        {"code": "complement", "ordre": 3, "libelles": {
+          "ar": {"texte": "بيانات إضافية حول المطلب", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Renseignements complémentaires sur la demande", "source": "traduction_equipe"}}},
+        {"code": "recu", "ordre": 4, "libelles": {
+          "ar": {"texte": "وصل إيداع مطلب", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Récépissé de dépôt de la demande", "source": "traduction_equipe"}}}
+      ],
+      "champs": [
+        {"code": "nom_ou_raison_sociale", "section": "demandeur", "ordre": 1, "type": "texte", "categorie": "contact", "libelles": {
+          "ar": {"texte": "الإسم واللقب / الإسم الإجتماعي", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Nom et prénom / raison sociale", "source": "traduction_equipe"}}},
+        {"code": "adresse_ou_siege", "section": "demandeur", "ordre": 2, "type": "texte_long", "categorie": "contact", "libelles": {
+          "ar": {"texte": "العنوان / المقر الإجتماعي", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Adresse / siège social", "source": "traduction_equipe"}}},
+        {"code": "cin_numero", "section": "demandeur", "ordre": 3, "type": "texte", "categorie": "non_enregistre", "libelles": {
+          "ar": {"texte": "ب. ت. و. رقم", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "N° de la carte d’identité nationale", "source": "traduction_equipe"}}},
+        {"code": "email", "section": "demandeur", "ordre": 4, "type": "texte", "categorie": "contact", "libelles": {
+          "ar": {"texte": "العنوان الإلكتروني", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Adresse électronique", "source": "traduction_equipe"}}},
+        {"code": "telephone", "section": "demandeur", "ordre": 5, "type": "texte", "categorie": "contact", "libelles": {
+          "ar": {"texte": "الهاتف القار / الجوّال", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Téléphone fixe / mobile", "source": "traduction_equipe"}}},
+        {"code": "objet_demande", "section": "demandeur", "ordre": 6, "type": "texte_long", "categorie": "projet", "libelles": {
+          "ar": {"texte": "الغاية من طلب الوثيقة", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Objet de la demande du document", "source": "traduction_equipe"}}},
+        {"code": "date_demande", "section": "demandeur", "ordre": 7, "type": "date", "categorie": "projet", "libelles": {
+          "ar": {"texte": "تاريخ المطلب", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Date de la demande", "source": "traduction_equipe"}}},
+        {"code": "signature_demandeur", "section": "demandeur", "ordre": 8, "type": "texte", "categorie": "non_enregistre", "libelles": {
+          "ar": {"texte": "إمضاء طالب الخدمة", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Signature du demandeur", "source": "traduction_equipe"}}},
+
+        {"code": "document_demande", "section": "document", "ordre": 9, "type": "choix_unique", "categorie": "projet",
+         "choix": [
+           {"valeur": "1", "libelles": {"ar": "شهادة في الوضعية العقارية", "fr": "Attestation de situation foncière"}},
+           {"valeur": "2", "libelles": {"ar": "إلتزام بإدراج رهن", "fr": "Engagement d’insertion d’hypothèque"}},
+           {"valeur": "3", "libelles": {"ar": "شهادة في رفع اليد", "fr": "Attestation de mainlevée"}},
+           {"valeur": "4", "libelles": {"ar": "كتب توضيحي / عقد نهائي", "fr": "Acte de précision / contrat final"}},
+           {"valeur": "5", "libelles": {"ar": "ترخيص بالبيع (خاص بمؤسسات الإيجار المالي)", "fr": "Autorisation de vente (réservée aux sociétés de leasing)"}},
+           {"valeur": "6", "libelles": {"ar": "نسخة مطابقة للأصل من وثائق رسمية (وعد أو عقد بيع، كتب توضيحي، كتب تكميلي، عقد نهائي....)", "fr": "Copie conforme de documents officiels (promesse ou contrat de vente, acte de précision, acte complémentaire, contrat final…)"}}],
+         "libelles": {
+          "ar": {"texte": "إسم الوثيقة", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Document demandé", "source": "traduction_equipe"}}},
+        {"code": "zone_industrielle", "section": "document", "ordre": 10, "type": "texte", "categorie": "projet", "prerempli_depuis": ["lot.zone_nom"], "libelles": {
+          "ar": {"texte": "المنطقة الصناعية", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Zone industrielle", "source": "traduction_equipe"}}},
+        {"code": "numero_lot", "section": "document", "ordre": 11, "type": "texte", "categorie": "projet", "prerempli_depuis": ["lot.numero"], "libelles": {
+          "ar": {"texte": "عدد المقسم", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "N° du lot", "source": "traduction_equipe"}}},
+
+        {"code": "informations_complementaires", "section": "complement", "ordre": 12, "type": "texte_long", "categorie": "projet", "libelles": {
+          "ar": {"texte": "بيانات إضافية حول المطلب", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Renseignements complémentaires", "source": "traduction_equipe"}}},
+
+        {"code": "recu_nom", "section": "recu", "ordre": 13, "type": "texte", "categorie": "reserve_afi", "libelles": {
+          "ar": {"texte": "الإسم و اللقب / الإسم الإجتماعي", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Nom et prénom / raison sociale", "source": "traduction_equipe"}}},
+        {"code": "recu_zone", "section": "recu", "ordre": 14, "type": "texte", "categorie": "reserve_afi", "libelles": {
+          "ar": {"texte": "المنطقة الصناعية", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Zone industrielle", "source": "traduction_equipe"}}},
+        {"code": "recu_lot", "section": "recu", "ordre": 15, "type": "texte", "categorie": "reserve_afi", "libelles": {
+          "ar": {"texte": "عدد المقسم", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "N° du lot", "source": "traduction_equipe"}}},
+        {"code": "recu_document", "section": "recu", "ordre": 16, "type": "texte", "categorie": "reserve_afi", "libelles": {
+          "ar": {"texte": "الوثيقة المطلوبة", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Document demandé", "source": "traduction_equipe"}}},
+        {"code": "recu_date_cachet", "section": "recu", "ordre": 17, "type": "texte", "categorie": "reserve_afi", "libelles": {
+          "ar": {"texte": "تاريخ إيداع المطلب و الختم", "source": "pdf_texte", "page": 1},
+          "fr": {"texte": "Date de dépôt de la demande et cachet", "source": "traduction_equipe"}}}
+      ],
+      "mentions": [
+        {"langue": "ar", "section": "document", "ordre": 1, "source": "pdf_texte", "page": 1, "texte": "(*) تلغى المطالب المذكورة إذا لم تكن مرفقة وجوبا بالوثائق التالية :"},
+        {"langue": "ar", "section": "document", "ordre": 2, "source": "pdf_texte", "page": 1, "si": {"champ": "document_demande", "valeur": "1"}, "texte": "1 * نسخة من عقد بيع مسجل / مطلب معلل / مبلغ 50 د معلوم الشهادة (يكون خلاص المعلوم عند تقديم المطلب)"},
+        {"langue": "ar", "section": "document", "ordre": 3, "source": "pdf_texte", "page": 1, "si": {"champ": "document_demande", "valeur": "2"}, "texte": "2 * مطلب / نسخة مطابقة للأصل من عقد بيع مسجل / موافقة مبدئية من البنك (نسخة قانونية) أو نسخة مطابقة للأصل من عقد قرض مسجل (شهادة الدخول في طور الإنتاج لمن تجاوزت عقودهم 3 سنوات ) / مبلغ 50د معلوم الإلتزام."},
+        {"langue": "ar", "section": "document", "ordre": 4, "source": "pdf_texte", "page": 1, "si": {"champ": "document_demande", "valeur": "3"}, "texte": "3 * مطلب / نسخة مطابقة للأصل من كتب توضيحي مسجل / مضمون من السجل التجاري / شهادة ملكية حديثة العهد / مثال كتل البناء من طرف خبير مساح (plan de masse) / تصريح على الشرف بخصوص الرهون معرف به / وصل خلاص مجمع الصيانة والتصرف / شهادة الدخول في طور الإنتاج / مبلغ 50د معلوم الشهادة."},
+        {"langue": "ar", "section": "document", "ordre": 5, "source": "pdf_texte", "page": 1, "si": {"champ": "document_demande", "valeur": "4"}, "texte": "4 * مطلب / نسخة مطابقة للإصل من عقد بيع مسجل / الوثائق القانونية المحينة للشركة (مصحوبة بقائمة الشركاء الجدد) / نسخة من ب. ت .و بالنسبة للذوات الطبيعية / محضر معاينة رسمية لإنتهاء الأشغال عن طريق عدل منفذ+صور / تصريح على الشرف بخصوص الرهون مصرح به / وصل خلاص مجمع الصيانة والتصرف / مبلغ 150 د معلوم تسليم الكتب الأصلي."},
+        {"langue": "ar", "section": "document", "ordre": 6, "source": "pdf_texte", "page": 1, "si": {"champ": "document_demande", "valeur": "5"}, "texte": "5 * مطلب / نسخة مطابقة للاصل من عقد بيع مسجل / نسخة قانونية من عقد القرض مسجل / محضر معاينة رسمية عن طريق عدل منفذ+صور / شهادة نهاية الاشغال لدى بلدية الامكان / وصل خلاص معاليم مجمع الصيانة والتصرف."},
+        {"langue": "ar", "section": "document", "ordre": 7, "source": "pdf_texte", "page": 1, "si": {"champ": "document_demande", "valeur": "6"}, "texte": "6 * مطلب / نسخة من وثائق تثبت هوية طالب الخدمة / مبلغ 15د معلوم النسخة المطابقة للأصل (يكون خلاص المعلوم عند تقديم المطلب)"}
+      ]
+    }
+  ]
+}

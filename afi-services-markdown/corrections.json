@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "description": "Corrections et signalements appliqués aux brouillons importés, chacun avec sa preuve (page enregistrée et citation). Lu par scripts/corriger_brouillons.py. Les textes français nouveaux sont des traductions non officielles.",
+  "date": "2026-11-27",
+  "decision": "Choix « Corriger » de Safouen le 2026-11-27 pour la mainlevée et l'hypothèque ; les autres écarts sont signalés sans changer le texte.",
+  "preuves": [
+    {
+      "cle": "afi_nos_services_ar",
+      "organisation": "AFI",
+      "title": "خدماتنا",
+      "url": "https://www.afi.nat.tn/%d8%ae%d8%af%d9%85%d8%a7%d8%aa%d9%86%d8%a7/",
+      "langue": "ar",
+      "fichier": "data/documents/pages/nos-services-ar-2026-11-27.html",
+      "sha256": "0b66a6cb1aad0335d3e0a563a70c046282f624b94121407f79ab295cebfd5896",
+      "collecte": "2026-11-27"
+    },
+    {
+      "cle": "afi_nos_services",
+      "organisation": "AFI",
+      "title": "Nos services",
+      "url": "https://www.afi.nat.tn/fr/nos-services/",
+      "langue": "fr",
+      "fichier": "data/documents/pages/nos-services-fr-2026-11-27.html",
+      "sha256": "8602b48ab5b5bf3718f0dbe5b7b4207c71f0e81a18eddbed61eee2707bf4a5b4",
+      "collecte": "2026-11-27"
+    }
+  ],
+  "corrections": [
+    {
+      "action": "remplacer",
+      "parcours": "insertion-hypotheque",
+      "type": "etape",
+      "avant": "Préparation du certificat : Suite à l’approbation du comité chargé d’examiner les documents administratifs, le Département des Affaires Commerciales prépare les livres explicatifs ou le contrat final et le soumet à l’approbation de la direction générale.",
+      "apres": "Préparation du certificat : Suite à l’approbation du comité chargé d’examiner les documents administratifs, le Département des Affaires Commerciales prépare le certificat et le soumet à l’approbation de la direction générale.",
+      "note": "Corrigé d'après la page arabe de l'AFI : la page française parle de « livres explicatifs » ou de « contrat final » au lieu du certificat. Traduction non officielle, à confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "تقوم إدارة الشؤون التجارية بإعداد الشهادة وعرضها على الإدارة العامة للإمضاء"
+    },
+    {
+      "action": "remplacer",
+      "parcours": "main-levee",
+      "type": "etape",
+      "avant": "Préparation du certificat : Suite à l’approbation du comité chargé d’examiner les documents administratifs, le Département des Affaires Commerciales prépare les livres explicatifs ou le contrat final et le soumet à l’approbation de la direction générale.",
+      "apres": "Préparation du certificat : Suite à l’approbation du comité chargé d’examiner les documents administratifs, le Département des Affaires Commerciales prépare le certificat et le soumet à l’approbation de la direction générale.",
+      "note": "Corrigé d'après la page arabe de l'AFI : la page française parle de « livres explicatifs » ou de « contrat final » au lieu du certificat. Traduction non officielle, à confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "تقوم إدارة الشؤون التجارية بإعداد الشهادة وعرضها على الإدارة العامة للإمضاء"
+    },
+    {
+      "action": "remplacer",
+      "parcours": "main-levee",
+      "type": "etape",
+      "avant": "Paiement des frais : Paiement des frais de préparation des livres explicatifs ou du contrat final, s’élevant à 50 dinars.",
+      "apres": "Paiement des frais : Paiement des frais du certificat, s’élevant à 50 dinars.",
+      "note": "Corrigé d'après la page arabe de l'AFI : la page française parle de « livres explicatifs » ou de « contrat final » au lieu du certificat. Traduction non officielle, à confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "خلاص معلوم الشهادة بمبلغ 50د"
+    },
+    {
+      "action": "remplacer",
+      "parcours": "main-levee",
+      "type": "frais",
+      "avant": "Paiement des frais : Paiement des frais de préparation des livres explicatifs ou du contrat final, s’élevant à 50 dinars.",
+      "apres": "Paiement des frais : Paiement des frais du certificat, s’élevant à 50 dinars.",
+      "note": "Corrigé d'après la page arabe de l'AFI : la page française parle de « livres explicatifs » ou de « contrat final » au lieu du certificat. Traduction non officielle, à confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "خلاص معلوم الشهادة بمبلغ 50د"
+    },
+    {
+      "action": "remplacer",
+      "parcours": "main-levee",
+      "type": "etape",
+      "avant": "Remise des livres explicatifs ou du contrat final : Après vérification de l’accomplissement de toutes les conditions, les livres explicatifs ou le contrat final sont remis au demandeur du service.",
+      "apres": "Remise du certificat : Après vérification de l’accomplissement de toutes les conditions, le certificat est remis au demandeur du service.",
+      "note": "Corrigé d'après la page arabe de l'AFI : la page française parle de « livres explicatifs » ou de « contrat final » au lieu du certificat. Traduction non officielle, à confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "بعد التثبت من استفاء جميع الشروط يتم تسليم شهادة إلى طالب الخدمة"
+    },
+    {
+      "action": "ajouter",
+      "parcours": "main-levee",
+      "type": "piece",
+      "apres": "Reçu de paiement des frais du certificat, d’un montant de 50 dinars (Agence Foncière Industrielle)",
+      "note": "Ajouté d'après la page arabe de l'AFI et le formulaire de demande de service administratif : cette pièce manque dans la liste française. Traduction non officielle, à confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "وصل خلاص الشهادة مبلغ 50د"
+    },
+    {
+      "action": "signaler",
+      "parcours": "main-levee",
+      "type": "piece",
+      "avant": "Une déclaration sur l’honneur de ne pas hypothéquer la propriété, avec signature (Demandeur de Services)",
+      "note": "La page arabe et le formulaire demandent une signature légalisée. La page française dit seulement « avec signature ». À confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "تصريح على الشرف لعدم توظيف رهون على المقسم معرف بإمضائه"
+    },
+    {
+      "action": "signaler",
+      "parcours": "main-levee",
+      "type": "piece",
+      "avant": "Une copie conforme d’un acte de précision enregistrés (demandeur de service)",
+      "note": "La page arabe accepte le contrat de vente ou l'acte de précision enregistré ; la page française et le formulaire citent seulement l'acte de précision. À confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "نسخة مطابقة للأصل من عقد بيع أو كتب توضيحي مسجل"
+    },
+    {
+      "action": "signaler",
+      "parcours": "acte-precision-contrats-finaux",
+      "type": "piece",
+      "avant": "7. Une déclaration sur l’honneur de ne pas hypothéquer la propriété, avec signature **(Demandeur de Services)**",
+      "note": "La page arabe demande une signature légalisée ; la page française dit « avec signature » et le formulaire dit seulement que la déclaration est faite sur l'honneur. À confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "تصريح على الشرف لعدم توظيف رهون على المقسم معرف بإمضائه"
+    },
+    {
+      "action": "signaler",
+      "parcours": "acte-precision-contrats-finaux",
+      "type": "etape",
+      "avant": "Dépôt de la demande : L’initiateur dépose une demande d’acquisition d’un lot industriel au bureau d’enregistrement central de l’agence, ou dans l’une des délégations ou représentations régionales, en remplissant le « formulaire de demande » disponible sur le site web de l’agence www.afi.nat.tn.",
+      "note": "La page de l'AFI reprend ici la procédure d'achat d'un lot, alors que les documents demandés pour ce service comprennent le contrat de vente déjà enregistré. À confirmer avec l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "يودع الباعث مطلب اقتناء مقسم صناعي بمكتب الضبط المركزي للوكالة"
+    },
+    {
+      "action": "signaler",
+      "parcours": "acte-precision-contrats-finaux",
+      "type": "etape",
+      "avant": "Attribution du lot : Le procès-verbal est présenté à la commission d’attribution de l’agence pour examen du dossier. Une lettre d’attribution est préparée par les services de la direction des affaires commerciales, indiquant la superficie du lot et le prix de vente, avec une période de trente (30) jours accordée à l’initiateur à partir de la date d’émission de la correspondance pour le règlement du prix du lot.",
+      "note": "La page de l'AFI reprend ici la procédure d'achat d'un lot, alors que les documents demandés pour ce service comprennent le contrat de vente déjà enregistré. À confirmer avec l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "يعرض المحضر على أنظار لجنة الإسناد بالوكالة لدراسة الملف"
+    },
+    {
+      "action": "signaler",
+      "parcours": "acte-precision-contrats-finaux",
+      "type": "etape",
+      "avant": "Établissement du lot : Après le règlement du prix du lot attribué à l’initiateur selon la lettre d’attribution, les services de la direction des affaires commerciales préparent une demande d’établissement du lot. Un exemple et un procès-verbal d’établissement sont préparés par le géomètre de la direction des affaires immobilières pour la préparation du contrat de vente.",
+      "note": "La page de l'AFI reprend ici la procédure d'achat d'un lot, alors que les documents demandés pour ce service comprennent le contrat de vente déjà enregistré. À confirmer avec l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "عند خلاص ثمن المقسم المسند للباعث بمقتضى رسالة الإسناد"
+    },
+    {
+      "action": "signaler",
+      "parcours": "acte-precision-contrats-finaux",
+      "type": "etape",
+      "avant": "Préparation et signature du contrat de vente : Après réception de l’exemple et du procès-verbal d’établissement et vérification du règlement du prix du lot ainsi que de toutes les dépenses qui y sont liées, le contrat de vente est préparé par le service de vente de la direction des affaires commerciales. Il est ensuite soumis à la signature de l’avocat de l’agence avant d’être remis à l’initiateur pour signature à la mairie, avant d’être présenté au directeur général pour signature au gouvernorat.",
+      "note": "La page de l'AFI reprend ici la procédure d'achat d'un lot, alors que les documents demandés pour ce service comprennent le contrat de vente déjà enregistré. À confirmer avec l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "بعد توصل مصالح الإدارة التجارية بمثال ومحضر التوتيد"
+    },
+    {
+      "action": "signaler",
+      "parcours": "insertion-hypotheque",
+      "type": "etape",
+      "avant": "Paiement de la Redevance : Paiement de la redevance du certificat, d’un montant de 50 Dinar.",
+      "note": "La page place le paiement des 50 DT après l'accord du comité ; le formulaire les cite parmi les pièces à joindre obligatoirement à la demande. À confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "خلاص المعلوم : خلاص معلوم الشهادة 50د"
+    },
+    {
+      "action": "signaler",
+      "parcours": "vente-encheres-publiques",
+      "type": "condition",
+      "avant": "Le Président Directeur Général (PDG) de l’agence doit approuver le procès-verbal de vente, régler le prix de vente et tous les frais liés au lot.",
+      "note": "La page arabe cite l'approbation du procès-verbal par le PDG, et le paiement du prix et des frais du lot. La phrase française peut faire croire que c'est le PDG qui paie. À confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "مصادقة الرئيس المدير العام للوكالة على محضر البيع وخلاص ثمن البيع وجميع المصاريف المتعلقة بالمقسم"
+    },
+    {
+      "action": "signaler",
+      "parcours": "situation-fonciere",
+      "type": "piece",
+      "avant": "[Formulaire](https://www.afi.nat.tn/fr/docs/demande-dacquisition/) dûment complété, fourni par l’agence.",
+      "note": "La page française renvoie au formulaire de demande d'acquisition ; la page arabe renvoie à la fois à la demande de service administratif et à la demande d'acquisition. Formulaire retenu : demande de service administratif. À confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "تعمير الإستمارة وفق الأنموذج الموضوع على ذمة طالب الخدمة"
+    },
+    {
+      "action": "signaler",
+      "parcours": "situation-fonciere",
+      "type": "piece",
+      "avant": "Copie conforme du contrat de vente enregistré ou des livres explicatifs ou complémentaires, si la parcelle est située dans une zone industrielle déjà liquidée sur le plan foncier.",
+      "note": "La page ne demande cette copie que pour une zone dont la situation foncière est réglée ; le formulaire de demande de service administratif la demande sans cette condition. À confirmer par l'AFI.",
+      "preuve": "afi_nos_services_ar",
+      "citation": "إذا تعلق المطلب بمقسم كائن بمنطقة صناعية تمت تصفيتها عقاريا"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+// Textes de l'interface (pas des données AFI : les libellés des formulaires viennent de l'API).
+
+const fr = {
+  chargement: 'Chargement du formulaire…',
+  erreurChargement: 'Le formulaire n’a pas pu être chargé.',
+  introuvable: 'Ce formulaire n’existe pas ou n’est pas disponible en ligne.',
+  pasDeParcours: 'Ouvrez cette page depuis le lien donné par Dalila.',
+  bandeau: 'Préparation de votre demande. Ce n’est pas le dépôt officiel : déposez le formulaire signé à l’AFI.',
+  etapes: ['Remplir', 'Relire', 'Envoyé'],
+  langueFormulaire: 'Langue du formulaire officiel',
+  traductionNonOfficielle: 'traduction non officielle',
+  saisieIci: 'saisi ici seulement',
+  nonEnregistre: 'à écrire à la main sur le papier imprimé — jamais enregistré',
+  reserveAfi: 'réservé à l’AFI',
+  impose: 'fixé par le service choisi',
+  prerempli: 'prérempli par Dalila',
+  relire: 'Relire ma demande',
+  modifier: 'Modifier',
+  imprimer: 'Télécharger / imprimer',
+  imprimerAide: 'Dans la fenêtre d’impression, choisissez « Enregistrer en PDF » pour garder une copie.',
+  vide: '(vide)',
+  projet: 'Votre projet',
+  contact: 'Vos coordonnées',
+  aucunContact: 'Ajoutez au moins un moyen de vous joindre pour pouvoir envoyer la demande à l’AFI.',
+  envoyer: 'Envoyer à l’AFI',
+  envoiEnCours: 'Envoi…',
+  envoyeTitre: 'Demande envoyée à l’AFI',
+  reference: 'Référence',
+  rappelDepot: 'Ce n’est pas encore le dépôt officiel. Imprimez le formulaire, signez-le, et déposez-le à l’AFI avec les pièces demandées.',
+  sourceService: 'Fiche du service sur le site de l’AFI',
+  pdfVierge: 'Formulaire officiel vierge (PDF)',
+  avertissements: 'À savoir',
+  lots: 'Lot(s) concerné(s)',
+  erreurs: {
+    contact_requis: 'Ajoutez au moins un moyen de vous joindre.',
+    consentement_requis: 'Cochez l’accord pour envoyer vos coordonnées.',
+    champ_refuse: 'Un champ ne peut pas être envoyé.',
+    valeur_trop_longue: 'Un texte est trop long.',
+    valeur_invalide: 'Un champ contient des caractères non autorisés.',
+    nombre_attendu: 'Un nombre est attendu.',
+    date_attendue: 'Une date est attendue.',
+    choix_inconnu: 'Un choix n’est pas valable.',
+    valeur_imposee: 'Une valeur fixée par le service a été modifiée.',
+    lot_introuvable: 'Un lot n’existe plus.',
+    envoi_indisponible: 'L’envoi est indisponible pour le moment. Vous pouvez imprimer le formulaire.',
+    donnees_indisponibles: 'Service indisponible pour le moment. Réessayez plus tard.',
+    inconnu: 'L’envoi a échoué.',
+  } as Record<string, string>,
+  avert: {
+    point_a_verifier: 'À confirmer auprès de l’AFI',
+    lot_non_disponible: 'Ce lot n’est pas disponible pour ce service',
+    lot_introuvable: 'Lot introuvable',
+    donnee_non_fraiche: 'Disponibilité à reconfirmer auprès de l’AFI',
+    prix_indicatif: 'Prix indicatif (données du 13/11/2026)',
+    prix_ecart_site_public: 'Le site de l’AFI affichait un autre prix : à vérifier',
+    valeur_non_preremplie: 'Les lots choisis diffèrent : à remplir vous-même',
+    gouvernorat_non_reconnu: 'Gouvernorat non reconnu',
+    lot_orphelin: 'Lot sans zone connue',
+    statut_inconnu: 'Pas d’information sur ce lot',
+  } as Record<string, string>,
+}
+
+const ar: typeof fr = {
+  chargement: 'جارٍ تحميل المطلب…',
+  erreurChargement: 'تعذّر تحميل المطلب.',
+  introuvable: 'هذا المطلب غير موجود أو غير متوفر على الإنترنت.',
+  pasDeParcours: 'افتح هذه الصفحة من الرابط الذي قدّمته دليلة.',
+  bandeau: 'إعداد مطلبك. هذا ليس الإيداع الرسمي: أودِع المطلب الممضى لدى الوكالة العقارية الصناعية.',
+  etapes: ['التعمير', 'المراجعة', 'تمّ الإرسال'],
+  langueFormulaire: 'لغة المطلب الرسمي',
+  traductionNonOfficielle: 'ترجمة غير رسمية',
+  saisieIci: 'يُدخل هنا فقط',
+  nonEnregistre: 'يُكتب بخط اليد على النسخة المطبوعة — لا يُسجَّل أبدًا',
+  reserveAfi: 'خاص بالوكالة',
+  impose: 'محدّد حسب الخدمة المختارة',
+  prerempli: 'عمّرته دليلة مسبقًا',
+  relire: 'مراجعة مطلبي',
+  modifier: 'تعديل',
+  imprimer: 'تحميل / طباعة',
+  imprimerAide: 'في نافذة الطباعة، اختر « حفظ بصيغة PDF » للاحتفاظ بنسخة.',
+  vide: '(فارغ)',
+  projet: 'مشروعك',
+  contact: 'بيانات الاتصال',
+  aucunContact: 'أضف وسيلة اتصال واحدة على الأقل لإرسال المطلب إلى الوكالة.',
+  envoyer: 'إرسال إلى الوكالة',
+  envoiEnCours: 'جارٍ الإرسال…',
+  envoyeTitre: 'تمّ إرسال المطلب إلى الوكالة',
+  reference: 'المرجع',
+  rappelDepot: 'هذا ليس الإيداع الرسمي بعد. اطبع المطلب وأمضِه وأودِعه لدى الوكالة مع الوثائق المطلوبة.',
+  sourceService: 'بطاقة الخدمة على موقع الوكالة',
+  pdfVierge: 'المطلب الرسمي فارغًا (PDF)',
+  avertissements: 'للعلم',
+  lots: 'المقسم أو المقاسم المعنية',
+  erreurs: {
+    contact_requis: 'أضف وسيلة اتصال واحدة على الأقل.',
+    consentement_requis: 'ضع علامة على الموافقة لإرسال بياناتك.',
+    champ_refuse: 'لا يمكن إرسال أحد الحقول.',
+    valeur_trop_longue: 'أحد النصوص طويل جدًا.',
+    valeur_invalide: 'أحد الحقول يحتوي على رموز غير مسموح بها.',
+    nombre_attendu: 'يجب إدخال عدد.',
+    date_attendue: 'يجب إدخال تاريخ.',
+    choix_inconnu: 'أحد الاختيارات غير صالح.',
+    valeur_imposee: 'تمّ تغيير قيمة محدّدة حسب الخدمة.',
+    lot_introuvable: 'أحد المقاسم لم يعد موجودًا.',
+    envoi_indisponible: 'الإرسال غير متاح حاليًا. يمكنك طباعة المطلب.',
+    donnees_indisponibles: 'الخدمة غير متاحة حاليًا. أعد المحاولة لاحقًا.',
+    inconnu: 'تعذّر الإرسال.',
+  },
+  avert: {
+    point_a_verifier: 'يجب التأكد منه لدى الوكالة',
+    lot_non_disponible: 'هذا المقسم غير متاح لهذه الخدمة',
+    lot_introuvable: 'المقسم غير موجود',
+    donnee_non_fraiche: 'يجب التأكد من التوفر لدى الوكالة',
+    prix_indicatif: 'سعر تقريبي (بيانات 13/11/2026)',
+    prix_ecart_site_public: 'موقع الوكالة كان يعرض سعرًا آخر: يجب التثبت',
+    valeur_non_preremplie: 'المقاسم المختارة مختلفة: عمّر هذا الحقل بنفسك',
+    gouvernorat_non_reconnu: 'ولاية غير معروفة',
+    lot_orphelin: 'مقسم دون منطقة معروفة',
+    statut_inconnu: 'لا توجد معلومات عن هذا المقسم',
+  },
+}
+
+export type Textes = typeof fr
+const TEXTES: Record<string, Textes> = { fr, ar }
+
+/** Langue de l'interface : ?aide=…, sinon la langue du navigateur, sinon le français. */
+export function langueInterface(params: URLSearchParams): string {
+  const demandee = params.get('aide') ?? navigator.language.slice(0, 2)
+  return demandee in TEXTES ? demandee : 'fr'
+}
+
+export function textes(langue: string): Textes {
+  return TEXTES[langue] ?? fr
+}
+
+export const sens = (langue: string): 'rtl' | 'ltr' => (langue === 'ar' ? 'rtl' : 'ltr')

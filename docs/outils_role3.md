@@ -7,7 +7,7 @@ Version du 26 novembre 2026. Le contrat (schémas Pydantic) est dans `backend/ap
 | Moyen | Usage |
 |---|---|
 | Python | `from app.processing.registre import executer` puis `executer("chercher_lots", {...})`. Les arguments sont validés : un champ inconnu est refusé. |
-| REST | `POST /outils/{nom}` avec les arguments en JSON. `GET /outils` liste les 8 outils avec les schémas JSON de leur entrée et de leur sortie. Ces schémas peuvent servir à générer les définitions d'outils du LLM. |
+| REST | `POST /outils/{nom}` avec les arguments en JSON. `GET /outils` liste les 10 outils avec les schémas JSON de leur entrée et de leur sortie. Ces schémas peuvent servir à générer les définitions d'outils du LLM. |
 | Lancement | `.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --port 8000` |
 
 Chaque sortie a la même forme :
@@ -18,7 +18,7 @@ Chaque sortie a la même forme :
 
 Le LLM rédige à partir de `donnees`. Il **recopie les chiffres sans les recalculer**, insère les `balises[].texte` et restitue les `avertissements`.
 
-## Les 8 outils
+## Les 10 outils
 
 | Outil | Entrée principale | Ce qu'il renvoie |
 |---|---|---|
@@ -27,11 +27,13 @@ Le LLM rédige à partir de `donnees`. Il **recopie les chiffres sans les recalc
 | `comparer_lots` | `lot_ids` (2 à 10) | Une ligne par lot avec ses distances, et les meilleurs lots par critère (prix total, prix au m², surface, chaque type de distance) |
 | `lots_proches` | `type` (`port`, `gare`, `aeroport`, `autoroute`, `route_gp`, `bank`, `hospital`…) **et/ou** une référence (`lot_id`, `zone_id`, `point`), plus `distance_max_km` | Zones triées par distance, avec le nombre de lots disponibles et aux enchères |
 | `avantages` | `activite`, `gouvernorat`, `zone_id` | Incitations **avec leurs sources**. **STUB** en attendant le rôle 2 : liste vide + `source_indisponible` |
-| `services_afi` | `besoin` (texte libre, facultatif) | Les 8 services, les services candidats et des balises `CHOIX` pour la question à choix (BF22), plus le contact AFI |
-| `demarche` | `service` (id), `variante` (acquisition : `developpement_regional` ou `littoral_grand_tunis`) | Pour chaque fiche : conditions, étapes, pièces par phase, frais, lieu de dépôt, texte source et URL. Service inconnu : `service_non_couvert` + contact AFI (BF24) |
-| `preparer_demande` | `lot_ids`, `projet` (activité, emplois, investissement, surface, gouvernorat : **aucune donnée personnelle**), `service`, `variante` | Résumé (lots, totaux, pièces, frais, lieu de dépôt), informations manquantes, liens. `depot_effectue = false` et `confirmation_requise = true`, toujours |
+| `services_afi` | `besoin` (texte libre, facultatif) | Les services actifs (schéma `assistant`), les services candidats et des balises `CHOIX` pour la question à choix (BF22), plus le contact AFI |
+| `demarche` | `service` (code donné par `services_afi`), `parcours` (code, si le service en a plusieurs) | Pour chaque parcours **publié** : conditions, étapes, pièces (avec sous-lignes et phases), frais en dinars, lieu de dépôt, lignes de paiement sans montant, formulaire (PDF par langue, ligne à cocher), URL source et date. Plus les fiches validées de l'AFI en complément. Service inconnu : `service_non_couvert` + contact AFI (BF24) |
+| `guider_service` | `parcours` (code), `position` (0, puis `suivant`) | **Un point à la fois** : présentation (si l'ontologie en désigne une), conditions, pièces, formulaire, étapes, frais, puis lieu de dépôt (ou contact AFI s'il n'est pas dans la source). Avec `total`, `plan`, `precedent` et `suivant` |
+| `preparer_demande` | `service` (code, **obligatoire**), `parcours`, `lot_ids`, `projet` (activité, emplois, investissement, surface, gouvernorat : **aucune donnée personnelle**) | Résumé (lots, totaux, pièces, frais, lieu de dépôt, formulaire), informations manquantes, liens, et `formulaires_preremplis` : pour chaque langue officielle, le lien de la page du formulaire, les valeurs préremplies (champs « projet » seulement) et `champs_projet_a_completer` (ce que l'agent peut encore demander). `depot_effectue = false` et `confirmation_requise = true`, toujours |
+| `noter_besoin` | `question` (≤ 500 caractères, sans nom ni numéro), `langue` | Note la question hors des services dans `assistant.besoins_non_couverts` (BF24). `note = false` si l'enregistrement est indisponible |
 
-Identifiants des services : `acquisition`, `encheres`, `situation_fonciere`, `insertion_hypotheque`, `mainlevee`, `acte_precision`, `autorisation_vente_leasing`, `copie_conforme`.
+Rien n'est écrit dans le code : les services, parcours, textes, montants et formulaires viennent des **versions publiées** du schéma `assistant` ; les synonymes, les liens vers les fiches de `afi.chatbot_connaissances`, le vocabulaire du lieu de dépôt et des frais, et le lien entre statut d'un lot et service viennent de l'ontologie `ontology/afi_ontology.ttl`. Chaque ligne garde son identifiant (`assistant.parcours_elements.id`) ; une ligne corrigée d'après une autre source porte `corrige = true`, `a_verifier = true` et sa preuve dans `note_verification`.
 
 ## Enchaînement type (BF10 : « lot de 3 000 m² près d'un port, le moins cher »)
 
@@ -67,9 +69,16 @@ Résultat sur le dump du 13/11/2026 : lot 37 de Ras El Morj Monastir, port de So
 | `document_sans_lien` | Le document existe, mais aucune URL publique n'est connue |
 | `besoin_non_reconnu` | Poser la question à choix avec les 8 services |
 | `service_non_couvert` | Donner le contact AFI, sans inventer de démarche |
-| `lieu_depot_non_precise`, `frais_non_chiffres` | La source ne le précise pas : ne rien compléter |
+| `lieu_depot_non_precise` | La source ne dit pas où déposer : inviter poliment à contacter l'AFI (`contact_afi`), sans deviner |
+| `frais_non_chiffres` | La source cite un paiement sans montant : ne rien compléter |
+| `point_a_verifier` | Une ligne est à confirmer auprès de l'AFI (`note_verification` dit pourquoi) |
+| `parcours_a_choisir` | Le service a plusieurs parcours : question à choix avec les balises `CHOIX` |
+| `demarche_non_publiee`, `parcours_inconnu` | Aucune démarche publiée : contact AFI |
+| `position_hors_parcours` | `position` dépasse le dernier point du guidage |
 | `source_indisponible` | Incitations indisponibles (le retrieval du rôle 2 n'est pas branché) |
 | `confirmation_requise` | Rien n'est déposé : l'investisseur dépose lui-même |
+| `valeur_non_preremplie` | Les lots choisis diffèrent sur ce champ (`detail` = code du champ) : l'investisseur le remplit |
+| `formulaire_indisponible` | Le parcours n'a pas de formulaire en ligne (ex. enchères) : suivre la démarche |
 
 ## Interface attendue du rôle 2 (incitations)
 
@@ -81,4 +90,7 @@ Résultat sur le dump du 13/11/2026 : lot 37 de Ras El Morj Monastir, port de So
 - **Activités :** pas de filtre par activité autorisée (absente des tables SQL).
 - **Regroupement :** pas de regroupement de lots adjacents (l'ancienne `RechercheTerrain` le faisait) ; à étudier avec les polygones de `lots_kml`.
 - **Proximité :** la distance aux équipements est celle saisie par l'AFI (`zone_commodites.value`), ou celle d'OSM pour les services. Les distances « depuis un point » sont à vol d'oiseau, d'après les coordonnées de la zone.
-- **Orientation BF22 :** elle repose sur des mots-clés (français, anglais, arabe, quelques formes tunisiennes). La compréhension fine des 8 langues relève des rôles 2 et 4.
+- **Orientation BF22 :** elle repose sur les synonymes de l'ontologie (saisis par l'équipe, en attendant l'apprentissage BF18) et les mots-clés des fiches de l'AFI. La compréhension par le sens (BF17) reste à faire.
+- **Lieu de dépôt :** la page de l'AFI ne le donne que pour l'acquisition ; pour les autres services, l'agent oriente vers le contact de l'AFI.
+- **Guidage :** la position est portée par la conversation (argument `position`) ; l'enregistrer côté serveur demandera une table de sessions (migration à relire).
+- **Formulaires :** l'agent ne demande jamais l'identité dans le chat (nom, société, CIN, passeport, adresse, téléphone, e-mail) : l'investisseur la saisit sur la page. La page d'acquisition « confirmation » (pages 3-4 des PDF, à renvoyer dans les 6 mois) n'est pas encore proposée.
